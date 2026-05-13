@@ -1,0 +1,9 @@
+node_modules/**
+coverage/**
+.eslintrc*
+.git/**
+.gitignore
+*.md
+package*
+tsconfig*
+.github/**

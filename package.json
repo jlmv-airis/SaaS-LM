@@ -1,0 +1,19 @@
+{
+  "name": "saas-lm",
+  "version": "1.0.0",
+  "description": "SaaS para gestión de Legal y Materialidad",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src/",
+    "test": "echo \"Tests: TBD\"",
+    "push": "clasp push",
+    "deploy": "clasp deploy",
+    "open": "clasp open"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.3.0",
+    "@types/google-apps-script": "^1.0.83",
+    "eslint": "^8.57.0",
+    "eslint-config-google": "^0.14.0"
+  }
+}
