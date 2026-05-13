@@ -43,7 +43,26 @@ function initConfig() {
   }
   if (!keys['app_initialized']) {
     appendRow(SHEET_CONFIG, ['app_initialized', 'true']);
+    seedDefaultManagers();
   }
+}
+
+function seedDefaultManagers() {
+  var existing = getSheetData(SHEET_MANAGERS);
+  if (existing.length > 0) return;
+
+  var defaults = [
+    { name: 'Emmanuel', pass: '6666' },
+    { name: 'Maite', pass: '7777' },
+    { name: 'Julia', pass: '8888' },
+    { name: 'Amaury', pass: '9999' },
+    { name: 'Alfredo', pass: '1010' },
+    { name: 'Caleb', pass: '1212' }
+  ];
+
+  defaults.forEach(function(m) {
+    appendRow(SHEET_MANAGERS, ['man_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), m.name, m.pass, new Date().toISOString()]);
+  });
 }
 
 function getSheetData(sheetName) {

@@ -754,6 +754,122 @@ tr:hover td {
   to { opacity: 0; transform: translateX(20px); }
 }
 
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 24px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.03);
+}
+
+.tab-btn.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Project Form */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xs);
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+  resize: vertical;
+  min-height: 90px;
+}
+
+.form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+  background: rgba(255,255,255,0.1);
+}
+
+.form-textarea::placeholder {
+  color: rgba(255,255,255,0.25);
+}
+
+.form-select {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xs);
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+  background-color: rgba(255,255,255,0.1);
+}
+
+.form-select option {
+  background: #1a1040;
+  color: white;
+}
+
+.form-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
 /* Confirm dialog */
 .confirm-dialog {
   text-align: center;
@@ -842,9 +958,17 @@ tr:hover td {
         <span class="header-title">SaaS LM</span>
         <span class="header-badge">Admin</span>
       </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('operators')" id="tabOperators">
+          <i class="fas fa-users"></i> Operadores
+        </button>
+        <button class="tab-btn" onclick="switchTab('projects')" id="tabProjects">
+          <i class="fas fa-folder-open"></i> Proyectos
+        </button>
+      </div>
     </div>
     <div class="header-right">
-      <button class="btn-accent" onclick="openCreateModal()">
+      <button class="btn-accent" id="btnHeaderAction" onclick="openCreateOperatorModal()">
         <i class="fas fa-plus"></i> Nuevo Operador
       </button>
       <button class="btn-glass" onclick="handleLogout()">
@@ -854,43 +978,91 @@ tr:hover td {
   </header>
 
   <main class="main-content">
-    <div class="stats-grid">
-      <div class="glass stat-card">
-        <div class="stat-icon ops"><i class="fas fa-users"></i></div>
-        <div class="stat-number" id="statTotal">0</div>
-        <div class="stat-label">Operadores Registrados</div>
+
+    <!-- TAB: OPERADORES -->
+    <div class="tab-content active" id="viewOperators">
+      <div class="stats-grid">
+        <div class="glass stat-card">
+          <div class="stat-icon ops"><i class="fas fa-users"></i></div>
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Operadores Registrados</div>
+        </div>
+        <div class="glass stat-card">
+          <div class="stat-icon active"><i class="fas fa-user-check"></i></div>
+          <div class="stat-number" id="statActive">0</div>
+          <div class="stat-label">Operadores Activos</div>
+        </div>
       </div>
-      <div class="glass stat-card">
-        <div class="stat-icon active"><i class="fas fa-user-check"></i></div>
-        <div class="stat-number" id="statActive">0</div>
-        <div class="stat-label">Operadores Activos</div>
+
+      <div class="glass table-card">
+        <div class="table-header">
+          <span class="table-title"><i class="fas fa-list"></i> Lista de Operadores</span>
+          <span style="color:var(--text-secondary);font-size:13px;" id="tableCount">0 operadores</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Operador</th>
+                <th>ID</th>
+                <th>Fecha de creación</th>
+                <th style="text-align:right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="operatorsBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
+          <div class="empty-text">No hay operadores registrados</div>
+          <div class="empty-sub">Crea tu primer operador para comenzar</div>
+        </div>
       </div>
     </div>
 
-    <div class="glass table-card">
-      <div class="table-header">
-        <span class="table-title"><i class="fas fa-list"></i> Lista de Operadores</span>
-        <span style="color:var(--text-secondary);font-size:13px;" id="tableCount">0 operadores</span>
+    <!-- TAB: PROYECTOS -->
+    <div class="tab-content" id="viewProjects">
+      <div class="stats-grid">
+        <div class="glass stat-card">
+          <div class="stat-icon ops"><i class="fas fa-folder-open"></i></div>
+          <div class="stat-number" id="projTotal">0</div>
+          <div class="stat-label">Proyectos Creados</div>
+        </div>
+        <div class="glass stat-card">
+          <div class="stat-icon active"><i class="fas fa-spinner"></i></div>
+          <div class="stat-number" id="projOpen">0</div>
+          <div class="stat-label">Proyectos Abiertos</div>
+        </div>
       </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Operador</th>
-              <th>ID</th>
-              <th>Fecha de creación</th>
-              <th style="text-align:right;">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="operatorsBody"></tbody>
-        </table>
-      </div>
-      <div id="emptyState" class="empty-state">
-        <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
-        <div class="empty-text">No hay operadores registrados</div>
-        <div class="empty-sub">Crea tu primer operador para comenzar</div>
+
+      <div class="glass table-card">
+        <div class="table-header">
+          <span class="table-title"><i class="fas fa-list"></i> Proyectos</span>
+          <span style="color:var(--text-secondary);font-size:13px;" id="projCount">0 proyectos</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Operador</th>
+                <th>Cliente</th>
+                <th>Fecha Límite</th>
+                <th>Estado</th>
+                <th>Encargados</th>
+              </tr>
+            </thead>
+            <tbody id="projectsBody"></tbody>
+          </table>
+        </div>
+        <div id="projEmptyState" class="empty-state">
+          <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+          <div class="empty-text">No hay proyectos registrados</div>
+          <div class="empty-sub">Crea tu primer proyecto para comenzar</div>
+        </div>
       </div>
     </div>
+
   </main>
 </div>
 
@@ -958,9 +1130,72 @@ tr:hover td {
   </div>
 </div>
 
+<!-- MODAL CREATE PROJECT -->
+<div class="modal-overlay" id="projectModal">
+  <div class="glass modal" style="max-width:680px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-plus-circle"></i> Nuevo Proyecto</span>
+      <button class="modal-close" onclick="closeProjectModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div style="max-height:70vh;overflow-y:auto;padding-right:4px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Operador</label>
+          <select id="projOperator" class="form-select"><option value="">Seleccionar...</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Compromiso</label>
+          <input type="date" id="projDeadline" class="form-input">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <input type="text" id="projClient" class="form-input" placeholder="Ej: Carga Terrestre">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proyecto</label>
+          <input type="text" id="projName" class="form-input" placeholder="Ej: Auditoría 2024">
+        </div>
+      </div>
+      <div class="form-section-title"><i class="fas fa-users"></i> Encargados de Materialidad</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Encargado 1</label>
+          <select id="projManager1" class="form-select"><option value="">Seleccionar...</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Encargado 2 <span style="color:var(--text-secondary);font-weight:400;">(Opcional)</span></label>
+          <select id="projManager2" class="form-select"><option value="">-- Ninguno --</option></select>
+        </div>
+      </div>
+      <div class="form-section-title"><i class="fas fa-clipboard-list"></i> Checklists</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Checklist Legal</label>
+          <textarea id="projLegal" class="form-textarea" placeholder="Un documento por línea&#10;Ej:&#10;Acta constitutiva&#10;RFC&#10;Poder notarial"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Checklist Materialidad</label>
+          <textarea id="projMat" class="form-textarea" placeholder="Un documento por línea&#10;Ej:&#10;Estados financieros&#10;Informe de gestión&#10;Política contable"></textarea>
+        </div>
+      </div>
+      <div id="projectError" class="form-error" style="margin-top:8px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeProjectModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmCreateProject()">
+        <i class="fas fa-check"></i> Crear Proyecto
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 var sessionToken = null;
 var operatorsCache = [];
+var managersCache = [];
+var projectsCache = [];
 var currentUserId = null;
 
 window.addEventListener('load', function() {
@@ -1002,6 +1237,8 @@ function handleLogin() {
         showToast('Bienvenido al panel de administración', 'success');
         showDashboard();
         loadOperators();
+        loadManagers();
+        loadProjects();
       } else {
         error.textContent = result.error || 'Error de autenticación';
       }
@@ -1022,6 +1259,9 @@ function handleLogout() {
   google.script.run
     .withSuccessHandler(function() {
       sessionToken = null;
+      operatorsCache = [];
+      managersCache = [];
+      projectsCache = [];
       document.getElementById('dashboard').classList.remove('active');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
@@ -1091,8 +1331,161 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-/* Create Modal */
-function openCreateModal() {
+/* Tab Switching */
+function switchTab(tab) {
+  var tabs = ['operators', 'projects'];
+  tabs.forEach(function(t) {
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+    document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+  });
+
+  var btn = document.getElementById('btnHeaderAction');
+  if (tab === 'operators') {
+    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Operador';
+    btn.onclick = openCreateOperatorModal;
+  } else {
+    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Proyecto';
+    btn.onclick = openProjectModal;
+  }
+}
+
+/* Managers */
+function loadManagers() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) managersCache = result.managers;
+    })
+    .listManagers(sessionToken);
+}
+
+/* Projects */
+function loadProjects() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        projectsCache = result.projects;
+        renderProjects();
+      } else if (result.error === 'Sesión expirada') {
+        handleLogout();
+      }
+    })
+    .listProjects(sessionToken);
+}
+
+function renderProjects() {
+  var tbody = document.getElementById('projectsBody');
+  var empty = document.getElementById('projEmptyState');
+  var totalEl = document.getElementById('projTotal');
+  var openEl = document.getElementById('projOpen');
+  var countEl = document.getElementById('projCount');
+
+  var openCount = projectsCache.filter(function(p) { return p.status === 'Abierto'; }).length;
+  totalEl.textContent = projectsCache.length;
+  openEl.textContent = openCount;
+  countEl.textContent = projectsCache.length + ' proyectos';
+
+  if (projectsCache.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  tbody.innerHTML = '';
+
+  projectsCache.forEach(function(p) {
+    var deadline = p.deadline ? new Date(p.deadline + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+    var isOpen = p.status === 'Abierto';
+    var statusBadge = isOpen
+      ? '<span style="background:rgba(81,207,102,0.15);color:#51cf66;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Abierto</span>'
+      : '<span style="background:rgba(255,107,107,0.15);color:#ff6b6b;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Cerrado</span>';
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span style="font-weight:600;">' + escapeHtml(p.projectName) + '</span></td>' +
+      '<td>' + escapeHtml(p.operator) + '</td>' +
+      '<td>' + escapeHtml(p.client) + '</td>' +
+      '<td>' + deadline + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td>' + escapeHtml(p.managers) + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* Project Modal */
+function openProjectModal() {
+  document.getElementById('projOperator').innerHTML = '<option value="">Seleccionar...</option>';
+  document.getElementById('projManager1').innerHTML = '<option value="">Seleccionar...</option>';
+  document.getElementById('projManager2').innerHTML = '<option value="">-- Ninguno --</option>';
+  document.getElementById('projectError').textContent = '';
+
+  operatorsCache.forEach(function(op) {
+    document.getElementById('projOperator').innerHTML += '<option value="' + escapeHtml(op.name) + '">' + escapeHtml(op.name) + '</option>';
+  });
+  managersCache.forEach(function(m) {
+    document.getElementById('projManager1').innerHTML += '<option value="' + escapeHtml(m.name) + '">' + escapeHtml(m.name) + '</option>';
+    document.getElementById('projManager2').innerHTML += '<option value="' + escapeHtml(m.name) + '">' + escapeHtml(m.name) + '</option>';
+  });
+
+  document.getElementById('projClient').value = '';
+  document.getElementById('projName').value = '';
+  document.getElementById('projDeadline').value = '';
+  document.getElementById('projLegal').value = '';
+  document.getElementById('projMat').value = '';
+
+  document.getElementById('projectModal').classList.add('active');
+}
+
+function closeProjectModal() {
+  document.getElementById('projectModal').classList.remove('active');
+}
+
+function confirmCreateProject() {
+  var operator = document.getElementById('projOperator').value;
+  var client = document.getElementById('projClient').value.trim();
+  var projectName = document.getElementById('projName').value.trim();
+  var deadline = document.getElementById('projDeadline').value;
+  var manager1 = document.getElementById('projManager1').value;
+  var manager2 = document.getElementById('projManager2').value;
+  var legal = document.getElementById('projLegal').value;
+  var mat = document.getElementById('projMat').value;
+  var error = document.getElementById('projectError');
+
+  if (!operator) { error.textContent = 'Selecciona un operador'; return; }
+  if (!client) { error.textContent = 'El cliente es obligatorio'; return; }
+  if (!projectName) { error.textContent = 'El nombre del proyecto es obligatorio'; return; }
+  if (!deadline) { error.textContent = 'La fecha compromiso es obligatoria'; return; }
+  if (!manager1) { error.textContent = 'Selecciona al menos un encargado'; return; }
+
+  var data = {
+    operator: operator,
+    client: client,
+    projectName: projectName,
+    deadline: deadline,
+    manager1: manager1,
+    manager2: manager2,
+    legalSteps: legal.split('\n').filter(function(l) { return l.trim(); }),
+    matSteps: mat.split('\n').filter(function(l) { return l.trim(); })
+  };
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        closeProjectModal();
+        showToast('Proyecto "' + projectName + '" creado exitosamente', 'success');
+        loadProjects();
+      } else {
+        error.textContent = result.error;
+      }
+    })
+    .withFailureHandler(function(err) {
+      error.textContent = 'Error: ' + err.message;
+    })
+    .createProject(sessionToken, data);
+}
+
+/* Create Operator Modal */
+function openCreateOperatorModal() {
   document.getElementById('newOpName').value = '';
   document.getElementById('newOpPass').value = '';
   document.getElementById('createError').textContent = '';
