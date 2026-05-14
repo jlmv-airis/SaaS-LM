@@ -1796,10 +1796,21 @@ function showDashboard() {
 }
 
 function refreshData() {
-  showToast('Actualizando datos...', 'success');
-  loadOperators();
-  loadProjects();
-  loadAreas();
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        operatorsCache = result.operators || [];
+        projectsCache = result.projects || [];
+        areasCache = result.areas || [];
+        renderOperators();
+        renderOperatorsByArea();
+        renderProjects();
+        renderAreas();
+        showToast('Datos actualizados', 'success');
+      }
+    })
+    .withFailureHandler(function() { showToast('Error al actualizar', 'error'); })
+    .refreshAllData(sessionToken);
 }
 
 function handleLogout() {
