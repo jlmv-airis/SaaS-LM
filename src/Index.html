@@ -1915,6 +1915,7 @@ function inlineCreateArea() {
       btn.innerHTML = '<i class="fas fa-plus"></i>';
       if (!result.success) { error.textContent = result.error; return; }
       if (!result.exists) areasCache.push({ id: result.id, name: name });
+      renderAreas();
       var sel = document.getElementById('newOpArea');
       sel.innerHTML = '<option value="">Sin área</option>';
       areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
