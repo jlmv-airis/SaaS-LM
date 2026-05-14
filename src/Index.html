@@ -1437,14 +1437,14 @@ tr:hover td {
       <label class="form-label">Área</label>
       <div style="display:flex;gap:8px;">
         <select id="newOpArea" class="form-select" style="flex:1;"><option value="">Sin área</option></select>
-        <button class="btn-glass" style="padding:8px 14px;flex-shrink:0;" onclick="toggleNewAreaInput()" title="Crear nueva área" id="btnNewArea">
+        <button class="btn-glass" id="btnNewArea" style="padding:8px 14px;flex-shrink:0;" onclick="inlineCreateArea()" title="Crear nueva área">
           <i class="fas fa-plus"></i>
         </button>
       </div>
       <div id="newAreaRow" style="display:none;margin-top:8px;gap:8px;align-items:center;">
-        <input type="text" id="newAreaName" class="form-input" style="flex:1;padding:10px 14px;font-size:13px;" placeholder="Nombre del área" onkeydown="if(event.key==='Enter') confirmNewArea()">
-        <button class="btn-accent" id="btnConfirmNewArea" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="confirmNewArea()">Crear</button>
-        <button class="btn-secondary" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="cancelNewArea()">Cancelar</button>
+        <input type="text" id="newAreaName" class="form-input" style="flex:1;padding:10px 14px;font-size:13px;" placeholder="Nombre del área" onkeydown="if(event.key==='Enter') document.getElementById('btnConfirmNewArea').click()">
+        <button class="btn-accent" id="btnConfirmNewArea" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="inlineConfirmArea()">Crear</button>
+        <button class="btn-secondary" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="inlineCancelArea()">Cancelar</button>
       </div>
       <div id="createError" class="form-error"></div>
     </div>
@@ -1642,7 +1642,7 @@ tr:hover td {
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeAreaModal()">Cancelar</button>
-      <button class="btn-accent" onclick="confirmCreateArea()"><i class="fas fa-check"></i> Crear</button>
+      <button class="btn-accent" id="btnConfirmArea" onclick="confirmCreateArea()"><i class="fas fa-check"></i> Crear</button>
     </div>
   </div>
 </div>
@@ -1900,49 +1900,47 @@ function openCreateOperatorModal() {
 
 function closeCreateModal() {
   document.getElementById('createModal').classList.remove('active');
-  document.getElementById('newAreaRow').style.display = 'none';
+  inlineCancelArea();
 }
 
 /* Inline area creation */
-function toggleNewAreaInput() {
-  var row = document.getElementById('newAreaRow');
-  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
-  if (row.style.display === 'flex') document.getElementById('newAreaName').focus();
+function inlineCreateArea() {
+  document.getElementById('newAreaRow').style.display = 'flex';
+  document.getElementById('newAreaName').focus();
 }
 
-function cancelNewArea() {
+function inlineCancelArea() {
   document.getElementById('newAreaRow').style.display = 'none';
   document.getElementById('newAreaName').value = '';
 }
 
-function confirmNewArea() {
+function inlineConfirmArea() {
   var name = document.getElementById('newAreaName').value.trim();
   var error = document.getElementById('createError');
-  var btn = document.getElementById('btnNewArea');
-  if (!name) { error.textContent = 'El nombre del área es obligatorio'; return; }
+  if (!name) { error.textContent = 'Escribe un nombre para el área'; return; }
   error.textContent = '';
+
+  var btn = document.getElementById('btnNewArea');
   var input = document.getElementById('newAreaName');
   var confirmBtn = document.getElementById('btnConfirmNewArea');
   btn.disabled = true; input.disabled = true; confirmBtn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
   google.script.run
     .withSuccessHandler(function(result) {
       btn.disabled = false; input.disabled = false; confirmBtn.disabled = false;
       btn.innerHTML = '<i class="fas fa-plus"></i>';
-      if (result.success) {
-        cancelNewArea();
-        loadAreas();
-        var sel = document.getElementById('newOpArea');
-        sel.innerHTML = '<option value="">Sin área</option>';
-        areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
-        sel.value = name;
-        showToast('Área "' + name + '" creada', 'success');
-      } else {
-        error.textContent = result.error;
-      }
+      if (!result.success) { error.textContent = result.error; return; }
+      inlineCancelArea();
+      if (!result.exists) areasCache.push({ id: result.id, name: name });
+      var sel = document.getElementById('newOpArea');
+      sel.innerHTML = '<option value="">Sin área</option>';
+      areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
+      sel.value = name;
+      showToast('Área "' + name + '" creada', 'success');
     })
     .withFailureHandler(function(err) {
-      btn.disabled = false;
+      btn.disabled = false; input.disabled = false; confirmBtn.disabled = false;
       btn.innerHTML = '<i class="fas fa-plus"></i>';
       error.textContent = 'Error: ' + err.message;
     })
@@ -2326,7 +2324,7 @@ function confirmCreateProject() {
 /* ====== ÁREAS ====== */
 function loadAreas() {
   google.script.run
-    .withSuccessHandler(function(result) { if (result.success) { areasCache = result.areas; renderAreas(); } })
+    .withSuccessHandler(function(result) { if (result.success) { areasCache = result.areas; renderAreas(); renderOperatorsByArea(); } })
     .listAreas(sessionToken);
 }
 
@@ -2387,14 +2385,26 @@ function closeAreaModal() { document.getElementById('areaModal').classList.remov
 function confirmCreateArea() {
   var name = document.getElementById('areaName').value.trim();
   var error = document.getElementById('areaError');
+  var btn = document.getElementById('btnConfirmArea');
   if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
+  error.textContent = '';
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
 
   google.script.run
     .withSuccessHandler(function(result) {
-      if (result.success) { closeAreaModal(); showToast('Área "' + name + '" creada', 'success'); loadAreas(); }
-      else { error.textContent = result.error; }
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Crear';
+      if (result.success) {
+        closeAreaModal();
+        showToast('Área "' + name + '" creada', 'success');
+        loadAreas();
+      } else {
+        error.textContent = result.error;
+      }
     })
-    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .withFailureHandler(function(err) {
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Crear';
+      error.textContent = 'Error: ' + err.message;
+    })
     .createArea(sessionToken, name);
 }
 
