@@ -75,11 +75,16 @@ function seedDefaultManagers() {
 }
 
 function getSheetData(sheetName) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return [];
-  var rows = sheet.getDataRange().getValues();
-  return rows.slice(1);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return [];
+    var rows = sheet.getDataRange().getValues();
+    return rows.slice(1);
+  } catch (e) {
+    console.error('getSheetData(' + sheetName + ') error: ' + e.toString());
+    return [];
+  }
 }
 
 function appendRow(sheetName, values) {

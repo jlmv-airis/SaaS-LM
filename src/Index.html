@@ -1482,17 +1482,21 @@ tr:hover td {
 <!-- MODAL DELETE CONFIRM -->
 <div class="modal-overlay" id="deleteModal">
   <div class="glass modal">
+    <div class="modal-header" style="background:linear-gradient(135deg,rgba(255,107,107,0.12),rgba(255,107,107,0.03));margin:-36px -32px 28px -32px;padding:32px 32px 24px 32px;border-radius:16px 16px 0 0;position:relative;">
+      <span class="modal-title" style="color:var(--danger);"><i class="fas fa-trash-can"></i> Eliminar Operador</span>
+      <button class="modal-close" style="position:absolute;top:8px;right:10px;z-index:2;" onclick="closeDeleteModal()"><i class="fas fa-xmark"></i></button>
+      <div style="position:absolute;bottom:-10px;left:0;right:0;height:10px;background:linear-gradient(135deg,rgba(255,107,107,0.10),transparent);clip-path:polygon(0 0, 6% 40%, 12% 0, 18% 40%, 24% 0, 30% 40%, 36% 0, 42% 40%, 48% 0, 54% 40%, 60% 0, 66% 40%, 72% 0, 78% 40%, 84% 0, 90% 40%, 96% 0, 100% 40%, 100% 100%, 0 100%);"></div>
+    </div>
     <div class="confirm-dialog">
-      <div style="text-align:left;">
-        <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-trash-can" style="color:var(--danger);margin-right:10px;"></i> Eliminar Operador</div>
-        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px;">¿Estás seguro de eliminar a <strong id="deleteOpName" style="color:var(--text-primary);"></strong>?</div>
-        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Esta acción no se puede deshacer.</div>
-        <div id="deleteError" class="form-error"></div>
-        <div class="modal-actions" style="margin-top:20px;">
-          <button class="btn-secondary" onclick="closeDeleteModal()"><i class="fas fa-xmark"></i> Cancelar</button>
-          <button class="btn-danger" onclick="confirmDelete()"><i class="fas fa-trash-can"></i> Eliminar</button>
-        </div>
-      </div>
+      <div class="confirm-icon danger"><i class="fas fa-trash-can"></i></div>
+      <div class="confirm-text">¿Estás seguro de eliminar a</div>
+      <div class="confirm-name" id="deleteOpName"></div>
+      <div class="confirm-text">Esta acción no se puede deshacer.</div>
+      <div id="deleteError" class="form-error"></div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;gap:16px;">
+      <button class="btn-secondary" style="padding:14px 36px;font-size:15px;" onclick="closeDeleteModal()"><i class="fas fa-xmark"></i> Cancelar</button>
+      <button class="btn-danger" style="padding:14px 36px;font-size:15px;" onclick="confirmDelete()"><i class="fas fa-trash-can"></i> Eliminar</button>
     </div>
   </div>
 </div>
@@ -1798,6 +1802,7 @@ function showDashboard() {
 function refreshData() {
   var icon = document.querySelector('.btn-glass .fa-rotate');
   if (icon) icon.classList.add('fa-spin');
+  showToast('Recargando...', 'success');
   google.script.run
     .withSuccessHandler(function(result) {
       if (icon) icon.classList.remove('fa-spin');
@@ -1809,17 +1814,15 @@ function refreshData() {
         renderOperatorsByArea();
         renderProjects();
         renderAreas();
-        showToast('Datos actualizados', 'success');
+        showToast('✓ Recargado: ' + (result.operators || []).length + ' operadores', 'success');
       } else {
-        sessionToken = null;
-        currentUser = null;
-        operatorsCache = []; managersCache = []; projectsCache = [];
-        document.getElementById('dashboard').classList.remove('active');
-        document.getElementById('login-screen').classList.remove('hidden');
-        showToast('Sesión expirada, inicia sesión de nuevo', 'error');
+        showToast('✗ ' + (result.error || 'Error desconocido'), 'error');
       }
     })
-    .withFailureHandler(function() { showToast('Error al actualizar', 'error'); if (icon) icon.classList.remove('fa-spin'); })
+    .withFailureHandler(function(err) {
+      if (icon) icon.classList.remove('fa-spin');
+      showToast('✗ Error de conexión: ' + (err ? err.message || err : 'sin respuesta'), 'error');
+    })
     .refreshAllData(sessionToken);
 }
 
@@ -2023,7 +2026,7 @@ function openDeleteModal(id) {
   currentUserId = id;
   var op = operatorsCache.find(function(o) { return o.id === id; });
   if (!op) return;
-  document.getElementById('deleteOpName').textContent = op.name;
+  document.getElementById('deleteOpName').textContent = op.name + '?';
   document.getElementById('deleteError').textContent = '';
   document.getElementById('deleteModal').classList.add('active');
 }
