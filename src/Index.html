@@ -1807,6 +1807,13 @@ function refreshData() {
         renderProjects();
         renderAreas();
         showToast('Datos actualizados', 'success');
+      } else {
+        sessionToken = null;
+        currentUser = null;
+        operatorsCache = []; managersCache = []; projectsCache = [];
+        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('login-screen').classList.remove('hidden');
+        showToast('Sesión expirada, inicia sesión de nuevo', 'error');
       }
     })
     .withFailureHandler(function() { showToast('Error al actualizar', 'error'); })
