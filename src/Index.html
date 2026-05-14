@@ -1866,7 +1866,7 @@ function renderOperators() {
 
   operatorsCache.forEach(function(op) {
     var initials = op.name.substring(0, 2).toUpperCase();
-    var areaName = op.area || '—';
+    var areaName = op.area || 'Sin área';
 
     var tr = document.createElement('tr');
     tr.innerHTML =
