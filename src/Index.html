@@ -1769,8 +1769,7 @@ function showDashboard() {
   var isAdmin = currentUser && currentUser.role === 'admin';
 
   // Header: user name + role badge
-  document.getElementById('userBadge').textContent = currentUser.role === 'admin' ? 'Admin' : currentUser.name;
-  document.getElementById('roleBadge').textContent = isAdmin ? 'Admin' : 'Operador';
+  document.getElementById('roleBadge').textContent = isAdmin ? 'Admin' : currentUser.name;
 
   // Show/hide admin tabs
   document.getElementById('tabOperators').style.display = isAdmin ? '' : 'none';
