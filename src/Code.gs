@@ -16,6 +16,8 @@ function include(filename) {
 function refreshAllData(token) {
   if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
 
+  SpreadsheetApp.flush();
+
   return {
     success: true,
     operators: listOperators(token).operators,

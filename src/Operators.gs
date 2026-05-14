@@ -2,9 +2,12 @@ function listOperators(token) {
   if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
 
   var data = getSheetData(SHEET_OPERATORS);
-  var operators = data.map(function(row) {
-    return { id: row[0], name: row[1], area: row[3] || '', createdAt: row[4] || row[3] };
-  });
+  var operators = [];
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    if (!row[1] || row[1].trim() === '') continue;
+    operators.push({ id: row[0], name: row[1], area: row[3] || '', createdAt: row[4] || row[3] });
+  }
 
   return { success: true, operators: operators };
 }
