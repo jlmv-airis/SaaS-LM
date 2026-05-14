@@ -183,6 +183,18 @@ body {
   color: rgba(255,255,255,0.3);
 }
 
+/* Operator info bar */
+.operator-info-bar {
+  padding: 10px 32px;
+  background: rgba(81,207,102,0.08);
+  border-bottom: 1px solid rgba(81,207,102,0.15);
+  font-size: 13px;
+  font-weight: 600;
+  color: #51cf66;
+  align-items: center;
+  gap: 6px;
+}
+
 .login-btn {
   width: 100%;
   padding: 16px;
@@ -1226,7 +1238,8 @@ tr:hover td {
     </div>
     <h1 class="login-title">SaaS LM</h1>
     <p class="login-sub">Legal y Materialidad</p>
-    <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña de administrador" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
+    <input type="text" id="loginUser" class="login-input" placeholder="Usuario" autocomplete="off" onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()" style="margin-bottom:12px;letter-spacing:normal;text-transform:lowercase;">
+    <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
     <button id="loginBtn" class="login-btn" onclick="handleLogin()">
       <i class="fas fa-arrow-right-to-bracket"></i> Ingresar
     </button>
@@ -1241,7 +1254,7 @@ tr:hover td {
       <div class="header-logo"><i class="fas fa-shield-halved"></i></div>
       <div>
         <span class="header-title">SaaS LM</span>
-        <span class="header-badge">Admin</span>
+        <span class="header-badge" id="roleBadge">Admin</span>
       </div>
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('operators')" id="tabOperators">
@@ -1264,6 +1277,13 @@ tr:hover td {
       </button>
     </div>
   </header>
+
+  <!-- Operator info bar -->
+  <div id="operatorInfo" class="operator-info-bar" style="display:none;">
+    <i class="fas fa-user"></i> <span id="operatorInfoName"></span>
+    <span style="color:var(--text-secondary);margin:0 8px;">|</span>
+    <i class="fas fa-building" style="color:var(--text-secondary);"></i> <span id="operatorInfoArea"></span>
+  </div>
 
   <main class="main-content">
 
@@ -1654,6 +1674,7 @@ tr:hover td {
 
 <script>
 var sessionToken = null;
+var currentUser = null;
 var operatorsCache = [];
 var managersCache = [];
 var projectsCache = [];
@@ -1666,7 +1687,7 @@ var pendingTemplateType = null;
 var checklistState = { legal: [], mat: [] };
 
 window.addEventListener('load', function() {
-  document.getElementById('loginPassword').focus();
+  document.getElementById('loginUser').focus();
 });
 
 /* ====== HELPERS ====== */
@@ -1691,11 +1712,12 @@ function escapeHtml(text) {
 
 /* ====== AUTH ====== */
 function handleLogin() {
+  var username = document.getElementById('loginUser').value.trim().toLowerCase();
   var password = document.getElementById('loginPassword').value;
   var btn = document.getElementById('loginBtn');
   var error = document.getElementById('loginError');
 
-  if (!password) { error.textContent = 'Ingresa la contraseña de administrador'; return; }
+  if (!username || !password) { error.textContent = 'Ingresa usuario y contraseña'; return; }
 
   btn.classList.add('loading');
   error.textContent = '';
@@ -1705,13 +1727,16 @@ function handleLogin() {
       btn.classList.remove('loading');
       if (result.success) {
         sessionToken = result.token;
+        currentUser = result;
         error.textContent = '';
-        showToast('Bienvenido al panel de administración', 'success');
+        showToast('Bienvenido' + (result.role === 'admin' ? ' al panel de administración' : ', ' + result.name), 'success');
         showDashboard();
-        loadOperators();
-        loadManagers();
+        if (result.role === 'admin') {
+          loadOperators();
+          loadManagers();
+          loadAreas();
+        }
         loadProjects();
-        loadAreas();
       } else {
         error.textContent = result.error || 'Error de autenticación';
       }
@@ -1720,21 +1745,46 @@ function handleLogin() {
       btn.classList.remove('loading');
       error.textContent = 'Error de conexión: ' + err.message;
     })
-    .login(password);
+    .login(username, password);
 }
 
 function showDashboard() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('dashboard').classList.add('active');
+
+  var isAdmin = currentUser && currentUser.role === 'admin';
+
+  // Header: user name + role badge
+  document.getElementById('userBadge').textContent = currentUser.role === 'admin' ? 'Admin' : currentUser.name;
+  document.getElementById('roleBadge').textContent = isAdmin ? 'Admin' : 'Operador';
+
+  // Show/hide admin tabs
+  document.getElementById('tabOperators').style.display = isAdmin ? '' : 'none';
+  document.getElementById('tabSettings').style.display = isAdmin ? '' : 'none';
+
+  // Default tab for operators
+  if (!isAdmin) switchTab('projects');
+
+  // Hide action button for operators
+  document.getElementById('btnHeaderAction').style.display = isAdmin ? '' : 'none';
+
+  // Show/hide operator-only info
+  document.getElementById('operatorInfo').style.display = isAdmin ? 'none' : 'flex';
+  if (!isAdmin) {
+    document.getElementById('operatorInfoName').textContent = currentUser.name;
+    document.getElementById('operatorInfoArea').textContent = currentUser.area || 'Sin área';
+  }
 }
 
 function handleLogout() {
   google.script.run
     .withSuccessHandler(function() {
       sessionToken = null;
+      currentUser = null;
       operatorsCache = []; managersCache = []; projectsCache = [];
       document.getElementById('dashboard').classList.remove('active');
       document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('loginUser').value = '';
       document.getElementById('loginPassword').value = '';
       document.getElementById('loginError').textContent = '';
       showToast('Sesión cerrada', 'success');
@@ -1921,16 +1971,21 @@ function renderProjects() {
   var totalEl = document.getElementById('projTotal');
   var openEl = document.getElementById('projOpen');
   var countEl = document.getElementById('projCount');
-  var openCount = projectsCache.filter(function(p) { return p.status === 'Abierto'; }).length;
-  totalEl.textContent = projectsCache.length;
-  openEl.textContent = openCount;
-  countEl.textContent = projectsCache.length + ' proyectos';
 
-  if (projectsCache.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  var filtered = currentUser && currentUser.role === 'operator'
+    ? projectsCache.filter(function(p) { return p.operator === currentUser.name; })
+    : projectsCache;
+
+  var openCount = filtered.filter(function(p) { return p.status === 'Abierto'; }).length;
+  totalEl.textContent = filtered.length;
+  openEl.textContent = openCount;
+  countEl.textContent = filtered.length + ' proyectos';
+
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = '';
 
-  projectsCache.forEach(function(p) {
+  filtered.forEach(function(p) {
     var deadline = p.deadline ? new Date(p.deadline + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
     var isOpen = p.status === 'Abierto';
     var statusBadge = isOpen
