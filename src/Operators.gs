@@ -3,13 +3,13 @@ function listOperators(token) {
 
   var data = getSheetData(SHEET_OPERATORS);
   var operators = data.map(function(row) {
-    return { id: row[0], name: row[1], createdAt: row[3] };
+    return { id: row[0], name: row[1], area: row[3] || '', createdAt: row[4] || row[3] };
   });
 
   return { success: true, operators: operators };
 }
 
-function createOperator(token, name, password) {
+function createOperator(token, name, password, area) {
   if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
 
   if (!name || name.trim() === '') {
@@ -28,10 +28,29 @@ function createOperator(token, name, password) {
   }
 
   var id = 'op_' + Date.now();
-  appendRow(SHEET_OPERATORS, [id, name.trim(), password, new Date().toISOString()]);
-  logAction('admin', 'CREATE_OPERATOR', 'Creado operador: ' + name.trim());
+  appendRow(SHEET_OPERATORS, [id, name.trim(), password, area || '', new Date().toISOString()]);
+  logAction('admin', 'CREATE_OPERATOR', 'Creado operador: ' + name.trim() + ' (Área: ' + (area || 'sin área') + ')');
 
   return { success: true, id: id };
+}
+
+function updateOperator(token, id, data) {
+  if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
+
+  var idx = findRowIndex(SHEET_OPERATORS, 0, id);
+  if (idx === -1) return { success: false, error: 'Operador no encontrado' };
+
+  var rows = getSheetData(SHEET_OPERATORS);
+  var row = rows[idx];
+
+  if (data.name !== undefined) row[1] = data.name;
+  if (data.password !== undefined) row[2] = data.password;
+  if (data.area !== undefined) row[3] = data.area;
+
+  updateRow(SHEET_OPERATORS, idx, row);
+  logAction('admin', 'UPDATE_OPERATOR', 'Operador actualizado ID: ' + id);
+
+  return { success: true };
 }
 
 function updateOperatorPassword(token, id, newPassword) {

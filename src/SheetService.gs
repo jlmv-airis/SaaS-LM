@@ -6,6 +6,10 @@ var SHEET_LEGAL_STEPS = 'LegalSteps';
 var SHEET_MAT_STEPS = 'MatSteps';
 var SHEET_COMMENTS = 'Comments';
 var SHEET_LOGS = 'Logs';
+var SHEET_AREAS = 'Areas';
+var SHEET_CUSTOM_FIELDS = 'CustomFields';
+var SHEET_PROJECT_FIELD_VALUES = 'ProjectFieldValues';
+var SHEET_CHECKLIST_TEMPLATES = 'ChecklistTemplates';
 
 function ensureSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -13,13 +17,17 @@ function ensureSheets() {
 
   var required = [
     { name: SHEET_CONFIG, headers: ['key', 'value'] },
-    { name: SHEET_OPERATORS, headers: ['id', 'name', 'password', 'createdAt'] },
+    { name: SHEET_OPERATORS, headers: ['id', 'name', 'password', 'area', 'createdAt'] },
     { name: SHEET_MANAGERS, headers: ['id', 'name', 'password', 'createdAt'] },
-    { name: SHEET_PROJECTS, headers: ['id', 'operator', 'client', 'projectName', 'deadline', 'status', 'managers'] },
+    { name: SHEET_PROJECTS, headers: ['id', 'operator', 'client', 'projectName', 'deadline', 'status', 'managers', 'createdAt'] },
     { name: SHEET_LEGAL_STEPS, headers: ['id', 'projectId', 'name', 'done'] },
     { name: SHEET_MAT_STEPS, headers: ['id', 'projectId', 'name', 'done'] },
     { name: SHEET_COMMENTS, headers: ['id', 'projectId', 'author', 'text', 'date', 'history'] },
-    { name: SHEET_LOGS, headers: ['timestamp', 'user', 'action', 'detail'] }
+    { name: SHEET_LOGS, headers: ['timestamp', 'user', 'action', 'detail'] },
+    { name: SHEET_AREAS, headers: ['id', 'name', 'createdAt'] },
+    { name: SHEET_CUSTOM_FIELDS, headers: ['id', 'fieldName', 'fieldType', 'fieldOptions', 'areaId', 'required', 'displayOrder', 'createdAt'] },
+    { name: SHEET_PROJECT_FIELD_VALUES, headers: ['id', 'projectId', 'fieldId', 'value'] },
+    { name: SHEET_CHECKLIST_TEMPLATES, headers: ['id', 'type', 'name', 'items', 'createdBy', 'createdAt'] }
   ];
 
   required.forEach(function(sheet) {
@@ -44,6 +52,7 @@ function initConfig() {
   if (!keys['app_initialized']) {
     appendRow(SHEET_CONFIG, ['app_initialized', 'true']);
     seedDefaultManagers();
+    seedDefaultAreas();
   }
 }
 
@@ -123,6 +132,16 @@ function updateConfig(key, value) {
     }
   }
   appendRow(SHEET_CONFIG, [key, value]);
+}
+
+function seedDefaultAreas() {
+  var existing = getSheetData(SHEET_AREAS);
+  if (existing.length > 0) return;
+
+  var defaults = ['Legal', 'Materialidad', 'Administración', 'Finanzas', 'Operaciones'];
+  defaults.forEach(function(name) {
+    appendRow(SHEET_AREAS, ['area_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), name, new Date().toISOString()]);
+  });
 }
 
 function logAction(user, action, detail) {

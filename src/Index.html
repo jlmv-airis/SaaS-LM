@@ -916,6 +916,211 @@ tr:hover td {
 }
 
 /* Scrollbar */
+/* Settings */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.settings-card {
+  padding: 24px 28px;
+  animation: slideUp 0.6s ease;
+}
+
+.settings-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section:last-child { margin-bottom: 0; }
+
+/* Checklist interactive */
+.checklist-area {
+  margin-top: 4px;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-xs);
+  min-height: 40px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.checklist-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.checklist-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.checklist-item .item-text {
+  flex: 1;
+}
+
+.checklist-item .item-text.done {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.checklist-item .btn-icon-sm {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  opacity: 0;
+}
+
+.checklist-item:hover .btn-icon-sm {
+  opacity: 1;
+}
+
+.checklist-item .btn-icon-sm:hover {
+  background: rgba(255,107,107,0.2);
+  color: var(--danger);
+}
+
+.checklist-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.checklist-add-row .form-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.checklist-tools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.checklist-tools .form-select {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.checklist-counter {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+/* Empty checklist */
+.checklist-empty {
+  text-align: center;
+  padding: 14px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Dynamic fields */
+.dynamic-fields-section {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.dynamic-field {
+  margin-bottom: 16px;
+}
+
+.dynamic-field:last-child { margin-bottom: 0; }
+
+/* Small list inside settings */
+.settings-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.settings-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-xs);
+  transition: background 0.2s;
+}
+
+.settings-list-item:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.settings-list-item .item-label {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-list-item .item-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(108,92,231,0.15);
+  color: var(--accent-light);
+  text-transform: uppercase;
+}
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
@@ -964,6 +1169,9 @@ tr:hover td {
         </button>
         <button class="tab-btn" onclick="switchTab('projects')" id="tabProjects">
           <i class="fas fa-folder-open"></i> Proyectos
+        </button>
+        <button class="tab-btn" onclick="switchTab('settings')" id="tabSettings">
+          <i class="fas fa-cog"></i> Configuración
         </button>
       </div>
     </div>
@@ -1063,6 +1271,41 @@ tr:hover td {
       </div>
     </div>
 
+    <!-- TAB: CONFIGURACIÓN -->
+    <div class="tab-content" id="viewSettings">
+      <div class="settings-grid">
+        <div class="glass settings-card">
+          <div class="settings-card-title">
+            <span><i class="fas fa-building"></i> Áreas</span>
+            <button class="btn-accent" style="padding:6px 14px;font-size:11px;" onclick="openAreaModal()">
+              <i class="fas fa-plus"></i> Nueva
+            </button>
+          </div>
+          <div class="settings-section">
+            <div class="settings-item-list" id="areasList"></div>
+            <div id="areasEmpty" class="checklist-empty" style="display:none;">No hay áreas registradas</div>
+          </div>
+        </div>
+        <div class="glass settings-card">
+          <div class="settings-card-title">
+            <span><i class="fas fa-list-check"></i> Campos Personalizados</span>
+            <button class="btn-accent" style="padding:6px 14px;font-size:11px;" onclick="openCustomFieldModal()">
+              <i class="fas fa-plus"></i> Nuevo
+            </button>
+          </div>
+          <div class="settings-section">
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <select id="cfAreaFilter" class="form-select" style="font-size:12px;padding:8px 12px;" onchange="loadCustomFields()">
+                <option value="">Todas las áreas</option>
+              </select>
+            </div>
+            <div class="settings-item-list" id="customFieldsList"></div>
+            <div id="cfEmpty" class="checklist-empty" style="display:none;">No hay campos personalizados</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end TAB: CONFIGURACIÓN -->
+
   </main>
 </div>
 
@@ -1080,6 +1323,10 @@ tr:hover td {
     <div class="form-group">
       <label class="form-label">Contraseña</label>
       <input type="password" id="newOpPass" class="form-input" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter') confirmCreate()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Área</label>
+      <select id="newOpArea" class="form-select"><option value="">Sin área</option></select>
       <div id="createError" class="form-error"></div>
     </div>
     <div class="modal-actions">
@@ -1138,48 +1385,91 @@ tr:hover td {
       <button class="modal-close" onclick="closeProjectModal()"><i class="fas fa-xmark"></i></button>
     </div>
     <div style="max-height:70vh;overflow-y:auto;padding-right:4px;">
+
+      <!-- SECCIÓN 1: DATOS DEL PROYECTO -->
+      <div class="form-section-title"><i class="fas fa-file-lines"></i> DATOS DEL PROYECTO</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Operador</label>
-          <select id="projOperator" class="form-select"><option value="">Seleccionar...</option></select>
+          <label class="form-label">Nombre del Proyecto</label>
+          <input type="text" id="projName" class="form-input" placeholder="Ej: Auditoría 2024">
         </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Compromiso</label>
-          <input type="date" id="projDeadline" class="form-input">
-        </div>
-      </div>
-      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Cliente</label>
           <input type="text" id="projClient" class="form-input" placeholder="Ej: Carga Terrestre">
         </div>
+      </div>
+      <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Proyecto</label>
-          <input type="text" id="projName" class="form-input" placeholder="Ej: Auditoría 2024">
+          <label class="form-label">Operador</label>
+          <select id="projOperator" class="form-select" onchange="onProjectOperatorChange()"><option value="">Seleccionar...</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Compromiso (Inicio)</label>
+          <input type="date" id="projDeadline" class="form-input">
         </div>
       </div>
-      <div class="form-section-title"><i class="fas fa-users"></i> Encargados de Materialidad</div>
+
+      <!-- SECCIÓN 2: ENCARGADOS -->
+      <div class="form-section-title"><i class="fas fa-users"></i> ENCARGADOS (Máx. 2)</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Encargado 1</label>
-          <select id="projManager1" class="form-select"><option value="">Seleccionar...</option></select>
+          <select id="projEncargado1" class="form-select"><option value="">Seleccionar...</option></select>
         </div>
         <div class="form-group">
           <label class="form-label">Encargado 2 <span style="color:var(--text-secondary);font-weight:400;">(Opcional)</span></label>
-          <select id="projManager2" class="form-select"><option value="">-- Ninguno --</option></select>
+          <select id="projEncargado2" class="form-select"><option value="">-- Ninguno --</option></select>
         </div>
       </div>
-      <div class="form-section-title"><i class="fas fa-clipboard-list"></i> Checklists</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Checklist Legal</label>
-          <textarea id="projLegal" class="form-textarea" placeholder="Un documento por línea&#10;Ej:&#10;Acta constitutiva&#10;RFC&#10;Poder notarial"></textarea>
+
+      <!-- SECCIÓN 3: CHECKLIST LEGAL -->
+      <div class="form-section-title"><i class="fas fa-gavel"></i> CHECKLIST LEGAL</div>
+      <div class="checklist-area" id="legalChecklistArea">
+        <div class="checklist-tools">
+          <select class="form-select" id="legalTemplateSelect" onchange="loadChecklistTemplate('legal')">
+            <option value="">Cargar plantilla guardada...</option>
+          </select>
+          <button class="btn-glass" style="padding:8px 14px;font-size:11px;" onclick="saveCurrentAsTemplate('legal')">
+            <i class="fas fa-floppy-disk"></i> Guardar plantilla
+          </button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Checklist Materialidad</label>
-          <textarea id="projMat" class="form-textarea" placeholder="Un documento por línea&#10;Ej:&#10;Estados financieros&#10;Informe de gestión&#10;Política contable"></textarea>
+        <div class="checklist-counter" id="legalChecklistCounter">0 items</div>
+        <div class="checklist-items" id="legalChecklistItems">
+          <div class="checklist-empty">Agrega items al checklist legal</div>
+        </div>
+        <div class="checklist-add-row">
+          <input type="text" class="form-input" id="legalNewItem" placeholder="NUEVO DOCUMENTO..." onkeydown="if(event.key==='Enter') addChecklistItem('legal')" style="text-transform:uppercase;">
+          <button class="btn-accent" style="padding:10px 16px;" onclick="addChecklistItem('legal')"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+
+      <!-- SECCIÓN 4: CHECKLIST MATERIALIDAD -->
+      <div class="form-section-title"><i class="fas fa-chart-bar"></i> CHECKLIST MATERIALIDAD</div>
+      <div class="checklist-area" id="matChecklistArea">
+        <div class="checklist-tools">
+          <select class="form-select" id="matTemplateSelect" onchange="loadChecklistTemplate('mat')">
+            <option value="">Cargar plantilla guardada...</option>
+          </select>
+          <button class="btn-glass" style="padding:8px 14px;font-size:11px;" onclick="saveCurrentAsTemplate('mat')">
+            <i class="fas fa-floppy-disk"></i> Guardar plantilla
+          </button>
+        </div>
+        <div class="checklist-counter" id="matChecklistCounter">0 items</div>
+        <div class="checklist-items" id="matChecklistItems">
+          <div class="checklist-empty">Agrega items al checklist de materialidad</div>
+        </div>
+        <div class="checklist-add-row">
+          <input type="text" class="form-input" id="matNewItem" placeholder="NUEVO DOCUMENTO..." onkeydown="if(event.key==='Enter') addChecklistItem('mat')" style="text-transform:uppercase;">
+          <button class="btn-accent" style="padding:10px 16px;" onclick="addChecklistItem('mat')"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 5: CAMPOS ADICIONALES -->
+      <div class="dynamic-fields-section" id="customFieldsSection" style="display:none;">
+        <div class="form-section-title"><i class="fas fa-pen-to-square"></i> CAMPOS ADICIONALES</div>
+        <div id="customFieldsContainer"></div>
+      </div>
+
       <div id="projectError" class="form-error" style="margin-top:8px;"></div>
     </div>
     <div class="modal-actions">
@@ -1191,17 +1481,106 @@ tr:hover td {
   </div>
 </div>
 
+<!-- MODAL SAVE TEMPLATE -->
+<div class="modal-overlay" id="templateModal">
+  <div class="glass modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-floppy-disk"></i> Guardar Plantilla</span>
+      <button class="modal-close" onclick="closeTemplateModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre de la plantilla</label>
+      <input type="text" id="templateName" class="form-input" placeholder="Ej: Documentación estándar" onkeydown="if(event.key==='Enter') confirmSaveTemplate()">
+      <div id="templateError" class="form-error"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTemplateModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmSaveTemplate()"><i class="fas fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREATE AREA -->
+<div class="modal-overlay" id="areaModal">
+  <div class="glass modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-building"></i> Nueva Área</span>
+      <button class="modal-close" onclick="closeAreaModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre del área</label>
+      <input type="text" id="areaName" class="form-input" placeholder="Ej: Legal Corporativo" onkeydown="if(event.key==='Enter') confirmCreateArea()">
+      <div id="areaError" class="form-error"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAreaModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmCreateArea()"><i class="fas fa-check"></i> Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREATE CUSTOM FIELD -->
+<div class="modal-overlay" id="customFieldModal">
+  <div class="glass modal" style="max-width:480px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-list-check"></i> Nuevo Campo Personalizado</span>
+      <button class="modal-close" onclick="closeCustomFieldModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre del campo</label>
+      <input type="text" id="cfName" class="form-input" placeholder="Ej: Número de Expediente">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <select id="cfType" class="form-select">
+        <option value="text">Texto</option>
+        <option value="select">Lista desplegable</option>
+        <option value="date">Fecha</option>
+      </select>
+    </div>
+    <div class="form-group" id="cfOptionsGroup" style="display:none;">
+      <label class="form-label">Opciones (separadas por coma)</label>
+      <input type="text" id="cfOptions" class="form-input" placeholder="Ej: Opción 1, Opción 2, Opción 3">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Área</label>
+        <select id="cfArea" class="form-select"><option value="">Seleccionar...</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">¿Obligatorio?</label>
+        <select id="cfRequired" class="form-select">
+          <option value="true">Sí</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+    </div>
+    <div id="cfError" class="form-error"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeCustomFieldModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmCreateCustomField()"><i class="fas fa-check"></i> Crear Campo</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var sessionToken = null;
 var operatorsCache = [];
 var managersCache = [];
 var projectsCache = [];
+var areasCache = [];
+var customFieldsCache = [];
 var currentUserId = null;
+var pendingTemplateType = null;
+
+/* Checklist state per type */
+var checklistState = { legal: [], mat: [] };
 
 window.addEventListener('load', function() {
   document.getElementById('loginPassword').focus();
 });
 
+/* ====== HELPERS ====== */
 function showToast(message, type) {
   var container = document.getElementById('toastContainer');
   var icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark';
@@ -1215,15 +1594,19 @@ function showToast(message, type) {
   }, 3000);
 }
 
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+/* ====== AUTH ====== */
 function handleLogin() {
   var password = document.getElementById('loginPassword').value;
   var btn = document.getElementById('loginBtn');
   var error = document.getElementById('loginError');
 
-  if (!password) {
-    error.textContent = 'Ingresa la contraseña de administrador';
-    return;
-  }
+  if (!password) { error.textContent = 'Ingresa la contraseña de administrador'; return; }
 
   btn.classList.add('loading');
   error.textContent = '';
@@ -1239,6 +1622,7 @@ function handleLogin() {
         loadOperators();
         loadManagers();
         loadProjects();
+        loadAreas();
       } else {
         error.textContent = result.error || 'Error de autenticación';
       }
@@ -1259,9 +1643,7 @@ function handleLogout() {
   google.script.run
     .withSuccessHandler(function() {
       sessionToken = null;
-      operatorsCache = [];
-      managersCache = [];
-      projectsCache = [];
+      operatorsCache = []; managersCache = []; projectsCache = [];
       document.getElementById('dashboard').classList.remove('active');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
@@ -1271,18 +1653,42 @@ function handleLogout() {
     .logout(sessionToken);
 }
 
+/* ====== TAB SWITCHING ====== */
+function switchTab(tab) {
+  ['operators', 'projects', 'settings'].forEach(function(t) {
+    var tabId = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
+    var viewId = 'view' + t.charAt(0).toUpperCase() + t.slice(1);
+    document.getElementById(tabId).classList.toggle('active', t === tab);
+    document.getElementById(viewId).classList.toggle('active', t === tab);
+  });
+
+  var btn = document.getElementById('btnHeaderAction');
+  if (tab === 'operators') {
+    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Operador';
+    btn.onclick = openCreateOperatorModal;
+    btn.style.display = '';
+  } else if (tab === 'projects') {
+    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Proyecto';
+    btn.onclick = openProjectModal;
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+  }
+
+  if (tab === 'settings') {
+    renderAreas();
+    renderCustomFields();
+  }
+}
+
+/* ====== OPERADORES ====== */
 function loadOperators() {
   google.script.run
     .withSuccessHandler(function(result) {
       if (result.success) {
         operatorsCache = result.operators;
         renderOperators();
-      } else {
-        if (result.error === 'Sesión expirada') {
-          handleLogout();
-          showToast('Sesión expirada, inicia sesión nuevamente', 'error');
-        }
-      }
+      } else if (result.error === 'Sesión expirada') { handleLogout(); }
     })
     .listOperators(sessionToken);
 }
@@ -1298,23 +1704,19 @@ function renderOperators() {
   statActive.textContent = operatorsCache.length;
   tableCount.textContent = operatorsCache.length + ' operadores';
 
-  if (operatorsCache.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-
+  if (operatorsCache.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = '';
 
   operatorsCache.forEach(function(op) {
     var initials = op.name.substring(0, 2).toUpperCase();
     var date = op.createdAt ? new Date(op.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+    var areaBadge = op.area ? '<span style="font-size:11px;color:var(--text-secondary);margin-left:8px;">(' + escapeHtml(op.area) + ')</span>' : '';
     var shortId = op.id.substring(0, 8) + '...';
 
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td><div class="operator-name"><div class="operator-avatar">' + initials + '</div>' + escapeHtml(op.name) + '</div></td>' +
+      '<td><div class="operator-name"><div class="operator-avatar">' + initials + '</div>' + escapeHtml(op.name) + areaBadge + '</div></td>' +
       '<td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">' + shortId + '</td>' +
       '<td><span class="operator-date">' + date + '</span></td>' +
       '<td><div class="actions-cell" style="justify-content:flex-end;">' +
@@ -1325,200 +1727,35 @@ function renderOperators() {
   });
 }
 
-function escapeHtml(text) {
-  var div = document.createElement('div');
-  div.appendChild(document.createTextNode(text));
-  return div.innerHTML;
-}
-
-/* Tab Switching */
-function switchTab(tab) {
-  var tabs = ['operators', 'projects'];
-  tabs.forEach(function(t) {
-    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
-    document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
-  });
-
-  var btn = document.getElementById('btnHeaderAction');
-  if (tab === 'operators') {
-    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Operador';
-    btn.onclick = openCreateOperatorModal;
-  } else {
-    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Proyecto';
-    btn.onclick = openProjectModal;
-  }
-}
-
-/* Managers */
-function loadManagers() {
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.success) managersCache = result.managers;
-    })
-    .listManagers(sessionToken);
-}
-
-/* Projects */
-function loadProjects() {
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.success) {
-        projectsCache = result.projects;
-        renderProjects();
-      } else if (result.error === 'Sesión expirada') {
-        handleLogout();
-      }
-    })
-    .listProjects(sessionToken);
-}
-
-function renderProjects() {
-  var tbody = document.getElementById('projectsBody');
-  var empty = document.getElementById('projEmptyState');
-  var totalEl = document.getElementById('projTotal');
-  var openEl = document.getElementById('projOpen');
-  var countEl = document.getElementById('projCount');
-
-  var openCount = projectsCache.filter(function(p) { return p.status === 'Abierto'; }).length;
-  totalEl.textContent = projectsCache.length;
-  openEl.textContent = openCount;
-  countEl.textContent = projectsCache.length + ' proyectos';
-
-  if (projectsCache.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-
-  empty.style.display = 'none';
-  tbody.innerHTML = '';
-
-  projectsCache.forEach(function(p) {
-    var deadline = p.deadline ? new Date(p.deadline + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
-    var isOpen = p.status === 'Abierto';
-    var statusBadge = isOpen
-      ? '<span style="background:rgba(81,207,102,0.15);color:#51cf66;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Abierto</span>'
-      : '<span style="background:rgba(255,107,107,0.15);color:#ff6b6b;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Cerrado</span>';
-
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td><span style="font-weight:600;">' + escapeHtml(p.projectName) + '</span></td>' +
-      '<td>' + escapeHtml(p.operator) + '</td>' +
-      '<td>' + escapeHtml(p.client) + '</td>' +
-      '<td>' + deadline + '</td>' +
-      '<td>' + statusBadge + '</td>' +
-      '<td>' + escapeHtml(p.managers) + '</td>';
-    tbody.appendChild(tr);
-  });
-}
-
-/* Project Modal */
-function openProjectModal() {
-  document.getElementById('projOperator').innerHTML = '<option value="">Seleccionar...</option>';
-  document.getElementById('projManager1').innerHTML = '<option value="">Seleccionar...</option>';
-  document.getElementById('projManager2').innerHTML = '<option value="">-- Ninguno --</option>';
-  document.getElementById('projectError').textContent = '';
-
-  operatorsCache.forEach(function(op) {
-    document.getElementById('projOperator').innerHTML += '<option value="' + escapeHtml(op.name) + '">' + escapeHtml(op.name) + '</option>';
-  });
-  managersCache.forEach(function(m) {
-    document.getElementById('projManager1').innerHTML += '<option value="' + escapeHtml(m.name) + '">' + escapeHtml(m.name) + '</option>';
-    document.getElementById('projManager2').innerHTML += '<option value="' + escapeHtml(m.name) + '">' + escapeHtml(m.name) + '</option>';
-  });
-
-  document.getElementById('projClient').value = '';
-  document.getElementById('projName').value = '';
-  document.getElementById('projDeadline').value = '';
-  document.getElementById('projLegal').value = '';
-  document.getElementById('projMat').value = '';
-
-  document.getElementById('projectModal').classList.add('active');
-}
-
-function closeProjectModal() {
-  document.getElementById('projectModal').classList.remove('active');
-}
-
-function confirmCreateProject() {
-  var operator = document.getElementById('projOperator').value;
-  var client = document.getElementById('projClient').value.trim();
-  var projectName = document.getElementById('projName').value.trim();
-  var deadline = document.getElementById('projDeadline').value;
-  var manager1 = document.getElementById('projManager1').value;
-  var manager2 = document.getElementById('projManager2').value;
-  var legal = document.getElementById('projLegal').value;
-  var mat = document.getElementById('projMat').value;
-  var error = document.getElementById('projectError');
-
-  if (!operator) { error.textContent = 'Selecciona un operador'; return; }
-  if (!client) { error.textContent = 'El cliente es obligatorio'; return; }
-  if (!projectName) { error.textContent = 'El nombre del proyecto es obligatorio'; return; }
-  if (!deadline) { error.textContent = 'La fecha compromiso es obligatoria'; return; }
-  if (!manager1) { error.textContent = 'Selecciona al menos un encargado'; return; }
-
-  var data = {
-    operator: operator,
-    client: client,
-    projectName: projectName,
-    deadline: deadline,
-    manager1: manager1,
-    manager2: manager2,
-    legalSteps: legal.split('\n').filter(function(l) { return l.trim(); }),
-    matSteps: mat.split('\n').filter(function(l) { return l.trim(); })
-  };
-
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.success) {
-        closeProjectModal();
-        showToast('Proyecto "' + projectName + '" creado exitosamente', 'success');
-        loadProjects();
-      } else {
-        error.textContent = result.error;
-      }
-    })
-    .withFailureHandler(function(err) {
-      error.textContent = 'Error: ' + err.message;
-    })
-    .createProject(sessionToken, data);
-}
-
 /* Create Operator Modal */
 function openCreateOperatorModal() {
   document.getElementById('newOpName').value = '';
   document.getElementById('newOpPass').value = '';
   document.getElementById('createError').textContent = '';
+  var sel = document.getElementById('newOpArea');
+  sel.innerHTML = '<option value="">Sin área</option>';
+  areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
   document.getElementById('createModal').classList.add('active');
   setTimeout(function() { document.getElementById('newOpName').focus(); }, 200);
 }
 
-function closeCreateModal() {
-  document.getElementById('createModal').classList.remove('active');
-}
+function closeCreateModal() { document.getElementById('createModal').classList.remove('active'); }
 
 function confirmCreate() {
   var name = document.getElementById('newOpName').value.trim();
   var pass = document.getElementById('newOpPass').value.trim();
+  var area = document.getElementById('newOpArea').value;
   var error = document.getElementById('createError');
-
   if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
   if (!pass) { error.textContent = 'La contraseña es obligatoria'; return; }
 
   google.script.run
     .withSuccessHandler(function(result) {
-      if (result.success) {
-        closeCreateModal();
-        showToast('Operador "' + name + '" creado exitosamente', 'success');
-        loadOperators();
-      } else {
-        error.textContent = result.error;
-      }
+      if (result.success) { closeCreateModal(); showToast('Operador "' + name + '" creado', 'success'); loadOperators(); }
+      else { error.textContent = result.error; }
     })
-    .withFailureHandler(function(err) {
-      error.textContent = 'Error: ' + err.message;
-    })
-    .createOperator(sessionToken, name, pass);
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .createOperator(sessionToken, name, pass, area);
 }
 
 /* Edit Password Modal */
@@ -1533,29 +1770,19 @@ function openEditModal(id) {
   setTimeout(function() { document.getElementById('editOpPass').focus(); }, 200);
 }
 
-function closeEditModal() {
-  document.getElementById('editModal').classList.remove('active');
-  currentUserId = null;
-}
+function closeEditModal() { document.getElementById('editModal').classList.remove('active'); currentUserId = null; }
 
 function confirmEditPass() {
   var pass = document.getElementById('editOpPass').value.trim();
   var error = document.getElementById('editError');
-
   if (!pass) { error.textContent = 'La nueva contraseña es obligatoria'; return; }
 
   google.script.run
     .withSuccessHandler(function(result) {
-      if (result.success) {
-        closeEditModal();
-        showToast('Contraseña actualizada correctamente', 'success');
-      } else {
-        error.textContent = result.error;
-      }
+      if (result.success) { closeEditModal(); showToast('Contraseña actualizada', 'success'); }
+      else { error.textContent = result.error; }
     })
-    .withFailureHandler(function(err) {
-      error.textContent = 'Error: ' + err.message;
-    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
     .updateOperatorPassword(sessionToken, currentUserId, pass);
 }
 
@@ -1569,28 +1796,445 @@ function openDeleteModal(id) {
   document.getElementById('deleteModal').classList.add('active');
 }
 
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.remove('active');
-  currentUserId = null;
-}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); currentUserId = null; }
 
 function confirmDelete() {
   var error = document.getElementById('deleteError');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeDeleteModal(); showToast('Operador eliminado', 'success'); loadOperators(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .deleteOperator(sessionToken, currentUserId);
+}
+
+/* ====== MANAGERS ====== */
+function loadManagers() {
+  google.script.run
+    .withSuccessHandler(function(result) { if (result.success) managersCache = result.managers; })
+    .listManagers(sessionToken);
+}
+
+/* ====== PROJECTS ====== */
+function loadProjects() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { projectsCache = result.projects; renderProjects(); }
+      else if (result.error === 'Sesión expirada') { handleLogout(); }
+    })
+    .listProjects(sessionToken);
+}
+
+function renderProjects() {
+  var tbody = document.getElementById('projectsBody');
+  var empty = document.getElementById('projEmptyState');
+  var totalEl = document.getElementById('projTotal');
+  var openEl = document.getElementById('projOpen');
+  var countEl = document.getElementById('projCount');
+  var openCount = projectsCache.filter(function(p) { return p.status === 'Abierto'; }).length;
+  totalEl.textContent = projectsCache.length;
+  openEl.textContent = openCount;
+  countEl.textContent = projectsCache.length + ' proyectos';
+
+  if (projectsCache.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = '';
+
+  projectsCache.forEach(function(p) {
+    var deadline = p.deadline ? new Date(p.deadline + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+    var isOpen = p.status === 'Abierto';
+    var statusBadge = isOpen
+      ? '<span style="background:rgba(81,207,102,0.15);color:#51cf66;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Abierto</span>'
+      : '<span style="background:rgba(255,107,107,0.15);color:#ff6b6b;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">Cerrado</span>';
+    var managers = p.managers ? p.managers.replace('|', ' & ') : '-';
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span style="font-weight:600;">' + escapeHtml(p.projectName) + '</span></td>' +
+      '<td>' + escapeHtml(p.operator) + '</td>' +
+      '<td>' + escapeHtml(p.client) + '</td>' +
+      '<td>' + deadline + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td>' + escapeHtml(managers) + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* ====== PROJECT MODAL WITH CHECKLISTS ====== */
+function onProjectOperatorChange() {
+  var opName = document.getElementById('projOperator').value;
+  var op = operatorsCache.find(function(o) { return o.name === opName; });
+  var section = document.getElementById('customFieldsSection');
+  var container = document.getElementById('customFieldsContainer');
+  container.innerHTML = '';
+  customFieldsCache = [];
+
+  if (!op || !op.area) { section.style.display = 'none'; return; }
 
   google.script.run
     .withSuccessHandler(function(result) {
       if (result.success) {
-        closeDeleteModal();
-        showToast('Operador eliminado', 'success');
-        loadOperators();
-      } else {
-        error.textContent = result.error;
+        customFieldsCache = result.fields;
+        if (customFieldsCache.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        container.innerHTML = '';
+        customFieldsCache.forEach(function(f, i) {
+          var html = '<div class="dynamic-field"><label class="form-label">' + escapeHtml(f.fieldName) + (f.required === 'TRUE' ? ' <span style="color:var(--danger);">*</span>' : '') + '</label>';
+
+          if (f.fieldType === 'select') {
+            html += '<select id="cf_' + f.id + '" class="form-select"><option value="">Seleccionar...</option>';
+            if (f.fieldOptions) {
+              f.fieldOptions.split(',').forEach(function(opt) {
+                html += '<option value="' + escapeHtml(opt.trim()) + '">' + escapeHtml(opt.trim()) + '</option>';
+              });
+            }
+            html += '</select>';
+          } else if (f.fieldType === 'date') {
+            html += '<input type="date" id="cf_' + f.id + '" class="form-input">';
+          } else {
+            html += '<input type="text" id="cf_' + f.id + '" class="form-input" placeholder="' + escapeHtml(f.fieldName) + '">';
+          }
+          html += '</div>';
+          container.innerHTML += html;
+        });
       }
     })
-    .withFailureHandler(function(err) {
-      error.textContent = 'Error: ' + err.message;
+    .listCustomFields(sessionToken, op.area);
+}
+
+function openProjectModal() {
+  document.getElementById('projName').value = '';
+  document.getElementById('projClient').value = '';
+  document.getElementById('projDeadline').value = '';
+  document.getElementById('projectError').textContent = '';
+  document.getElementById('customFieldsSection').style.display = 'none';
+  document.getElementById('customFieldsContainer').innerHTML = '';
+
+  var opSel = document.getElementById('projOperator');
+  opSel.innerHTML = '<option value="">Seleccionar...</option>';
+  operatorsCache.forEach(function(op) { opSel.innerHTML += '<option value="' + escapeHtml(op.name) + '">' + escapeHtml(op.name) + '</option>'; });
+
+  var enc1 = document.getElementById('projEncargado1');
+  var enc2 = document.getElementById('projEncargado2');
+  enc1.innerHTML = '<option value="">Seleccionar...</option>';
+  enc2.innerHTML = '<option value="">-- Ninguno --</option>';
+  operatorsCache.forEach(function(op) {
+    enc1.innerHTML += '<option value="' + escapeHtml(op.name) + '">' + escapeHtml(op.name) + '</option>';
+    enc2.innerHTML += '<option value="' + escapeHtml(op.name) + '">' + escapeHtml(op.name) + '</option>';
+  });
+
+  checklistState.legal = [];
+  checklistState.mat = [];
+  renderChecklist('legal');
+  renderChecklist('mat');
+  loadTemplateSelects();
+
+  document.getElementById('projectModal').classList.add('active');
+}
+
+function closeProjectModal() { document.getElementById('projectModal').classList.remove('active'); }
+
+/* Checklist helpers */
+function renderChecklist(type) {
+  var container = document.getElementById(type + 'ChecklistItems');
+  var counter = document.getElementById(type + 'ChecklistCounter');
+  var items = checklistState[type];
+  counter.textContent = items.length + ' items';
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="checklist-empty">Agrega items al checklist</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  items.forEach(function(item, idx) {
+    var div = document.createElement('div');
+    div.className = 'checklist-item';
+    div.innerHTML =
+      '<label><input type="checkbox" ' + (item.done ? 'checked' : '') + ' onchange="toggleChecklistItem(\'' + type + '\',' + idx + ')">' +
+      '<span class="item-text' + (item.done ? ' done' : '') + '">' + escapeHtml(item.text) + '</span></label>' +
+      '<button class="btn-icon-sm" onclick="removeChecklistItem(\'' + type + '\',' + idx + ')"><i class="fas fa-times"></i></button>';
+    container.appendChild(div);
+  });
+}
+
+function addChecklistItem(type) {
+  var input = document.getElementById(type + 'NewItem');
+  var text = input.value.trim().toUpperCase();
+  if (!text) return;
+  checklistState[type].push({ text: text, done: false });
+  input.value = '';
+  renderChecklist(type);
+}
+
+function removeChecklistItem(type, idx) {
+  checklistState[type].splice(idx, 1);
+  renderChecklist(type);
+}
+
+function toggleChecklistItem(type, idx) {
+  checklistState[type][idx].done = !checklistState[type][idx].done;
+}
+
+function loadTemplateSelects() {
+  ['legal', 'mat'].forEach(function(type) {
+    var sel = document.getElementById(type + 'TemplateSelect');
+    sel.innerHTML = '<option value="">Cargar plantilla guardada...</option>';
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) {
+          result.templates.forEach(function(t) {
+            sel.innerHTML += '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.name) + '</option>';
+          });
+        }
+      })
+      .listChecklistTemplates(sessionToken, type);
+  });
+}
+
+function loadChecklistTemplate(type) {
+  var sel = document.getElementById(type + 'TemplateSelect');
+  var templateId = sel.value;
+  if (!templateId) return;
+
+  var typeParam = type === 'legal' ? 'legal' : 'mat';
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        var t = result.templates.find(function(t) { return t.id === templateId; });
+        if (t) {
+          checklistState[type] = t.items.map(function(item) { return { text: item.toUpperCase(), done: false }; });
+          renderChecklist(type);
+          showToast('Plantilla "' + t.name + '" cargada', 'success');
+        }
+      }
     })
-    .deleteOperator(sessionToken, currentUserId);
+    .listChecklistTemplates(sessionToken, typeParam);
+}
+
+function saveCurrentAsTemplate(type) {
+  var items = checklistState[type];
+  if (items.length === 0) { showToast('Agrega items antes de guardar la plantilla', 'error'); return; }
+  pendingTemplateType = type;
+  document.getElementById('templateName').value = '';
+  document.getElementById('templateError').textContent = '';
+  document.getElementById('templateModal').classList.add('active');
+  setTimeout(function() { document.getElementById('templateName').focus(); }, 200);
+}
+
+function closeTemplateModal() { document.getElementById('templateModal').classList.remove('active'); pendingTemplateType = null; }
+
+function confirmSaveTemplate() {
+  var name = document.getElementById('templateName').value.trim();
+  var error = document.getElementById('templateError');
+  if (!name) { error.textContent = 'El nombre de la plantilla es obligatorio'; return; }
+
+  var type = pendingTemplateType;
+  var items = checklistState[type].map(function(i) { return i.text; });
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeTemplateModal(); showToast('Plantilla "' + name + '" guardada', 'success'); loadTemplateSelects(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .saveChecklistTemplate(sessionToken, type, name, items);
+}
+
+function confirmCreateProject() {
+  var operator = document.getElementById('projOperator').value;
+  var client = document.getElementById('projClient').value.trim();
+  var projectName = document.getElementById('projName').value.trim();
+  var deadline = document.getElementById('projDeadline').value;
+  var encargado1 = document.getElementById('projEncargado1').value;
+  var encargado2 = document.getElementById('projEncargado2').value;
+  var error = document.getElementById('projectError');
+
+  if (!operator) { error.textContent = 'Selecciona un operador'; return; }
+  if (!client) { error.textContent = 'El cliente es obligatorio'; return; }
+  if (!projectName) { error.textContent = 'El nombre del proyecto es obligatorio'; return; }
+  if (!deadline) { error.textContent = 'La fecha compromiso es obligatoria'; return; }
+  if (!encargado1) { error.textContent = 'Selecciona al menos un encargado'; return; }
+
+  var legalSteps = checklistState.legal.filter(function(i) { return !i.done; }).map(function(i) { return i.text; });
+  var matSteps = checklistState.mat.filter(function(i) { return !i.done; }).map(function(i) { return i.text; });
+
+  var data = {
+    operator: operator,
+    client: client,
+    projectName: projectName,
+    deadline: deadline,
+    manager1: encargado1,
+    manager2: encargado2,
+    legalSteps: legalSteps,
+    matSteps: matSteps
+  };
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        var customValues = [];
+        customFieldsCache.forEach(function(f) {
+          var val = document.getElementById('cf_' + f.id);
+          if (val) customValues.push({ fieldId: f.id, value: val.value });
+        });
+        if (customValues.length > 0) {
+          google.script.run.saveProjectFieldValues(sessionToken, result.projectId, customValues);
+        }
+        closeProjectModal();
+        showToast('Proyecto "' + projectName + '" creado exitosamente', 'success');
+        loadProjects();
+      } else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .createProject(sessionToken, data);
+}
+
+/* ====== ÁREAS ====== */
+function loadAreas() {
+  google.script.run
+    .withSuccessHandler(function(result) { if (result.success) { areasCache = result.areas; renderAreas(); } })
+    .listAreas(sessionToken);
+}
+
+function renderAreas() {
+  var list = document.getElementById('areasList');
+  var empty = document.getElementById('areasEmpty');
+  if (areasCache.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = '';
+  areasCache.forEach(function(a) {
+    var div = document.createElement('div');
+    div.className = 'settings-list-item';
+    div.innerHTML = '<span class="item-label"><i class="fas fa-building" style="color:var(--accent-light);"></i> ' + escapeHtml(a.name) + '</span>' +
+      '<button class="btn-icon danger" onclick="deleteArea(\'' + a.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>';
+    list.appendChild(div);
+  });
+}
+
+function openAreaModal() {
+  document.getElementById('areaName').value = '';
+  document.getElementById('areaError').textContent = '';
+  document.getElementById('areaModal').classList.add('active');
+  setTimeout(function() { document.getElementById('areaName').focus(); }, 200);
+}
+
+function closeAreaModal() { document.getElementById('areaModal').classList.remove('active'); }
+
+function confirmCreateArea() {
+  var name = document.getElementById('areaName').value.trim();
+  var error = document.getElementById('areaError');
+  if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeAreaModal(); showToast('Área "' + name + '" creada', 'success'); loadAreas(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .createArea(sessionToken, name);
+}
+
+function deleteArea(id) {
+  if (!confirm('¿Eliminar esta área?')) return;
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { showToast('Área eliminada', 'success'); loadAreas(); }
+    })
+    .deleteArea(sessionToken, id);
+}
+
+/* ====== CAMPOS PERSONALIZADOS ====== */
+function loadCustomFields() {
+  var filterAreaId = document.getElementById('cfAreaFilter').value;
+  var list = document.getElementById('customFieldsList');
+  var empty = document.getElementById('cfEmpty');
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        var fields = result.fields;
+        if (fields.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+        list.innerHTML = '';
+        fields.forEach(function(f) {
+          var areaName = '';
+          var a = areasCache.find(function(x) { return x.id === f.areaId; });
+          if (a) areaName = a.name;
+
+          var typeLabel = { text: 'Texto', select: 'Lista', date: 'Fecha' }[f.fieldType] || f.fieldType;
+          var div = document.createElement('div');
+          div.className = 'settings-list-item';
+          div.innerHTML =
+            '<span class="item-label"><i class="fas fa-pen-to-square" style="color:var(--accent-light);"></i> ' + escapeHtml(f.fieldName) +
+            ' <span class="item-badge">' + typeLabel + '</span>' +
+            (areaName ? ' <span style="font-size:11px;color:var(--text-secondary);font-weight:400;">(' + escapeHtml(areaName) + ')</span>' : '') +
+            '</span>' +
+            '<button class="btn-icon danger" onclick="deleteCustomField(\'' + f.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>';
+          list.appendChild(div);
+        });
+
+        var filterSel = document.getElementById('cfAreaFilter');
+        filterSel.innerHTML = '<option value="">Todas las áreas</option>';
+        areasCache.forEach(function(a) {
+          filterSel.innerHTML += '<option value="' + a.id + '"' + (a.id === filterAreaId ? ' selected' : '') + '>' + escapeHtml(a.name) + '</option>';
+        });
+      }
+    })
+    .listCustomFields(sessionToken, filterAreaId);
+}
+
+function openCustomFieldModal() {
+  document.getElementById('cfName').value = '';
+  document.getElementById('cfType').value = 'text';
+  document.getElementById('cfOptions').value = '';
+  document.getElementById('cfRequired').value = 'true';
+  document.getElementById('cfOptionsGroup').style.display = 'none';
+  document.getElementById('cfError').textContent = '';
+  var sel = document.getElementById('cfArea');
+  sel.innerHTML = '<option value="">Seleccionar...</option>';
+  areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + a.id + '">' + escapeHtml(a.name) + '</option>'; });
+  document.getElementById('customFieldModal').classList.add('active');
+}
+
+function closeCustomFieldModal() { document.getElementById('customFieldModal').classList.remove('active'); }
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'cfType' && e.target.value === 'select') {
+    document.getElementById('cfOptionsGroup').style.display = 'block';
+  } else if (e.target.id === 'cfType') {
+    document.getElementById('cfOptionsGroup').style.display = 'none';
+  }
+});
+
+function confirmCreateCustomField() {
+  var name = document.getElementById('cfName').value.trim();
+  var type = document.getElementById('cfType').value;
+  var options = document.getElementById('cfOptions').value.trim();
+  var area = document.getElementById('cfArea').value;
+  var required = document.getElementById('cfRequired').value;
+  var error = document.getElementById('cfError');
+
+  if (!name) { error.textContent = 'El nombre del campo es obligatorio'; return; }
+  if (!area) { error.textContent = 'Selecciona un área'; return; }
+  if (type === 'select' && !options) { error.textContent = 'Agrega opciones para la lista desplegable'; return; }
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeCustomFieldModal(); showToast('Campo "' + name + '" creado', 'success'); loadCustomFields(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .saveCustomField(sessionToken, { fieldName: name, fieldType: type, fieldOptions: options, areaId: area, required: required === 'true', displayOrder: '0' });
+}
+
+function deleteCustomField(id) {
+  if (!confirm('¿Eliminar este campo personalizado?')) return;
+  google.script.run
+    .withSuccessHandler(function(result) { if (result.success) { showToast('Campo eliminado', 'success'); loadCustomFields(); } })
+    .deleteCustomField(sessionToken, id);
 }
 </script>
 </body>
