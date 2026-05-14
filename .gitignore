@@ -1,3 +1,4 @@
 DATA_LM/
 desktop.ini
 node_modules/
+*.gsheet
