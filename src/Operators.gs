@@ -34,7 +34,7 @@ function createOperator(token, name, password, area) {
   return { success: true, id: id };
 }
 
-function updateOperator(token, id, data) {
+function updateOperator(token, id, name, password, area) {
   if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
 
   var idx = findRowIndex(SHEET_OPERATORS, 0, id);
@@ -43,9 +43,16 @@ function updateOperator(token, id, data) {
   var rows = getSheetData(SHEET_OPERATORS);
   var row = rows[idx];
 
-  if (data.name !== undefined) row[1] = data.name;
-  if (data.password !== undefined) row[2] = data.password;
-  if (data.area !== undefined) row[3] = data.area;
+  // Check name duplicate (excluding self)
+  for (var i = 0; i < rows.length; i++) {
+    if (i !== idx && rows[i][1].toLowerCase() === name.toLowerCase()) {
+      return { success: false, error: 'Ya existe un operador con ese nombre' };
+    }
+  }
+
+  row[1] = name;
+  if (password) row[2] = password;
+  row[3] = area || '';
 
   updateRow(SHEET_OPERATORS, idx, row);
   logAction('admin', 'UPDATE_OPERATOR', 'Operador actualizado ID: ' + id);
