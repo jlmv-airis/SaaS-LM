@@ -1483,15 +1483,15 @@ tr:hover td {
 <div class="modal-overlay" id="deleteModal">
   <div class="glass modal">
     <div class="confirm-dialog">
-      <div class="confirm-icon danger"><i class="fas fa-trash-can"></i></div>
-      <div class="modal-title" style="margin-bottom:8px;">Eliminar Operador</div>
-      <div class="confirm-text">¿Estás seguro de eliminar a</div>
-      <div class="confirm-name" id="deleteOpName"></div>
-      <div class="confirm-text">Esta acción no se puede deshacer.</div>
-      <div id="deleteError" class="form-error"></div>
-      <div class="modal-actions" style="justify-content:center;margin-top:20px;">
-        <button class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-        <button class="btn-danger" onclick="confirmDelete()">Eliminar</button>
+      <div style="text-align:left;">
+        <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-trash-can" style="color:var(--danger);margin-right:10px;"></i> Eliminar Operador</div>
+        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px;">¿Estás seguro de eliminar a <strong id="deleteOpName" style="color:var(--text-primary);"></strong>?</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Esta acción no se puede deshacer.</div>
+        <div id="deleteError" class="form-error"></div>
+        <div class="modal-actions" style="margin-top:20px;">
+          <button class="btn-secondary" onclick="closeDeleteModal()"><i class="fas fa-xmark"></i> Cancelar</button>
+          <button class="btn-danger" onclick="confirmDelete()"><i class="fas fa-trash-can"></i> Eliminar</button>
+        </div>
       </div>
     </div>
   </div>
