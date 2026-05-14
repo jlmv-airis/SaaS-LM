@@ -1796,8 +1796,11 @@ function showDashboard() {
 }
 
 function refreshData() {
+  var icon = document.querySelector('.btn-glass .fa-rotate');
+  if (icon) icon.classList.add('fa-spin');
   google.script.run
     .withSuccessHandler(function(result) {
+      if (icon) icon.classList.remove('fa-spin');
       if (result.success) {
         operatorsCache = result.operators || [];
         projectsCache = result.projects || [];
@@ -1816,7 +1819,7 @@ function refreshData() {
         showToast('Sesión expirada, inicia sesión de nuevo', 'error');
       }
     })
-    .withFailureHandler(function() { showToast('Error al actualizar', 'error'); })
+    .withFailureHandler(function() { showToast('Error al actualizar', 'error'); if (icon) icon.classList.remove('fa-spin'); })
     .refreshAllData(sessionToken);
 }
 
