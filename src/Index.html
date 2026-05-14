@@ -110,6 +110,17 @@ body {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
+#login-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(107,99,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(81,207,102,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(255,107,107,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
 #login-screen.hidden {
   opacity: 0;
   transform: scale(0.95);
@@ -119,9 +130,28 @@ body {
 .login-card {
   width: 100%;
   max-width: 400px;
-  padding: 48px 40px;
+  padding: 48px 40px 40px;
   text-align: center;
   animation: slideUp 0.6s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #51cf66, var(--accent));
+  background-size: 200% 100%;
+  animation: shimmerBar 3s ease infinite;
+}
+
+@keyframes shimmerBar {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes slideUp {
@@ -130,29 +160,85 @@ body {
 }
 
 .login-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, var(--accent), #8b7cf7);
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--accent), #6c5ce7);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
   font-size: 32px;
-  box-shadow: 0 0 40px var(--accent-glow);
+  position: relative;
+  box-shadow: 0 0 50px var(--accent-glow);
+}
+
+.login-icon-duo {
+  position: absolute;
+  font-size: 14px;
+  background: var(--bg);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.login-icon-duo.legal {
+  bottom: -4px;
+  right: -4px;
+  color: var(--accent);
+}
+
+.login-icon-duo.mat {
+  top: -4px;
+  left: -4px;
+  color: #51cf66;
 }
 
 .login-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .login-sub {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 32px;
+  letter-spacing: 0.3px;
+}
+
+.login-sub span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
 }
 
 .login-input {
@@ -166,9 +252,8 @@ body {
   font-family: inherit;
   outline: none;
   transition: all 0.3s;
-  letter-spacing: 0.2em;
-  text-align: center;
-  font-weight: 600;
+  text-align: left;
+  font-weight: 500;
 }
 
 .login-input:focus {
@@ -178,7 +263,6 @@ body {
 }
 
 .login-input::placeholder {
-  letter-spacing: 0;
   font-weight: 400;
   color: rgba(255,255,255,0.3);
 }
@@ -1230,15 +1314,30 @@ tr:hover td {
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="glass login-card">
-    <div class="login-icon">
-      <i class="fas fa-shield-halved"></i>
+    <div class="login-icon" style="overflow:hidden;background:transparent;box-shadow:none;padding:0;width:100%;height:auto;max-height:100px;margin-bottom:30px;border-radius:0;display:flex;align-items:center;justify-content:center;">
+      <? if (logoBase64) { ?>
+        <div style="position:relative; width:100%; height:100px; display:flex; align-items:center; justify-content:center;">
+          <!-- Logo Base: Muestra el isotipo (bola) con colores naturales o brillo suave -->
+          <img src="<?!= logoBase64 ?>" style="width:auto;height:auto;max-width:100%;max-height:100px;display:block;filter: brightness(1.1); position:absolute;">
+          
+          <!-- Logo Superpuesto: Solo para el texto, con inversión total (blanco) -->
+          <!-- Usamos clip-path para mostrar solo la mitad derecha donde está el texto -->
+          <img src="<?!= logoBase64 ?>" style="width:auto;height:auto;max-width:100%;max-height:100px;display:block;filter: brightness(0) invert(1); position:absolute; clip-path: inset(0 0 0 35%);">
+        </div>
+      <? } else { ?>
+        <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg, var(--accent), #6c5ce7);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;box-shadow: 0 0 50px var(--accent-glow);">
+          <i class="fas fa-scale-balanced"></i>
+          <span class="login-icon-duo legal"><i class="fas fa-gavel"></i></span>
+          <span class="login-icon-duo mat"><i class="fas fa-clipboard-list"></i></span>
+        </div>
+      <? } ?>
     </div>
     <h1 class="login-title">SaaS LM</h1>
-    <p class="login-sub">Legal y Materialidad</p>
-    <input type="text" id="loginUser" class="login-input" placeholder="Usuario" autocomplete="off" onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()" style="margin-bottom:12px;letter-spacing:normal;text-transform:lowercase;">
+    <p class="login-sub"><span>Legal</span> y <span>Materialidad</span></p>
+    <div class="login-divider">Acceso al sistema</div>
+    <input type="text" id="loginUser" class="login-input" placeholder="Nombre de usuario" autocomplete="off" onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()" style="margin-bottom:12px;">
     <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
     <button id="loginBtn" class="login-btn" onclick="handleLogin()">
       <i class="fas fa-arrow-right-to-bracket"></i> Ingresar
@@ -1251,7 +1350,13 @@ tr:hover td {
 <div id="dashboard">
   <header class="header">
     <div class="header-left">
-      <div class="header-logo"><i class="fas fa-shield-halved"></i></div>
+      <div class="header-logo" style="overflow:hidden;background:transparent;padding:0;width:38px;height:38px;border-radius:10px;">
+        <? if (logoBase64) { ?>
+          <img src="<?!= logoBase64 ?>" style="width:100%;height:100%;object-fit:cover;">
+        <? } else { ?>
+          <i class="fas fa-scale-balanced"></i>
+        <? } ?>
+      </div>
       <div>
         <span class="header-title">SaaS LM</span>
         <span class="header-badge" id="roleBadge">Admin</span>

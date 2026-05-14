@@ -1,7 +1,15 @@
 function doGet() {
   ensureSheets();
 
-  var output = HtmlService.createHtmlOutputFromFile('Index')
+  var logoBase64 = '';
+  if (typeof LOGO_BASE64 !== 'undefined') {
+    logoBase64 = LOGO_BASE64;
+  }
+
+  var tpl = HtmlService.createTemplateFromFile('Index');
+  tpl.logoBase64 = logoBase64;
+
+  var output = tpl.evaluate()
     .setTitle('SaaS LM - Legal y Materialidad')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
