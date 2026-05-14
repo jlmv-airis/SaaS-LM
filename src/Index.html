@@ -1272,6 +1272,9 @@ tr:hover td {
       <button class="btn-accent" id="btnHeaderAction" onclick="openCreateOperatorModal()">
         <i class="fas fa-plus"></i> Nuevo Operador
       </button>
+      <button class="btn-glass" onclick="refreshData()" title="Actualizar">
+        <i class="fas fa-rotate"></i>
+      </button>
       <button class="btn-glass" onclick="handleLogout()">
         <i class="fas fa-right-from-bracket"></i> Salir
       </button>
@@ -1792,6 +1795,13 @@ function showDashboard() {
   }
 }
 
+function refreshData() {
+  showToast('Actualizando datos...', 'success');
+  loadOperators();
+  loadProjects();
+  loadAreas();
+}
+
 function handleLogout() {
   google.script.run
     .withSuccessHandler(function() {
@@ -1866,7 +1876,7 @@ function renderOperators() {
 
   operatorsCache.forEach(function(op) {
     var initials = op.name.substring(0, 2).toUpperCase();
-    var areaName = op.area || 'Sin área';
+    var areaName = op.area || '—';
 
     var tr = document.createElement('tr');
     tr.innerHTML =
