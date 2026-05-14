@@ -1426,7 +1426,17 @@ tr:hover td {
     </div>
     <div class="form-group">
       <label class="form-label">Área</label>
-      <select id="newOpArea" class="form-select"><option value="">Sin área</option></select>
+      <div style="display:flex;gap:8px;">
+        <select id="newOpArea" class="form-select" style="flex:1;"><option value="">Sin área</option></select>
+        <button class="btn-glass" style="padding:8px 14px;flex-shrink:0;" onclick="toggleNewAreaInput()" title="Crear nueva área" id="btnNewArea">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+      <div id="newAreaRow" style="display:none;margin-top:8px;gap:8px;align-items:center;">
+        <input type="text" id="newAreaName" class="form-input" style="flex:1;padding:10px 14px;font-size:13px;" placeholder="Nombre del área" onkeydown="if(event.key==='Enter') confirmNewArea()">
+        <button class="btn-accent" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="confirmNewArea()">Crear</button>
+        <button class="btn-secondary" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="cancelNewArea()">Cancelar</button>
+      </div>
       <div id="createError" class="form-error"></div>
     </div>
     <div class="modal-actions">
@@ -1878,7 +1888,46 @@ function openCreateOperatorModal() {
   setTimeout(function() { document.getElementById('newOpName').focus(); }, 200);
 }
 
-function closeCreateModal() { document.getElementById('createModal').classList.remove('active'); }
+function closeCreateModal() {
+  document.getElementById('createModal').classList.remove('active');
+  document.getElementById('newAreaRow').style.display = 'none';
+}
+
+/* Inline area creation */
+function toggleNewAreaInput() {
+  var row = document.getElementById('newAreaRow');
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+  if (row.style.display === 'flex') document.getElementById('newAreaName').focus();
+}
+
+function cancelNewArea() {
+  document.getElementById('newAreaRow').style.display = 'none';
+  document.getElementById('newAreaName').value = '';
+}
+
+function confirmNewArea() {
+  var name = document.getElementById('newAreaName').value.trim();
+  var error = document.getElementById('createError');
+  if (!name) { error.textContent = 'El nombre del área es obligatorio'; return; }
+  error.textContent = '';
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        cancelNewArea();
+        loadAreas();
+        // Refresh the select
+        var sel = document.getElementById('newOpArea');
+        sel.innerHTML = '<option value="">Sin área</option>';
+        areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
+        sel.value = name;
+        showToast('Área "' + name + '" creada', 'success');
+      } else {
+        error.textContent = result.error;
+      }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .createArea(sessionToken, name);
+}
 
 function confirmCreate() {
   var name = document.getElementById('newOpName').value.trim();
