@@ -1403,6 +1403,15 @@ tr:hover td {
             <div id="cfEmpty" class="checklist-empty" style="display:none;">No hay campos personalizados</div>
           </div>
         </div>
+        <div class="glass settings-card">
+          <div class="settings-card-title">
+            <span><i class="fas fa-users"></i> Operadores por Área</span>
+          </div>
+          <div class="settings-section">
+            <div id="operatorsByAreaList"></div>
+            <div id="opsByAreaEmpty" class="checklist-empty" style="display:none;">No hay operadores registrados</div>
+          </div>
+        </div>
       </div>
     </div><!-- end TAB: CONFIGURACIÓN -->
 
@@ -1434,7 +1443,7 @@ tr:hover td {
       </div>
       <div id="newAreaRow" style="display:none;margin-top:8px;gap:8px;align-items:center;">
         <input type="text" id="newAreaName" class="form-input" style="flex:1;padding:10px 14px;font-size:13px;" placeholder="Nombre del área" onkeydown="if(event.key==='Enter') confirmNewArea()">
-        <button class="btn-accent" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="confirmNewArea()">Crear</button>
+        <button class="btn-accent" id="btnConfirmNewArea" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="confirmNewArea()">Crear</button>
         <button class="btn-secondary" style="padding:8px 14px;font-size:12px;flex-shrink:0;" onclick="cancelNewArea()">Cancelar</button>
       </div>
       <div id="createError" class="form-error"></div>
@@ -1837,6 +1846,7 @@ function loadOperators() {
       if (result.success) {
         operatorsCache = result.operators;
         renderOperators();
+        renderOperatorsByArea();
       } else if (result.error === 'Sesión expirada') { handleLogout(); }
     })
     .listOperators(sessionToken);
@@ -1908,14 +1918,20 @@ function cancelNewArea() {
 function confirmNewArea() {
   var name = document.getElementById('newAreaName').value.trim();
   var error = document.getElementById('createError');
+  var btn = document.getElementById('btnNewArea');
   if (!name) { error.textContent = 'El nombre del área es obligatorio'; return; }
   error.textContent = '';
+  var input = document.getElementById('newAreaName');
+  var confirmBtn = document.getElementById('btnConfirmNewArea');
+  btn.disabled = true; input.disabled = true; confirmBtn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
   google.script.run
     .withSuccessHandler(function(result) {
+      btn.disabled = false; input.disabled = false; confirmBtn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-plus"></i>';
       if (result.success) {
         cancelNewArea();
         loadAreas();
-        // Refresh the select
         var sel = document.getElementById('newOpArea');
         sel.innerHTML = '<option value="">Sin área</option>';
         areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
@@ -1925,7 +1941,11 @@ function confirmNewArea() {
         error.textContent = result.error;
       }
     })
-    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-plus"></i>';
+      error.textContent = 'Error: ' + err.message;
+    })
     .createArea(sessionToken, name);
 }
 
@@ -2322,6 +2342,36 @@ function renderAreas() {
     div.innerHTML = '<span class="item-label"><i class="fas fa-building" style="color:var(--accent-light);"></i> ' + escapeHtml(a.name) + '</span>' +
       '<button class="btn-icon danger" onclick="deleteArea(\'' + a.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>';
     list.appendChild(div);
+  });
+}
+
+function renderOperatorsByArea() {
+  var container = document.getElementById('operatorsByAreaList');
+  var empty = document.getElementById('opsByAreaEmpty');
+  if (operatorsCache.length === 0) { container.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  container.innerHTML = '';
+
+  var groups = {};
+  operatorsCache.forEach(function(op) {
+    var area = op.area || 'Sin área';
+    if (!groups[area]) groups[area] = [];
+    groups[area].push(op);
+  });
+
+  var sortedAreas = Object.keys(groups).sort();
+  sortedAreas.forEach(function(area) {
+    var section = document.createElement('div');
+    section.style.marginBottom = '16px';
+    section.innerHTML = '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--glass-border);">' + escapeHtml(area) + ' <span style="font-weight:400;color:var(--text-secondary);">(' + groups[area].length + ')</span></div>';
+    groups[area].forEach(function(op) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;';
+      row.innerHTML = '<span style="width:28px;height:28px;border-radius:50%;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">' + escapeHtml(op.name.substring(0, 2).toUpperCase()) + '</span>' +
+        '<span style="font-weight:500;">' + escapeHtml(op.name) + '</span>';
+      section.appendChild(row);
+    });
+    container.appendChild(section);
   });
 }
 

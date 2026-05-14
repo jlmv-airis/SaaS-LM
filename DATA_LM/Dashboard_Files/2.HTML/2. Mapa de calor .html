@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Corporativo Integral</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --border-color: rgba(255,255,255,0.1);
+            
+            /* Semáforo */
+            --c-alto: #ef4444; --c-mayor: #f97316; --c-medio: #eab308;
+            --c-bajo: #84cc16; --c-insig: #22c55e;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- 1. HEADER FIJO (STICKY) --- */
+        .sticky-header {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .brand h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .brand span { color: var(--accent-blue); }
+
+        /* Buscador Compacto */
+        .search-wrapper { position: relative; width: 400px; }
+        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent-blue); }
+        #globalSearch {
+            width: 100%; padding: 10px 10px 10px 35px;
+            background: #334155; border: 1px solid var(--border-color);
+            color: #fff; border-radius: 8px; outline: none; transition: 0.3s;
+        }
+        #globalSearch:focus { border-color: var(--accent-blue); background: #475569; }
+
+        /* --- 2. BARRA DE KPIs (Compacta) --- */
+        .kpi-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+            padding: 20px 30px;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, transparent 100%);
+        }
+        .kpi-mini {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            padding: 10px 20px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .kpi-val { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .kpi-tit { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
+
+        /* --- 3. LAYOUT PRINCIPAL --- */
+        .dashboard-container {
+            padding: 0 30px 30px 30px;
+            display: grid; gap: 30px;
+            /* Layout: Arriba (Grid Scatter), Abajo (Grid Kanban) */
+        }
+
+        /* --- SECCIÓN SUPERIOR: MATRIZ Y LISTA --- */
+        .top-section {
+            display: grid; grid-template-columns: 1fr 350px; gap: 20px;
+            height: 500px; /* Altura controlada para no empujar todo abajo */
+        }
+
+        .card-panel {
+            background: var(--bg-panel); border-radius: 12px; border: 1px solid var(--border-color);
+            padding: 20px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .panel-header { font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
+
+        /* Matriz Compacta */
+        .matrix-wrapper { 
+            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        .matrix-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr);
+            width: 100%; max-width: 450px; aspect-ratio: 1/1;
+            border: 1px solid rgba(255,255,255,0.1); position: relative;
+        }
+        /* Celdas Matrix */
+        .cell { border: 1px solid rgba(0,0,0,0.1); }
+        .bg-red { background: rgba(239, 68, 68, 0.6); } .bg-orange { background: rgba(249, 115, 22, 0.6); }
+        .bg-yellow { background: rgba(234, 179, 8, 0.6); } .bg-olive { background: rgba(132, 204, 22, 0.6); } .bg-lime { background: rgba(34, 197, 94, 0.6); }
+
+        /* Dots */
+        .dot {
+            position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%;
+            transform: translate(-50%, 50%); cursor: pointer; transition: 0.3s;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .dot.active { transform: translate(-50%, 50%) scale(2.5); background: var(--accent-blue); z-index: 50; box-shadow: 0 0 15px var(--accent-blue); }
+        .dot.dimmed { opacity: 0.1; }
+
+        /* Lista Lateral Compacta */
+        .list-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .list-item {
+            padding: 8px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.8rem;
+            display: flex; justify-content: space-between; cursor: pointer; transition: 0.2s;
+        }
+        .list-item:hover { background: rgba(255,255,255,0.05); }
+        .list-item.selected { background: rgba(56, 189, 248, 0.15); border-left: 3px solid var(--accent-blue); }
+        .badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold; }
+
+        /* --- SECCIÓN INFERIOR: KANBAN COMPLETO --- */
+        .bottom-section {
+            display: flex; flex-direction: column;
+        }
+        
+        .kanban-board {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;
+            overflow-x: auto; padding-bottom: 10px;
+        }
+        
+        .kanban-col {
+            background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 8px;
+            display: flex; flex-direction: column; min-width: 220px; transition: 0.3s opacity;
+        }
+        .kanban-col.dimmed { opacity: 0.2; }
+
+        .col-head {
+            padding: 10px; text-align: center; color: white; font-weight: bold; font-size: 0.85rem;
+            border-radius: 8px 8px 0 0; text-transform: uppercase;
+        }
+        .col-body { padding: 10px; flex: 1; min-height: 150px; max-height: 500px; overflow-y: auto; }
+
+        /* Colores */
+        .head-alto { background: var(--c-alto); } .head-mayor { background: var(--c-mayor); }
+        .head-medio { background: var(--c-medio); } .head-bajo { background: var(--c-bajo); } .head-insig { background: var(--c-insig); }
+
+        /* Tarjetas Kanban */
+        .k-card {
+            background: var(--bg-card); padding: 10px; margin-bottom: 8px; border-radius: 4px;
+            border-left: 3px solid transparent; font-size: 0.8rem; transition: 0.3s;
+            animation: fadeIn 0.4s ease;
+        }
+        .k-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+        
+        /* EFECTO FOCUS DE SELECCIÓN */
+        .k-card.focus {
+            background: var(--accent-blue); color: #0f172a;
+            transform: scale(1.05); z-index: 10;
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+            font-weight: bold; border: 1px solid #fff;
+        }
+        .k-card.focus .k-pill { background: rgba(0,0,0,0.2); color: #fff; }
+
+        .k-name { display: block; margin-bottom: 5px; line-height: 1.3; }
+        .k-pill { font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; background: rgba(0,0,0,0.5); display: inline-block; }
+
+        /* Colores Borde Cards */
+        .b-alto { border-color: var(--c-alto); } .b-mayor { border-color: var(--c-mayor); }
+        .b-medio { border-color: var(--c-medio); } .b-bajo { border-color: var(--c-bajo); } .b-insig { border-color: var(--c-insig); }
+
+        /* Gráfica Circular (Flotante o integrada) */
+        .chart-mini-wrapper { height: 60px; width: 60px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Tooltip */
+        #tooltip { position: fixed; background: #000; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; pointer-events: none; opacity: 0; z-index: 2000; border: 1px solid #333; }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sticky-header">
+        <div class="brand">
+            <h1><i class="fa-solid fa-shield-halved"></i> Dashboard<span>Integral de Riesgos</span></h1>
+        </div>
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="globalSearch" placeholder="Buscar empresa, razón social o ID...">
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="text-align:right; font-size:0.8rem; color:#94a3b8;">
+                <div id="chartTotal">100%</div>
+                <div>Distribución</div>
+            </div>
+            <div class="chart-mini-wrapper">
+                <canvas id="miniChart"></canvas>
+            </div>
+        </div>
+    </nav>
+
+    <div class="kpi-bar">
+        <div class="kpi-mini">
+            <div>
+                <div class="kpi-tit">Total Empresas</div>
+                <div class="kpi-val" id="valTotal">0</div>
+            </div>
+            <i class="fa-solid fa-building text-slate-500 font-size-xl"></i>
+        </div>
+        <div class="kpi-mini" style="border-bottom: 2px solid var(--c-alto);">
+            <div>
+                <div class="kpi-tit" style="color:var(--c-alto);">Riesgo Alto</div>
+                <div class="kpi-val" style="color:var(--c-alto);" id="valAlto">0</div>
+            </div>
+            <i class="fa-solid fa-triangle-exclamation" style="color:var(--c-alto);"></i>
+        </div>
+        <div class="kpi-mini">
+            <div>
+                <div class="kpi-tit">Riesgo Promedio</div>
+                <div class="kpi-val" id="valAvg">0%</div>
+            </div>
+            <i class="fa-solid fa-chart-line text-blue-400"></i>
+        </div>
+        <div class="kpi-mini">
+            <div>
+                <div class="kpi-tit">Visible</div>
+                <div class="kpi-val" id="valVisible">0</div>
+            </div>
+            <i class="fa-solid fa-eye text-green-400"></i>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        
+        <div class="top-section">
+            <div class="card-panel">
+                <div class="panel-header"><i class="fa-solid fa-crosshairs mr-2"></i> Matriz de Dispersión</div>
+                <div class="matrix-wrapper">
+                    <div style="position:absolute; left:-20px; bottom:50%; transform:rotate(-90deg) translateX(-50%); font-size:0.7rem; color:#64748b; font-weight:bold; letter-spacing:2px;">IMPACTO</div>
+                    <div style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:0.7rem; color:#64748b; font-weight:bold; letter-spacing:2px;">PROBABILIDAD</div>
+                    
+                    <div class="matrix-grid" id="matrixGrid">
+                        <div class="cell bg-orange"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div>
+                        <div class="cell bg-orange"></div><div class="cell bg-orange"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div>
+                        <div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-orange"></div><div class="cell bg-orange"></div><div class="cell bg-red"></div>
+                        <div class="cell bg-olive"></div><div class="cell bg-olive"></div><div class="cell bg-yellow"></div><div class="cell bg-orange"></div><div class="cell bg-orange"></div>
+                        <div class="cell bg-lime"></div><div class="cell bg-lime"></div><div class="cell bg-olive"></div><div class="cell bg-yellow"></div><div class="cell bg-orange"></div>
+                        
+                        <div id="dotsLayer" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></div>
+                    </div>
+                </div>
+                <div id="tooltip"></div>
+            </div>
+
+            <div class="card-panel">
+                <div class="panel-header"><i class="fa-solid fa-list-ul mr-2"></i> Directorio</div>
+                <div class="list-scroll" id="listContent">
+                    </div>
+            </div>
+        </div>
+
+        <div class="card-panel" style="overflow: visible;"> <div class="panel-header"><i class="fa-solid fa-layer-group mr-2"></i> Clasificación de Riesgo (Kanban)</div>
+            <div class="kanban-board">
+                <div class="kanban-col" id="col-c-alto">
+                    <div class="col-head head-alto">ALTO (81-100%)</div>
+                    <div class="col-body" id="body-alto"></div>
+                </div>
+                <div class="kanban-col" id="col-c-mayor">
+                    <div class="col-head head-mayor">MAYOR (61-80%)</div>
+                    <div class="col-body" id="body-mayor"></div>
+                </div>
+                <div class="kanban-col" id="col-c-medio">
+                    <div class="col-head head-medio">MEDIO (41-60%)</div>
+                    <div class="col-body" id="body-medio"></div>
+                </div>
+                <div class="kanban-col" id="col-c-bajo">
+                    <div class="col-head head-bajo">BAJO (21-40%)</div>
+                    <div class="col-body" id="body-bajo"></div>
+                </div>
+                <div class="kanban-col" id="col-c-insig">
+                    <div class="col-head head-insig">Muy Bajo. (0-20%)</div>
+                    <div class="col-body" id="body-insig"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ---
+        const rawData = [
+            { name: "ADMINISTRADORA IMPULSO, S.A. DE C.V.\n(1-53)", score: 37.00 },
+            { name: "AFRX, S.A. DE C.V.\n(1-53)", score: 53.00 },
+            { name: "ASTRAL FREAKS, S.A. DE C.V.\n(1-53)", score: 46.00 },
+            { name: "CONSULTORIA PROFESIONAL DE CALIDAD,  S.A. DE C.V.\n(2-53)", score: 38.00 },
+            { name: "GRUPO INMOBILIARIO USA SHOES,  S.A.P.I. DE C.V.\n(1-53)", score: 43.00 },
+            { name: "LCK ESPECIALISTAS Y ASESORES EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.\n(1-53)", score: 51.00 },
+            { name: "LCR ADMINISTRACION PROFESIONAL EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.\n(1-53)", score: 48.00 },
+            { name: "MEGA ASTRAL, S.A. DE C.V.\n(1-53)", score: 46.00 },
+            { name: "SERVICIOS Y ANALISIS DE PROYECTOS EMPRESARIALES EV, S.A. DE C.V.\n(2-53)", score: 50.00 },
+            { name: "STAY FLY, S.A. DE C.V.\n(1-53)", score: 38.00 },
+            { name: "TELEMEDIX, S.A.P.I. DE C.V.\n(1-53)", score: 43.00 },
+            { name: "VE OUTSORCING DE MEXICO,  S.A.P.I. DE C.V.\n(2-53)", score: 40.00 },
+            { name: "ARTE Y PASION CULINARIA, S.A. DE C.V.\n(7-53)", score: 38.00 },
+            { name: "EXIMAGEN, S.A. DE C.V.\n(9-53)", score: 54.00 },
+            { name: "FRIGO NAOS, S.A. DE C.V.\n(3-53)", score: 14.00 },
+            { name: "AIRIS ADMINISTRACION EMPRESARIAL, S.A. DE C.V.\n(2-53)", score: 30.00 },
+            { name: "INMOBILIARIA CHAPULTEPEC 494,  S.A.P.I. DE C.V.\n(2-53)", score: 38.00 },
+            { name: "VE OUTSORCING DE RECURSOS HUMANOS, S.C.\n(2-53)", score: 70.00 },
+            { name: "SOLUCIONES EN COMUNICACIÓN Y TECNOLOGIA, S.A. DE C.V.\n(2-53)", score: 48.00 },
+            { name: "SCE SENTIDOS, S.A. DE C.V.\n(2-53)", score: 57.00 },
+            { name: "ENTORNO CORPORATIVO Y EMPRESARIAL DE MEXICO, S.A.P.I. DE C.V.\n(4-53)", score: 41.00 },
+            { name: "IT SKIL, S.A. DE C.V.\n(3-53)", score: 53.00 },
+            { name: "CORPORATIVO FRL INNOVACIÓN EN RECURSOS, S. DE R.L. DE C.V.\n(2-53)", score: 59.00 },
+            { name: "ESQUINA GLORIETA, S.A.P.I. DE C.V.\n(2-53)", score: 43.00 },
+            { name: "ENTORNO CORPORATIVO Y EMPRESARIAL, S.C.\n(4-53)", score: 56.00 },
+            { name: "JANTO CAPITAL, S.A. DE C.V.\n(2-53)", score: 40.00 },
+            { name: "NUEVO CONCEPTO EN RECURSOS HUMANOS, S.C.\n(2-53)", score: 53.00 },
+            { name: "IPM SANTA FE, S.A.P.I. DE C.V.\n(2-53)", score: 46.00 },
+            { name: "OPERADORA IPM,  S.A.P.I. DE C.V.\n(2-53)", score: 42.00 },
+            { name: "JOSO, S.A. DE C.V.\n(4-53)", score: 50.00 },
+            { name: "RECOMINTE, S.A. DE C.V.\n(8-53)", score: 41.00 },
+            { name: "SORVI, S.A. DE C.V.\n(3-53)", score: 46.00 },
+            { name: "PRESTADORA DE SERVICIOS AMBIENTALES SAI, S.C.\n(5-53)", score: 51.00 },
+            { name: "VILLADOM, S.A. DE C.V.\n(3-53)", score: 51.00 },
+            { name: "ARRENDA CLICK,  S.A. DE C.V.\n(14-53)", score: 39.00 },
+            { name: "RGA BUSINESS DEVELOPMENT, S.C.\n(25-53)", score: 59.00 },
+            { name: "ASESORIAS ESPECIALIZADAS EN NEGOCIOS, S.C.\n(33-53)", score: 63.00 },
+            { name: "DERSA INMOBILIARIA,  S.A. DE C.V.\n(22-53)", score: 54.00 },
+            { name: "GARCIA HIDALGO VELAZQUEZ GONZALEZ Y ASOCIADOS\n(37-53)", score: 71.00 },
+            { name: "GARCIA HIDALGO TAX ADVISOR DE MEXICO, S.A.P.I. DE C.V.\n(9-53)", score: 46.00 },
+            { name: "GARCIA HIDALGO TAX ADVISORS, S.C.\n(8-53)", score: 42.00 },
+            { name: "MAXWAY, S. DE R.L. DE C.V.\n(30-53)", score: 68.00 },
+            { name: "MCY SUMINISTROS, S.A. DE C.V.\n(26-53)", score: 62.00 },
+            { name: "CENTRO DE NEGOCIOS LAS DALIAS, S.A. DE C.V.\n(22-53)", score: 73.00 },
+            { name: "COMERCIALIZADORA DRY LINE, S.A. DE C.V.\n(43-53)", score: 78.00 },
+            { name: "STK PROJECT MÉXICO, S.A. DE C.V.\n(25-53)", score: 68.00 },
+            { name: "DISTRIBUIDORA COMERCIAL FANIX, S.A. DE C.V.\n(27-53)", score: 73.00 },
+            { name: "INMOBILIARIA SOFEMVI, S.A.P.I. DE C.V.\n(23-53)", score: 73.00 },
+            { name: "INMOBILIARIA FISSTEIN, S.A. DE C.V.\n(5-53)", score: 62.00 },
+            { name: "ESPECIALISTAS EN CONTABILIDAD Y FISCAL\n(3-53)", score: 68.00 },
+            { name: "OUT BUILDING HUMAN TALENT, S.A.P.I. DE C.V.\n(5-53)", score: 59.00 },
+            { name: "RHV OUTSOURCING\n(10-53)", score: 63.00 },
+            { name: "INGENIERIA Y LOGISTICA DE CAPITAL HUMANO, S.A.P.I. DE C.V.\n(29-53)", score: 58.00 },
+            { name: "RHS SERVICIOS ESTRATEGICOS, S.A. DE C.V.\n(26-53)", score: 62.00 },
+            { name: "BGC ARQUITECTOS, S.A. DE C.V.\n(9-53)", score: 62.00 },
+            { name: "CONSULTORES Y PROVEEDORES EN RECURSOS HUMANOS VALENCIA,S.C.\n(16-53)", score: 67.00 },
+            { name: "PARQUE CENTRAL RESIDENCIAS, S.A. DE C.V.\n(3-53)", score: 47.00 },
+            { name: "Bonilla Consultores en Recursos Humanos  SC\n(52-53)", score: 88.00 },
+            { name: "Grupo Papelero Ardano SA de CV\n(53-53)", score: 88.00 },
+            { name: "DIVCM MARKETING AND DESIGN, S.A.P.I. DE C.V.\n(51-53)", score: 88.00 },
+            { name: "MANAGEMENT INNOVATION PEOPLE, S.A.P.I. DE C.V.\n(51-53)", score: 88.00 }
+        ];
+
+        // --- CONFIGURACIÓN ---
+        const ranges = {
+            alto: { min: 81, max: 100, key:'alto', color: '#ef4444', colId: 'col-c-alto', bodyId: 'body-alto', border:'b-alto' },
+            mayor: { min: 61, max: 80, key:'mayor', color: '#f97316', colId: 'col-c-mayor', bodyId: 'body-mayor', border:'b-mayor' },
+            medio: { min: 41, max: 60, key:'medio', color: '#eab308', colId: 'col-c-medio', bodyId: 'body-medio', border:'b-medio' },
+            bajo: { min: 21, max: 40, key:'bajo', color: '#84cc16', colId: 'col-c-bajo', bodyId: 'body-bajo', border:'b-bajo' },
+            insignificante: { min: 0, max: 20, key:'insig', color: '#22c55e', colId: 'col-c-insig', bodyId: 'body-insig', border:'b-insig' }
+        };
+
+        function getRange(score) {
+            if (score > 80) return ranges.alto;
+            if (score > 60) return ranges.mayor;
+            if (score > 40) return ranges.medio;
+            if (score > 20) return ranges.bajo;
+            return ranges.insignificante;
+        }
+
+        // --- ELEMENTOS DOM ---
+        const listContent = document.getElementById('listContent');
+        const dotsLayer = document.getElementById('dotsLayer');
+        const tooltip = document.getElementById('tooltip');
+        let chartInstance = null;
+
+        // --- RENDERIZADO GLOBAL ---
+        function renderDashboard(filter = "") {
+            const term = filter.toLowerCase();
+            
+            // 1. Limpiezas
+            listContent.innerHTML = '';
+            dotsLayer.innerHTML = '';
+            Object.values(ranges).forEach(r => {
+                document.getElementById(r.bodyId).innerHTML = '';
+                document.getElementById(r.colId).classList.remove('dimmed');
+            });
+
+            // 2. Variables de Conteo
+            let counts = { alto:0, mayor:0, medio:0, bajo:0, insig:0 };
+            let visibleCount = 0;
+            let totalScore = 0;
+            let activeCols = new Set();
+            let uniqueMatch = null;
+            let matchesFound = 0;
+
+            // 3. Loop Principal
+            rawData.forEach(item => {
+                const match = item.name.toLowerCase().includes(term);
+                const range = getRange(item.score);
+
+                // Si hay match o no hay filtro (mostrar todo)
+                if(match) {
+                    visibleCount++;
+                    totalScore += item.score;
+                    counts[range.key]++;
+                    activeCols.add(range.colId);
+                    matchesFound++;
+
+                    // --- A. Lista Lateral ---
+                    const li = document.createElement('div');
+                    li.className = `list-item ${term && match ? 'selected' : ''}`;
+                    li.innerHTML = `<span>${item.name}</span><span class="badge" style="background:${range.color}">${item.score}%</span>`;
+                    li.onclick = () => {
+                        document.getElementById('globalSearch').value = item.name;
+                        renderDashboard(item.name);
+                    };
+                    listContent.appendChild(li);
+
+                    // --- B. Matriz (Dots) ---
+                    const dot = document.createElement('div');
+                    dot.className = `dot ${term && match ? 'active' : ''}`;
+                    // Posicion semi-aleatoria para dispersión visual
+                    dot.style.bottom = `${item.score}%`;
+                    dot.style.left = `${Math.random() * (90 - 10) + 10}%`; 
+                    dot.style.background = term && match ? range.color : '#fff'; // Color si activo
+                    
+                    dot.onmouseenter = (e) => {
+                        tooltip.style.opacity = 1;
+                        tooltip.innerHTML = `<strong>${item.name}</strong><br>Score: ${item.score}%`;
+                        tooltip.style.left = e.pageX + 10 + 'px';
+                        tooltip.style.top = e.pageY + 10 + 'px';
+                    };
+                    dot.onmouseleave = () => tooltip.style.opacity = 0;
+                    dot.onclick = () => {
+                        document.getElementById('globalSearch').value = item.name;
+                        renderDashboard(item.name);
+                    };
+                    dotsLayer.appendChild(dot);
+
+                    // --- C. Kanban Cards ---
+                    const card = document.createElement('div');
+                    card.className = `k-card ${range.border}`;
+                    card.innerHTML = `<span class="k-name">${item.name}</span><span class="k-pill">${item.score}%</span>`;
+                    document.getElementById(range.bodyId).appendChild(card);
+                    
+                    // Guardar referencia para auto-scroll
+                    uniqueMatch = card; 
+                } else if (term !== '') {
+                    // Si hay filtro activo y este NO coincide, agregar dot dimmed
+                    const dot = document.createElement('div');
+                    dot.className = 'dot dimmed';
+                    dot.style.bottom = `${item.score}%`;
+                    dot.style.left = `${Math.random() * (90 - 10) + 10}%`;
+                    dotsLayer.appendChild(dot);
+                }
+            });
+
+            // 4. Actualizar KPIs
+            document.getElementById('valTotal').innerText = rawData.length;
+            document.getElementById('valVisible').innerText = visibleCount;
+            document.getElementById('valAlto').innerText = counts.alto;
+            const avg = visibleCount ? (totalScore / visibleCount).toFixed(1) : 0;
+            document.getElementById('valAvg').innerText = avg + '%';
+
+            // 5. Actualizar Mini Chart
+            updateMiniChart(counts);
+
+            // 6. Efectos Finales (Focus y Dimming)
+            if (term !== '') {
+                // Dimming de columnas vacías
+                Object.values(ranges).forEach(r => {
+                    if (!activeCols.has(r.colId)) document.getElementById(r.colId).classList.add('dimmed');
+                });
+
+                // Auto-Focus si es único resultado
+                if (matchesFound === 1 && uniqueMatch) {
+                    uniqueMatch.classList.add('focus');
+                    // SCROLL AUTOMÁTICO HACIA LA TARJETA
+                    uniqueMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // --- MINI CHART ---
+        function updateMiniChart(c) {
+            const ctx = document.getElementById('miniChart').getContext('2d');
+            const data = [c.alto, c.mayor, c.medio, c.bajo, c.insig];
+            const bg = [ranges.alto.color, ranges.mayor.color, ranges.medio.color, ranges.bajo.color, ranges.insignificante.color];
+
+            if(chartInstance) {
+                chartInstance.data.datasets[0].data = data;
+                chartInstance.update();
+            } else {
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels:[], datasets: [{ data: data, backgroundColor: bg, borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+                });
+            }
+        }
+
+        // --- EVENTOS ---
+        document.getElementById('globalSearch').addEventListener('input', (e) => {
+            renderDashboard(e.target.value);
+        });
+
+        // INIT
+        renderDashboard();
+
+    </script>
+</body>
+</html>

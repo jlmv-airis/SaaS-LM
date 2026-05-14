@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Proceso Interactivo</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            user-select: none; 
+        }
+
+        .diagram-container {
+            background-color: white;
+            width: 900px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-top: 15px solid #4a47d6;
+            padding: 30px;
+            position: relative;
+            background: #ffffff; 
+        }
+
+        .header-title {
+            text-align: center;
+            color: #444;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            outline: none;
+            user-select: text; 
+        }
+
+        .actors-row {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+            z-index: 10;
+        }
+
+        .actor-box {
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            padding: 15px 10px;
+            width: 150px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            position: relative;
+            outline: none;
+            border-radius: 4px;
+            user-select: text;
+        }
+
+        .row-controls {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            gap: 4px;
+            z-index: 20;
+        }
+
+        .actor-box:hover .row-controls, 
+        .message-container:hover .row-controls {
+            display: flex;
+        }
+
+        .ctrl-btn {
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-updown { background-color: #4a47d6; }
+        .btn-updown:hover { background-color: #3734a9; }
+        .btn-delete { background-color: #ff4d4d; }
+        .btn-delete:hover { background-color: #cc0000; }
+        .btn-toggle { background-color: #28a745; font-size: 10px; }
+        .btn-toggle:hover { background-color: #218838; }
+
+        .sequence-body {
+            position: relative;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            min-height: 200px;
+        }
+
+        .vertical-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #ccc;
+            z-index: 1;
+        }
+
+        .message-container {
+            position: relative;
+            height: 65px;
+            width: 100%;
+            z-index: 5;
+            border: 1px solid transparent;
+        }
+
+        .message-container:hover {
+            background-color: #fcfcfc;
+            border: 1px dashed #eee;
+            border-radius: 8px;
+        }
+
+        .message-line {
+            position: absolute;
+            top: 30px;
+            z-index: 2;
+        }
+
+        .solid { border-bottom: 1px solid #333; }
+        .dashed { border-bottom: 1px dashed #333; }
+
+        .arrow-right::after {
+            content: ''; position: absolute; right: -2px; top: -5px;
+            border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #333;
+        }
+
+        .arrow-left::before {
+            content: ''; position: absolute; left: -2px; top: -5px;
+            border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid #333;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background-color: #007bff;
+            border: 2px solid white;
+            border-radius: 50%;
+            top: -7px;
+            cursor: ew-resize;
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .message-container:hover .resize-handle { opacity: 1; }
+        .resize-handle:hover { transform: scale(1.3); }
+
+        .left-handle { left: -7px; }
+        .right-handle { right: -7px; }
+
+        .circle-num {
+            position: absolute;
+            top: -10px;
+            width: 22px;
+            height: 22px;
+            background-color: #333;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            z-index: 3;
+            user-select: text;
+            outline: none;
+        }
+
+        .circle-left { left: 0; transform: translateX(-50%); }
+        .circle-right { right: 0; transform: translateX(50%); }
+
+        .message-text {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 0 8px;
+            font-size: 13px;
+            color: #444;
+            white-space: nowrap;
+            outline: none;
+            user-select: text;
+        }
+
+        .main-controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+
+        .btn-add { background-color: #4a47d6; }
+        .btn-add:hover { background-color: #3734a9; }
+        .btn-add-actor { background-color: #28a745; }
+        .btn-add-actor:hover { background-color: #218838; }
+        .btn-pdf { background-color: #e53935; }
+        .btn-pdf:hover { background-color: #c62828; }
+
+    </style>
+</head>
+<body>
+
+    <div class="diagram-container" id="diagramToExport">
+        <div class="header-title" contenteditable="true">DIAGRAMA DE PROCESO ( ADMINISTRATIVO / OPERATIVO )</div>
+
+        <div class="actors-row">
+            <div class="actor-box" contenteditable="true">Cliente<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Compras - Frigo<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Almacén - Frigo<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Facturación - Frigo<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+        </div>
+
+        <div class="sequence-body" id="sequence-body">
+            <div class="message-container">
+                <div class="row-controls">
+                    <button class="ctrl-btn btn-updown" onclick="moveUp(this)" title="Mover Arriba">▲</button>
+                    <button class="ctrl-btn btn-updown" onclick="moveDown(this)" title="Mover Abajo">▼</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleDirection(this)" title="Cambiar Dirección">↔</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleStyle(this)" title="Cambiar Punteada/Sólida">--</button>
+                    <button class="ctrl-btn btn-delete" onclick="this.closest('.message-container').remove()" title="Eliminar">X</button>
+                </div>
+                <div class="message-line solid arrow-right" style="left: 12.5%; width: 25%;">
+                    <div class="resize-handle left-handle" title="Arrastrar para ajustar"></div>
+                    <div class="circle-num circle-left" contenteditable="true">1</div>
+                    <div class="message-text" contenteditable="true">Orden de Compra OC-00001</div>
+                    <div class="resize-handle right-handle" title="Arrastrar para ajustar"></div>
+                </div>
+            </div>
+
+            <div class="message-container">
+                <div class="row-controls">
+                    <button class="ctrl-btn btn-updown" onclick="moveUp(this)" title="Mover Arriba">▲</button>
+                    <button class="ctrl-btn btn-updown" onclick="moveDown(this)" title="Mover Abajo">▼</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleDirection(this)" title="Cambiar Dirección">↔</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleStyle(this)" title="Cambiar Punteada/Sólida">--</button>
+                    <button class="ctrl-btn btn-delete" onclick="this.closest('.message-container').remove()">X</button>
+                </div>
+                <div class="message-line solid arrow-right" style="left: 37.5%; width: 25%;">
+                    <div class="resize-handle left-handle" title="Arrastrar para ajustar"></div>
+                    <div class="circle-num circle-left" contenteditable="true">2</div>
+                    <div class="message-text" contenteditable="true">Ingreso de Pedido OC-00001</div>
+                    <div class="resize-handle right-handle" title="Arrastrar para ajustar"></div>
+                </div>
+            </div>
+
+            <div class="message-container">
+                <div class="row-controls">
+                    <button class="ctrl-btn btn-updown" onclick="moveUp(this)" title="Mover Arriba">▲</button>
+                    <button class="ctrl-btn btn-updown" onclick="moveDown(this)" title="Mover Abajo">▼</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleDirection(this)" title="Cambiar Dirección">↔</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleStyle(this)" title="Cambiar Punteada/Sólida">--</button>
+                    <button class="ctrl-btn btn-delete" onclick="this.closest('.message-container').remove()">X</button>
+                </div>
+                <div class="message-line dashed arrow-left" style="left: 12.5%; width: 50%;">
+                    <div class="resize-handle left-handle" title="Arrastrar para ajustar"></div>
+                    <div class="circle-num circle-right" contenteditable="true">3</div>
+                    <div class="message-text" contenteditable="true">Confirmación de surtido de pedido</div>
+                    <div class="resize-handle right-handle" title="Arrastrar para ajustar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actors-row" style="margin-top: 30px;">
+            <div class="actor-box" contenteditable="true">Liz Memun (eATICS)<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Coord. Logística<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Jefe Almacén<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+            <div class="actor-box" contenteditable="true">Julio Antonio (Frigo)<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div></div>
+        </div>
+    </div>
+
+    <div class="main-controls">
+        <button class="action-btn btn-add" onclick="addStep()">+ Añadir Nuevo Paso</button>
+        <button class="action-btn btn-add-actor" onclick="addActor()">+ Añadir Actor</button>
+        <button class="action-btn btn-pdf" onclick="exportToPDF()">Descargar PDF</button>
+    </div>
+
+    <script>
+        // --- Dibujar Líneas Verticales Dinámicamente ---
+        function updateGrid() {
+            const sequenceBody = document.getElementById('sequence-body');
+            const topRow = document.querySelectorAll('.actors-row')[0];
+            const numActors = topRow.children.length;
+
+            const existingLines = sequenceBody.querySelectorAll('.vertical-line');
+            existingLines.forEach(line => line.remove());
+
+            for (let i = 0; i < numActors; i++) {
+                const line = document.createElement('div');
+                line.className = 'vertical-line';
+                const leftPercent = ((i * 2 + 1) / (2 * numActors)) * 100;
+                line.style.left = `${leftPercent}%`;
+                sequenceBody.insertBefore(line, sequenceBody.firstChild);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', updateGrid);
+
+        // --- Añadir y Eliminar Actores (Columnas) ---
+        function removeActor(btn) {
+            const actorBox = btn.closest('.actor-box');
+            const row = actorBox.parentElement;
+            const allRows = document.querySelectorAll('.actors-row');
+            
+            // Comprobamos si el cuadro que vamos a borrar es de la fila superior
+            const isTopRow = row === allRows[0];
+            const index = Array.from(row.children).indexOf(actorBox);
+
+            if (isTopRow) {
+                // Si eliminamos el de arriba, borramos la columna completa (arriba y abajo)
+                allRows.forEach(r => {
+                    if (r.children[index]) {
+                        r.children[index].remove();
+                    }
+                });
+                updateGrid();
+            } else {
+                // Si eliminamos el de abajo, SOLO lo ocultamos. 
+                // Esto conserva el espacio vacío y evita que la alineación flexbox colapse.
+                actorBox.style.visibility = 'hidden';
+                actorBox.innerHTML = ''; 
+            }
+        }
+
+        function addActor() {
+            const allRows = document.querySelectorAll('.actors-row');
+
+            const newActorTop = document.createElement('div');
+            newActorTop.className = 'actor-box';
+            newActorTop.contentEditable = true;
+            newActorTop.innerHTML = `Nuevo Actor<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div>`;
+            allRows[0].appendChild(newActorTop);
+
+            if (allRows.length > 1) {
+                const newActorBottom = document.createElement('div');
+                newActorBottom.className = 'actor-box';
+                newActorBottom.contentEditable = true;
+                newActorBottom.innerHTML = `Nuevo Actor<div class="row-controls"><button class="ctrl-btn btn-delete" onclick="removeActor(this)" contenteditable="false">X</button></div>`;
+                allRows[1].appendChild(newActorBottom);
+            }
+
+            updateGrid();
+        }
+
+
+        // --- Resto de las funciones PDF y Arrastrar ---
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('diagramToExport');
+            const btnPdf = document.querySelector('.btn-pdf');
+            
+            const originalText = btnPdf.innerText;
+            btnPdf.innerText = "Generando...";
+            btnPdf.disabled = true;
+
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2, 
+                    backgroundColor: '#ffffff',
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = canvas.width / 2;
+                const pdfHeight = canvas.height / 2;
+
+                const pdf = new jsPDF({
+                    orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+                    unit: 'px',
+                    format: [pdfWidth, pdfHeight]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('Diagrama_de_Proceso.pdf');
+
+            } catch (error) {
+                console.error("Error al generar PDF:", error);
+                alert("Hubo un error al crear el PDF. Revisa la consola para más detalles.");
+            } finally {
+                btnPdf.innerText = originalText;
+                btnPdf.disabled = false;
+            }
+        }
+
+        function moveUp(btn) {
+            const row = btn.closest('.message-container');
+            const prevRow = row.previousElementSibling;
+            if (prevRow && prevRow.classList.contains('message-container')) {
+                row.parentNode.insertBefore(row, prevRow);
+            }
+        }
+
+        function moveDown(btn) {
+            const row = btn.closest('.message-container');
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('message-container')) {
+                row.parentNode.insertBefore(nextRow, row);
+            }
+        }
+
+        function toggleDirection(btn) {
+            const line = btn.closest('.message-container').querySelector('.message-line');
+            const circle = line.querySelector('.circle-num');
+            
+            if (line.classList.contains('arrow-right')) {
+                line.classList.remove('arrow-right');
+                line.classList.add('arrow-left');
+                circle.classList.remove('circle-left');
+                circle.classList.add('circle-right');
+            } else {
+                line.classList.remove('arrow-left');
+                line.classList.add('arrow-right');
+                circle.classList.remove('circle-right');
+                circle.classList.add('circle-left');
+            }
+        }
+
+        function toggleStyle(btn) {
+            const line = btn.closest('.message-container').querySelector('.message-line');
+            if (line.classList.contains('solid')) {
+                line.classList.remove('solid');
+                line.classList.add('dashed');
+            } else {
+                line.classList.remove('dashed');
+                line.classList.add('solid');
+            }
+        }
+
+        function addStep() {
+            const sequenceBody = document.getElementById('sequence-body');
+            const newStep = document.createElement('div');
+            newStep.className = 'message-container';
+            newStep.innerHTML = `
+                <div class="row-controls">
+                    <button class="ctrl-btn btn-updown" onclick="moveUp(this)" title="Mover Arriba">▲</button>
+                    <button class="ctrl-btn btn-updown" onclick="moveDown(this)" title="Mover Abajo">▼</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleDirection(this)" title="Cambiar Dirección">↔</button>
+                    <button class="ctrl-btn btn-toggle" onclick="toggleStyle(this)" title="Cambiar Punteada/Sólida">--</button>
+                    <button class="ctrl-btn btn-delete" onclick="this.closest('.message-container').remove()" title="Eliminar">X</button>
+                </div>
+                <div class="message-line solid arrow-right" style="left: 12.5%; width: 25%;">
+                    <div class="resize-handle left-handle" title="Arrastrar para ajustar"></div>
+                    <div class="circle-num circle-left" contenteditable="true">#</div>
+                    <div class="message-text" contenteditable="true">Texto del nuevo paso</div>
+                    <div class="resize-handle right-handle" title="Arrastrar para ajustar"></div>
+                </div>
+            `;
+            sequenceBody.appendChild(newStep);
+        }
+
+        let activeHandle = null;
+        let startX = 0;
+        let initialLeftPercent = 0;
+        let initialWidthPercent = 0;
+        let sequenceBodyWidth = 0;
+
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('resize-handle')) {
+                activeHandle = e.target;
+                startX = e.clientX;
+                const line = activeHandle.parentElement;
+                sequenceBodyWidth = document.querySelector('.sequence-body').offsetWidth;
+
+                initialLeftPercent = parseFloat(line.style.left) || 0;
+                initialWidthPercent = parseFloat(line.style.width) || 0;
+                e.preventDefault(); 
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!activeHandle) return;
+
+            const dx = e.clientX - startX;
+            const dxPercent = (dx / sequenceBodyWidth) * 100;
+            const line = activeHandle.parentElement;
+
+            if (activeHandle.classList.contains('left-handle')) {
+                let newLeft = initialLeftPercent + dxPercent;
+                let newWidth = initialWidthPercent - dxPercent;
+                if (newWidth > 2) {
+                    line.style.left = newLeft + '%';
+                    line.style.width = newWidth + '%';
+                }
+            } else if (activeHandle.classList.contains('right-handle')) {
+                let newWidth = initialWidthPercent + dxPercent;
+                if (newWidth > 2) {
+                    line.style.width = newWidth + '%';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (activeHandle) {
+                activeHandle = null;
+            }
+        });
+    </script>
+</body>
+</html>

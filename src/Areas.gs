@@ -13,9 +13,19 @@ function createArea(token, name) {
   if (!validateSession(token)) return { success: false, error: 'Sesión expirada' };
   if (!name || name.trim() === '') return { success: false, error: 'El nombre es obligatorio' };
 
+  var nameTrimmed = name.trim();
+
+  // Prevent duplicates
+  var existing = getSheetData(SHEET_AREAS);
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i][1].toLowerCase() === nameTrimmed.toLowerCase()) {
+      return { success: true, id: existing[i][0], exists: true };
+    }
+  }
+
   var id = 'area_' + Date.now();
-  appendRow(SHEET_AREAS, [id, name.trim(), new Date().toISOString()]);
-  logAction('admin', 'CREATE_AREA', 'Área creada: ' + name.trim());
+  appendRow(SHEET_AREAS, [id, nameTrimmed, new Date().toISOString()]);
+  logAction('admin', 'CREATE_AREA', 'Área creada: ' + nameTrimmed);
 
   return { success: true, id: id };
 }

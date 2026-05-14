@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance: Matriz Maestra (61 Empresas)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-orange: #fb923c;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        
+        .dashboard-card {
+            background-color: var(--bg-card);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        /* Tabla */
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table th {
+            background-color: #334155; color: var(--accent-blue);
+            padding: 12px; text-align: left; position: sticky; top: 0;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .data-table td { padding: 12px; border-bottom: 1px solid #334155; font-size: 0.85rem; color: var(--text-muted); }
+        .data-table tr:hover td { background-color: #334155; color: white; cursor: pointer; }
+
+        /* Badges */
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        .badge-ok { background: rgba(74, 222, 128, 0.1); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-danger { background: rgba(248, 113, 113, 0.1); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .badge-warn { background: rgba(251, 146, 60, 0.1); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+        .badge-neutral { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid #475569; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 50;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-content {
+            background-color: var(--bg-card); width: 95%; max-width: 1400px; height: 95vh;
+            border-radius: 16px; border: 1px solid var(--accent-blue); display: flex; flex-direction: column;
+        }
+        
+        /* Tabs del Modal */
+        .tabs-header { display: flex; background: #0f172a; overflow-x: auto; border-bottom: 1px solid #334155; }
+        .tab-btn {
+            padding: 15px 20px; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            white-space: nowrap; border-bottom: 3px solid transparent; transition: 0.3s;
+        }
+        .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(56, 189, 248, 0.05); }
+        .tab-body { padding: 25px; overflow-y: auto; flex-grow: 1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Grid de Detalles */
+        .section-title {
+            color: white; font-size: 1rem; font-weight: 700; margin: 25px 0 15px 0;
+            padding-left: 10px; border-left: 4px solid var(--accent-blue);
+        }
+        .section-title:first-child { margin-top: 0; }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .detail-item label { display: block; font-size: 0.7rem; color: var(--accent-purple); margin-bottom: 4px; text-transform: uppercase; }
+        .detail-item div {
+            background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 4px;
+            font-size: 0.85rem; color: white; border-left: 2px solid rgba(192, 132, 252, 0.3);
+            min-height: 36px; word-break: break-word; white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="h-16 flex items-center justify-between px-6 border-b border-slate-700 bg-slate-900 sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-2xl text-cyan-400"></i>
+            <span class="text-xl font-bold tracking-wider text-white">Compliance: <span class="text-cyan-400">Matriz Corporativa</span></span>
+        </div>
+        <div class="text-sm text-slate-400 flex gap-4 items-center">
+            <span><i class="fa-regular fa-calendar mr-2"></i>Febrero 2026</span>
+            <div class="px-3 py-1 bg-slate-800 rounded-full border border-slate-700">Admin</div>
+        </div>
+    </nav>
+
+    <div class="p-6 max-w-[1800px] mx-auto">
+        
+        <div class="dashboard-card mb-6 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-white"><i class="fa-solid fa-magnifying-glass mr-2 text-cyan-400"></i>Explorador de Empresas</h2>
+            <select id="companySelector" class="bg-slate-800 border border-slate-600 text-white rounded px-4 py-2 w-1/3 focus:outline-none focus:border-cyan-400" onchange="filterDashboard(this.value)">
+                <option value="ALL">-- Ver Todas (Resumen) --</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="dashboard-card relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-building text-6xl text-blue-400"></i></div>
+                <p class="text-slate-400 text-xs uppercase font-bold">Total Empresas</p>
+                <p class="text-3xl font-bold text-white mt-1" id="kpiTotal">0</p>
+            </div>
+            <div class="dashboard-card relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-chart-line text-6xl text-orange-400"></i></div>
+                <p class="text-slate-400 text-xs uppercase font-bold">Riesgo Promedio</p>
+                <p class="text-3xl font-bold text-orange-400 mt-1" id="kpiAvgRisk">0%</p>
+            </div>
+            <div class="dashboard-card relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-triangle-exclamation text-6xl text-red-400"></i></div>
+                <p class="text-slate-400 text-xs uppercase font-bold">Riesgo Alto (>=50%)</p>
+                <p class="text-3xl font-bold text-red-400 mt-1" id="kpiHighRisk">0</p>
+            </div>
+            <div class="dashboard-card relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-key text-6xl text-green-400"></i></div>
+                <p class="text-slate-400 text-xs uppercase font-bold">Contingencias Activas</p>
+                <p class="text-3xl font-bold text-purple-400 mt-1" id="kpiContingencies">0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="dashboard-card col-span-1">
+                <h3 class="text-sm font-bold text-cyan-400 mb-4 uppercase">Estatus Constancia FIEL</h3>
+                <div class="h-60"><canvas id="chartFiel"></canvas></div>
+            </div>
+            <div class="dashboard-card col-span-2">
+                <h3 class="text-sm font-bold text-purple-400 mb-4 uppercase">Top 10 Riesgos Detectados</h3>
+                <div class="h-60"><canvas id="chartRisk"></canvas></div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white">Matriz de Operaciones</h3>
+                <button onclick="alert('Exportando a Excel...')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-4 py-2 rounded transition shadow-lg shadow-cyan-500/20"><i class="fa-solid fa-download mr-2"></i>Exportar Excel</button>
+            </div>
+            <div class="overflow-x-auto h-[600px]">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Razón Social</th>
+                            <th>RFC</th>
+                            <th>Director</th>
+                            <th>Estatus</th>
+                            <th>Opinión SAT</th>
+                            <th>Vigencia FIEL</th>
+                            <th>Empleados</th>
+                            <th>Dom. Verificado</th>
+                            <th class="text-right">Riesgo Calc.</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="bg-slate-900 p-6 border-b border-slate-700 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-1" id="m_title"></h2>
+                    <div class="flex gap-4 text-sm mt-2">
+                        <span class="text-cyan-400 bg-cyan-900/20 px-2 rounded border border-cyan-900/50" id="m_rfc_header"></span>
+                        <span class="text-slate-300"><i class="fa-solid fa-user-tie mr-1"></i> <span id="m_director_header"></span></span>
+                        <span id="m_status_header" class="font-bold"></span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-400 uppercase font-bold mb-1">Riesgo Calculado</div>
+                    <div class="text-3xl font-bold" id="m_risk_score"></div>
+                </div>
+                <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="openTab(event, 'tab1')">Datos de Identificación</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab2')">Legalidad</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab3')">Fiscal y Contable</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab4')">Domicilio Fiscal</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab5')">Bastanteo Bancario</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab6')">Seguridad Social</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab7')">Corporativo & Análisis</button>
+                <button class="tab-btn" onclick="openTab(event, 'tab8')">Compromisos</button>
+            </div>
+
+            <div class="tab-body">
+                <div id="tab1" class="tab-content active">
+                    <h4 class="section-title">Datos de Identificación</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>RFC</label><div id="d_rfc"></div></div>
+                        <div class="detail-item"><label>Director Contabilidad</label><div id="d_director"></div></div>
+                        <div class="detail-item"><label>Estatus de operatividad</label><div id="d_estatus"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab2" class="tab-content">
+                    <h4 class="section-title">Legalidad</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Fecha de constitución</label><div id="d_fecha_const"></div></div>
+                        <div class="detail-item"><label>Notaría</label><div id="d_notaria"></div></div>
+                        <div class="detail-item"><label>Lugar de constitución</label><div id="d_lugar"></div></div>
+                        <div class="detail-item"><label>Capital Social</label><div id="d_capital"></div></div>
+                        <div class="detail-item col-span-2"><label>Actividad ecónomica (CSF)</label><div id="d_actividad"></div></div>
+                        <div class="detail-item col-span-2"><label>Cambios Accionarios Histórico</label><div id="d_cambios_acc"></div></div>
+                        <div class="detail-item col-span-2"><label>Accionistas Actuales</label><div id="d_accionistas"></div></div>
+                        <div class="detail-item"><label>Empresas COINCIDE</label><div id="d_emp_coincide"></div></div>
+                        <div class="detail-item"><label>Opinión Cumplimiento Accionistas</label><div id="d_opinion_acc"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab3" class="tab-content">
+                    <h4 class="section-title">Fiscal y Contable</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>AD</label><div id="d_ad"></div></div>
+                        <div class="detail-item"><label>Tipo de Régimen</label><div id="d_regimen"></div></div>
+                        <div class="detail-item"><label>Buzón Tributario</label><div id="d_buzon"></div></div>
+                        <div class="detail-item"><label>Aviso de Socios SAT</label><div id="d_aviso_sat"></div></div>
+                        <div class="detail-item"><label>Aviso de Socios SAT Actualizado</label><div id="d_aviso_sat_act"></div></div>
+                        
+                        <div class="detail-item"><label>Opinión de cumplimiento (SAT)</label><div id="d_opinion_sat" class="font-bold"></div></div>
+                        <div class="detail-item"><label>Constancia Vigencia FIEL</label><div id="d_vigencia_fiel" class="font-bold"></div></div>
+                        
+                        <div class="detail-item"><label>Activo Fijo</label><div id="d_activo"></div></div>
+                        <div class="detail-item"><label>Cuentas por Cobrar</label><div id="d_cxc"></div></div>
+                        <div class="detail-item"><label>Cuentas por Pagar</label><div id="d_cxp"></div></div>
+                        <div class="detail-item"><label>Riesgo de Cuentas</label><div id="d_riesgo_cuentas"></div></div>
+                        <div class="detail-item"><label>CUCA</label><div id="d_cuca"></div></div>
+                        <div class="detail-item"><label>CUFIN</label><div id="d_cufin"></div></div>
+                        <div class="detail-item"><label>Pérdidas Fiscales</label><div id="d_perdidas"></div></div>
+                        <div class="detail-item"><label>IVA a Favor</label><div id="d_iva"></div></div>
+                        <div class="detail-item"><label>ISR a Favor</label><div id="d_isr"></div></div>
+                        <div class="detail-item col-span-2"><label>Conceptos Facturados</label><div id="d_conceptos"></div></div>
+                        <div class="detail-item"><label>Beneficiario Controlador</label><div id="d_beneficiario"></div></div>
+                        <div class="detail-item"><label>Actividades Vulnerables</label><div id="d_vulnerable"></div></div>
+                        <div class="detail-item"><label>Lista 69-B</label><div id="d_69b"></div></div>
+                        <div class="detail-item"><label>Contingencias Fiscales</label><div id="d_cont_fiscal"></div></div>
+                        <div class="detail-item"><label>Estatus Procedimental</label><div id="d_estatus_proc"></div></div>
+                        <div class="detail-item"><label>Relación Prov. 69-B</label><div id="d_rel_69b"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab4" class="tab-content">
+                    <h4 class="section-title">Domicilio Fiscal</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item col-span-2"><label>Domicilio Fiscal Actual</label><div id="d_domicilio"></div></div>
+                        <div class="detail-item"><label>Estatus Verificación</label><div id="d_verificacion"></div></div>
+                        <div class="detail-item"><label>Tipo Comprobante</label><div id="d_tipo_comp"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab5" class="tab-content">
+                    <h4 class="section-title">Bastanteo Bancario</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item col-span-2"><label>Cuentas Bancarias Activas</label><div id="d_cuentas_banc"></div></div>
+                        <div class="detail-item col-span-2"><label>Domicilio en Bancos</label><div id="d_dom_bancos"></div></div>
+                        <div class="detail-item col-span-2"><label>Accionistas en Bancos</label><div id="d_acc_bancos"></div></div>
+                        <div class="detail-item col-span-2"><label>Contingencias Bancarias</label><div id="d_cont_bancos"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab6" class="tab-content">
+                    <h4 class="section-title">Seguridad Social</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Opinión IMSS</label><div id="d_imss"></div></div>
+                        <div class="detail-item"><label>Opinión INFONAVIT</label><div id="d_infonavit"></div></div>
+                        <div class="detail-item"><label>Registro Patronal</label><div id="d_rp"></div></div>
+                        <div class="detail-item"><label>REPSE</label><div id="d_repse"></div></div>
+                        <div class="detail-item"><label>Número de Empleados</label><div id="d_empleados"></div></div>
+                        <div class="detail-item col-span-2"><label>Contingencias SS</label><div id="d_cont_ss"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab7" class="tab-content">
+                    <h4 class="section-title">Corporativo</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item col-span-2"><label>Página WEB</label><div id="d_web"></div></div>
+                    </div>
+                    <h4 class="section-title">Análisis de Operaciones</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Acumulado Hist. (Retiros)</label><div id="d_acum_ret"></div></div>
+                        <div class="detail-item"><label>Acumulado Hist. (Ingresos)</label><div id="d_acum_ing"></div></div>
+                        
+                        <div class="detail-item"><label>Facturación (Acum. al 31-10-25)</label><div id="d_fact_acum" class="font-mono text-cyan-300"></div></div>
+                        <div class="detail-item"><label>Facturación (Ejer. 2025)</label><div id="d_fact_ejer" class="font-mono text-cyan-300"></div></div>
+                    </div>
+                </div>
+
+                <div id="tab8" class="tab-content">
+                    <h4 class="section-title">Compromisos Anclados en Modelos Específicos</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Donativos (Clientes)</label><div id="d_don_cte"></div></div>
+                        <div class="detail-item"><label>Donativos (Monto)</label><div id="d_don_monto"></div></div>
+                        <div class="detail-item"><label>Donativos (Fecha)</label><div id="d_don_fecha"></div></div>
+                        <div class="detail-item"><label>Modelo CUFIN</label><div id="d_mod_cufin"></div></div>
+                        <div class="detail-item"><label>Modelo CUCA</label><div id="d_mod_cuca"></div></div>
+                        <div class="detail-item"><label>Prima en Suscripción</label><div id="d_prima"></div></div>
+                    </div>
+
+                    <h4 class="section-title">Compromisos en C+V</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Saldo Actual</label><div id="d_cv_saldo"></div></div>
+                        <div class="detail-item"><label>Saldo B2B</label><div id="d_cv_b2b"></div></div>
+                        <div class="detail-item"><label>Saldo Inversión</label><div id="d_cv_inv"></div></div>
+                        <div class="detail-item"><label>Fecha Límite 1</label><div id="d_cv_fecha"></div></div>
+                    </div>
+
+                    <h4 class="section-title">Compromisos en Sinergia</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Saldo Actual</label><div id="d_sin_saldo"></div></div>
+                        <div class="detail-item"><label>Saldo B2B</label><div id="d_sin_b2b"></div></div>
+                        <div class="detail-item"><label>Saldo Inversión</label><div id="d_sin_inv"></div></div>
+                        <div class="detail-item"><label>Fecha Límite 2</label><div id="d_sin_fecha"></div></div>
+                    </div>
+
+                    <h4 class="section-title">Compromisos en MUGA</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Saldo Actual</label><div id="d_mug_saldo"></div></div>
+                        <div class="detail-item"><label>Saldo B2B</label><div id="d_mug_b2b"></div></div>
+                        <div class="detail-item"><label>Saldo Inversión</label><div id="d_mug_inv"></div></div>
+                        <div class="detail-item"><label>Fecha Límite 3</label><div id="d_mug_fecha"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Utils
+    const formatMoney = (amount) => {
+        if (!amount || amount === 'NaN' || amount === 'Ninguno' || amount === 'Pendiente' || amount.toString().trim() === '-') return amount;
+        let clean = amount.toString().replace(/[^0-9.-]+/g,"");
+        const num = parseFloat(clean);
+        if (isNaN(num)) return amount;
+        return "$" + num.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString || dateString.includes('Pendiente')) return dateString;
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return dateString;
+    };
+
+    // --- BASE DE DATOS COMPLETA (61 EMPRESAS) ---
+    // Incluye las 27 anteriores y las 34 nuevas operativas.
+    const rawCompaniesData = [
+        ["ADMINISTRADORA IMPULSO, S.A. DE C.V.", "AIM150326AQ6", "María Fernanda", "OPERANDO", "26/03/2015", "126 EDOMEX", "EDOMEX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "SERVICIOS DE CONSULTORÍA EN ADMINISTRACIÓN 100%", "1. Carlos Peña Guzmán y Johana Miroslava Brito Martínez del 2015 al 2017\n2. Anaid Moreno Ramirez y Rania Cristina Moreno Ramirez del 2017 al 2020\n3. Jessica Alejandra Torres Martinez del 2020 al 2024\n4. Jessica Alejandra Torres Martinez y Eduardo Carmona del 2024 a la actualidad", "Eduardo Carmona Solano (AU)\nJessica Alejandra Torres Martinez", "Eduardo Carmona - Negativo\nJessica Alejandra Torres Martínez - Negativo", "Eduardo Carmona Solano - Administradora Impulso y Nuevo Concepto\nJessica Alejandra Torres Martínez- Administradora Impulso y Stay Fly", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Anid Moreno Ramírez (25)\nTania Cristina Moreno Ramírez (25)", "POSITIVO", "VIGENTE", "$3,354,208", "$373,534,540.00", "$503,388,590.00", "", "$50,000.00", "$20,496,168.00", "$0.00", "$953,396.00", "$205,961.00", "Asesoría Legal\nServicios Administrativos", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Oficio de Invitación de Vigilancia Profunda", "CERRADA CON CONTINGENCIA\nSe dervirtuan todos los puntos a excepción de IVA diciembre 2023 pendiente de declarar 2.4 mdp de IVA", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR,SOLICITADA", "Recibo de Teléfono TotalPlay (Nov 2025)", "KUSPIT / UANALANAPAY, MIFEL, MULTIVA, BANKAOOL, PRIME", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "Eduardo Carmona Solano", "Ninguna", "Positiva", "Positiva", "Y62-44280-10-0", "No tiene", "8", "Sin Contingencias", "https://www.administradora-impulso.com.mx/", "$437,482,044.31", "$86,540,310.12", "$939,986,628.01", "$914,224,804.91", "Caritina Leon - $588,833.00", "$588,833.00", "31-dic-26", "NINGUNO", "NINGUNO", "NINGUNO", "$2,213,995.91", "$1,499,999.69", "$713,996.22", "31/08/2026", "$76,450,941.51", "$47,789,893.16", "$28,661,048.35", "31/12/2026", "$4,023,023.30", "$950,000.00", "$3,073,023.30", "30/09/2026"],
+        ["AFRX, S.A. DE C.V.", "AFR020917JN2", "María Fernanda", "OPERANDO", "13/09/2002", "113 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "SERVICIOS RELACIONADOS CON LA INTERMEDIACIÓN CREDITICIA 100%", "1. Bentsion Levy Ferre, Jaim Levy Ferre y Deborah Levy Ferre del 2002 al 2015.\n2. Ramón García González y Rogelio Ríos Sernas del 2015 al 2024\n3. Ramón García González y Analilia Román González del 2024 a la actualidad", "Ramón García Gonzalez (AU)\nAnalilia Román González", "Analilia Román González - Sin Obligaciones\nRamón García Gonzalez - Positivo", "Ramón García González - AFRX, y Mega Astral\nAnalilia Román González - AFRX y Solutelco", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Ramón García González (25)\nRogelio Ríos Sernas (25)", "POSITIVO", "VIGENTE", "$0", "$367,600,411.00", "$540,256,131.00", "", "$2,025,103.00", "-$5,253,722.00", "$26,943,499.00", "$367,378.00", "$1,810,595.00", "Comisiones por convenio de transacción en relación a traspasos de locales comerciales.", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Suspensión de registro de Padrón de Importadores\nDiferencias de ingresos CFDI 2019", "Ninguna.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. MANUEL LOPEZ COTILLA/1216 INT. 1/COL.DEL VALLE CENTRO/BENITO JUAREZ/CDMX", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "KUSPIT / UANALANAPAY, BANKAOOL, PRIME", "C. MANUEL LOPEZ COTILLA/1216 INT. 1/COL.DEL VALLE CENTRO/BENITO JUAREZ/CDMX", "RAMÓN GARCÍA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$139,502,697.65", "$2,658,613.07", "$272,279,158.66", "$287,747,657.63", "Leon Haber - $ 26,609,963.92\nCarlos Patricio Ibarra - $ 28,290,423.59\nLaura Estefania Torres- $33,653,000.00\nJose Manuel Lofte- $35,814,360.00\nJaime Achar Cabasso- $30,000,000.00\nMarcos Sacal - $26,000,000.00\nDolores Maricela Cota (Faysal) - $45,000,000.00\nAbraham Cohen Mizrahi- $16,131,480.00\nMaria de Jesus Camacho Licona- $25,000,000.00\nAntonio Leyva- $40,000,000.00", "$306,499,227.51", "31-dic-27", "NINGUNO", "Oscar Zermeño. Monto total: 2,950,000 MONTO OPERADO (20424): 2,950,000. DOCUMENTO SIN PROTOCOLIZAR (en espera de actualización de libros)", "NINGUNO", "$2,514,735.90", "$2,514,735.90", "$0.00", "31/03/2026", "$8,209,745.12", "$4,882,556.65", "$3,327,188.47", "31/08/2026", "$4,335,138.43", "$0.00", "$4,335,138.43", "31/07/2026"],
+        ["ASTRAL FREAKS, S.A. DE C.V.", "AFR990319A18", "María Fernanda", "OPERANDO", "16/03/1999", "113 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $75'400,000.00", "SERVICIOS RELACIONADOS CON LA INTERMEDIACIÓN CREDITICIA 100%", "1. Jaim Levy Ferre y Bentsion Levy Ferre de 1999 al 2015\n2. Ramón García González y Rogelio Ríos Serna de 2015 al 2024\n3. Lidia Martinez Santos de 2024 a la actualidad.", "Edgar Vidal Sotelo (AU)\nLidia Martinez Santos", "Edgar Vidal Sotelo- Sin Obligaciones\nLidia Martinez Santos - Sin Obligaciones", "Edgar Vidal Sotelo - Corporativo FRL - Astral Freaks\nLidia Martínez - Astral Freaks y Mega Astral", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Ramón García González (25)\nRogelio Ríos Sernas (25)", "POSITIVO", "VIGENTE", "$0", "$437,575,880.00", "$485,104,658.00", "0", "$170,989.00", "-$2,070,507.00", "$10,412,170.00", "$353,227.00", "$1,538,586.00", "Asesoria y desarrollo comercial a nivel nacional", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Omisión de Pago de IVA Septiembre 2016", "Ninguna.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. GABRIEL MANCERA/No.516 INT. 201/COL. DEL VALLE/BENITO JUAREZ/CDMX", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "BBVA, KUSPIT / UANALANAPAY, PRIME", "C. GABRIEL MANCERA/No.516 INT. 201/COL. DEL VALLE/BENITO JUAREZ/CDMX", "RAMÓN GARCÍA EN BBVA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$42,160,507.49", "$7,000,697.21", "$285,320,513.68", "$288,930,747.02", "Juan Carlos Sotomayor- $7,319,628.25\nOscar Servin- $17,750,000.00\nJose Manuel Lofte - $90,000,000.00\nHoracio Palencia- $160,232.82\nEduardo Legorreta- $70,000,000.00\nAntonio Leyva- $40,000,000.00", "$225,229,861.07", "30/09/2028", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$7,502,175.06", "$5,352,478.26", "$2,149,696.80", "01/08/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["CONSULTORIA PROFESIONAL DE CALIDAD,  S.A. DE C.V.", "CPC100727EM4", "María Fernanda", "OPERANDO", "14/07/2016", "49 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "SERVICIOS DE ADMINISTRACIÓN DE NEGOCIOS 100%", "1. Ernesto González Escamilla\n2.Eduardo Enrique García Hidalgo, ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Brenda América González Reséndiz) y DIMEXPRO, S.A. DE C.V. (Jesús Vilchis Herrera) del 2013 al 2016\n3. Mario Guillermo Mendoza Coss,  ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Brenda América González Reséndiz) y DIMEXPRO, S.A. DE C.V. (Jesús Vilchis Herrera) del 2016 al 2017\n4.Adela Georgina Candela Rojas, ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Brenda América González Reséndiz) y DIMEXPRO, S.A. DE C.V. (Jesús Vilchis Herrera) del 2017 al 2018\n5.Adela Georgina Candela Rojas, ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Luis Antonio Velázquez González) y DIMEXPRO, S.A. DE C.V. (Montserrat Columba Hernández González) del 2018 al 2019.\n6.Pamela Soledad Arndt, ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Luis Antonio Velázquez González) y DIMEXPRO, S.A. DE C.V. (Montserrat Columba Hernández González) del 2019 al 2023\n7.Pamela Soledad Arndt-  500 acciones con valor de $500.00 (Capital Fijo), ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. (Luis Antonio Velázquez González) y  Ricardo Climent Flores del 2023 al 2024\n8. Mónica Román Álvarez, ENTORNO CORPORATIVO Y EMPRESARIAL, S.C. y Stephanie Lizzette Rivera Chávez del 2024 a la actualidad.", "Monica Roman Alvarez (AU)\nENTORNO CORPORATIVO Y EMPRESARIAL, S.C. Stephanie Lizzette Rivera Chávez", "Monica Román Álvarez - Positivo Stheph Rivera Chávez - Positivo", "Steph Rivera – CPC y LCK\nMónica Román - CPC y LCR", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Adela Georgina Candela Rojas (9,990)\nErika Gomez Rocha (10)", "NEGATIVO", "VIGENTE", "$0", "$150,203,579.00", "$161,363,695.00", "", "$124,224,695.00", "$14,270,736.00", "$0.00", "$507,514.00", "$0.00", "Servicios de consultoría en negocios\nServicios temporales de construcción\nServicio de asesoriamiento en recursos humanos", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Oficio de Invitación de Vigilancia Profunda", "Ninguna.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "BANORTE, MULTIVA. PRIME", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "MONICA ROMAN ALVAREZ", "Ninguna", "Sin Opinión", "Sin Opinión", "Y6243681100\nY6237581100\nY6243683106\nY6243684104\nY6243685101", "No tiene", "Pendiente", "Cambio de RL", "NO TIENE", "$634,531,407.14", "$30,321,316..86", "$512,564,354.06", "$518,118,204.20", "David Cureño- $40,000,000.00\nSamuel Israel Chaillo - $10,233,116.00\nMaria de Jesus Camacho Licona - $8,000,000.00", "$58,233,116.00", "31-dic-27", "NINGUNO", "Mariana García. Monto total: 6,510,000 MONTO OPERADO (2024): 2,100,000 MONTO OPERADO (2025): 712,000 MONTO PENDIENTE DE OPERAR (2026): 3,698,000 DOCUMENTO SIN PROTOCOLIZAR (en espera de actualización de libros)", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$20,899,260.98", "$11,857,653.42", "$9,041,607.56", "30/11/2026", "$5,600,777.31", "$0.00", "$5,600,777.31", "30/05/2026"],
+        ["GRUPO INMOBILIARIO USA SHOES,  S.A.P.I. DE C.V.", "GIU141211E30", "María Fernanda", "OPERANDO", "11/12/2024", "122 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "CONSTRUCCIÓN DE VIVIENDA MULTIFAMILIAR 38%\nCONSTRUCCIÓN DE VIVIENDA UNIFAMILIAR 32%\nCONSTRUCCIÓN DE INMUEBLES COMERCIALES, INSTITUCIONALES Y DE SERVICIOS 15%\nCONSTRUCCIÓN DE NAVES Y PLANTAS INDUSTRIALES 15%", "1. Víctoria Cobaj Bistre, Esther Rahahim Cojab, Margarita Rahahim Cojab,  José Cherem Babbah, Carlos Mizrahi Zagha, Eduardo Enrique García Hidalgo y Abraham León Hirsch Pier del 2014 al 2025\n2. Claudia Carreón Ramírez y Arandeli Román Castro actualmente.", "Claudia Carreon Ramirez (Presidente)\nRicardo Pérez Córdova", "Claudia Carreon Ramirez- Positiva\nArandeli Román Castro - Positiva", "Claudia Carreón Ramírez- USA SHOES, y SERONO (inconcluso)\nArandeli Román Castro - USA SHOES y CORPORATIVO QUÍMICO SYR", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Claudia Carreon Ramirez (25,001)\nArandeli Roman Castro (24,499)", "POSITIVO", "VIGENTE", "$0", "$97,627,383.00", "$12,453,823.00", "", "$79,088.00", "-$160,429.00", "$13,066,793.00", "$656,983.00", "$48,132.00", "Arrendamiento de inmuebles\nServicios inmobiliarios", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. LAS PRADERAS/No.12/COL. JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN /CDMX/04500", "DOMICILIO SIN VERIFICAR,SOLICITADA", "Contrato Arrendamiento", "BBVA, PRIME", "C. LAS PRADERAS/No.12/COL. JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN /CDMX/04500", "SIN ACTUALIZAR EN BBVA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$19,241,540.37", "$4,735,964.95", "$144,020,695.19", "$144,399,385.54", "Laura Estefania Torres- $12,318,000.00\nAlejandro Vazquez - $11,520,230.97", "$23,838,230.97", "30-jun-28", "NINGUNO", "NINGUNO", "CARBON CONSTRUCCIÓN. Monto total: 50,000,000 MONTO OPERADO: 0 DOCUMENTO PROTOCOLIZADO\nSTERLING. Monto total: PENDIENTE DE DEFINIR. MONTO OPERADO (2025): 45,625,233.11 SIN DOCUMENTO SOPORTE", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$11,503,403.66", "$9,559,521.49", "$1,943,882.17", "30/11/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["LCK ESPECIALISTAS Y ASESORES EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.", "LEA120827JA2", "María Fernanda", "OPERANDO", "27/08/2012", "193 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Servicios de consultoría en administración 34%\nSalones y clínicas de belleza y peluquerías 33%\nComercio al por menor de instrumentos musicales y sus accesorios 33%", "1. Fernando Patiño Peña y Martín Gómez Hernández del 2012 al 2017\n2. Javier Chávez García yTania Cristina Moreno Ramírez del 2017 al 2020\n3. Javier Chávez García y Elena Anahí Garza González del 2020 al 2024\n4. Stephanie Lizzette Rivera Chávez y Ricardo Pérez Córdova del 2024 a la actualidad.", "Stephanie Lizzette Rivera Chávez (AU)\nRicardo Pérez Córdova", "Stephanie Lizzette Rivera Chávez - Positivo", "Ricardo Pérez - LCK y LCR\nSteph Rivera – LCK y CPC", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Javier Chavez Garcia (30,000)\nTania Cristina Moreno Ramirez (20,000)", "POSITIVO", "VIGENTE", "$0", "$798,384,922.00", "$822,072,543.00", "", "$87,174.00", "$12,470,453.00", "$0.00", "$236,618.00", "$61,107.00", "Desarrollo de RH (2019)\nAsesoría en RH (2019)\nAsesoría en estructuras organizacionales (2019)\nComisiones mercantiles (2019)", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Invitaciones Vigilancia Profunda 2017-2024\nMultas por Infracciones establecidad en CFF", "CARTA INVITACIÓN: Estatus: CERRADA CON CONTINGENCIAS", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. PASEO DE LA REFORMA/No. 389 INT.12/CUAUHTEMOC/CDMX/06500", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "KUSPIT / UANALANAPAY, MULTIVA, PRIME", "AV. PASEO DE LA REFORMA/No. 389 INT.12/CUAUHTEMOC/CDMX/06500", "Stephanie Lizzette Rivera Chávez", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$108,840,012.28", "$845,52.40", "$395,798,848.02", "$397,854,172.23", "Familia Achar Cohen - Dan - $8,126,000.00\nLuis Roberto Sandoval - $14,789,890.00\nMarcos Sacal - $41,997,300.00\nDiego Gutierrez - $1,000,000.00\nRebeca Buzali dlls - $38,601,468.18\nRebeca Buzalli DS - $48,470,000.00\nHoracio Palencia - $32,459,987.18\nEduardo Legorreta - $50,000,000.00\nFamilia Guerrero - $60,000,000.00\nAntonio Leyva - $69,500,000.00", "$364,944,645.36", "30 septiembre 2028", "Mariana García. Monto total: 4,968,000 MONTO OPERADO (2024): 1,200,000 MONTO OPERADO (2025): 1,079,999.99 MONTO PENDIENTE DE OPERAR: 2,688,000DOCUMENTO SIN PROTOCOLIZAR (Libros actualizados)", "NINGUNO", "NINGUNO", "$236,140.91", "$216,715.04", "$19,425.87", "31/08/2026", "$28,288,905.69", "$10,502,773.58", "$17,786,132.11", "30/11/2026", "$1,865,161.18", "$78,155.94", "$1,787,005.24", "31/04/2026"],
+        ["LCR ADMINISTRACION PROFESIONAL EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.", "LAP1208278T0", "María Fernanda", "OPERANDO", "27/08/2012", "193 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Servicios de consultoría en administración 34%\nEstacionamientos y pensiones para automóviles 33%\nComercio al por menor de instrumentos musicales y sus accesorios 33%", "1. Laura Karen Cruz Carreón y Patricia Moreno Ortiz del 2012 al 2017\n2. Javier Chávez García y Anaid Moreno Ramírez del 2017 al 2020\n3. Javier Chávez García y Raúl de Jesús Zurita Garza del 2020 al 2024\n4. Ricardo Pérez Cordóva y Mónica Román Álvarez del 2024 a la actualidad", "Ricardo Pérez Cordóva (AU)\nMónica Román Álvarez", "Mónica Román Álvarez - Positivo ", "Ricardo Pérez - LCK y LCR\nMónica Román – LCR y CPC", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Javier Chavez Garcia (30,000)\nAnaid Moreno Ramirez (20,000)", "POSITIVO", "VIGENTE", "$2,497,307", "$538,071,727.00", "$706,715,315.00", "", "$87,174.00", "-$36,651.00", "$0.00", "$6,555,083.00", "$3,074,446.00", "Servicios de consultoría en negocios (2019)\nServicios de apoyo gerencial (2019)\nServicio de planificación estrategica (2019)", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "CARTA INVITACIÓN", "CARTA INVITACIÓN. Estatus: CERRADA CON CONTINGENCIAS, Se solicitaron 7 prorrogas en total, la autoridad procedio con la cancelacion de CSD, que esta siendo atendido por el CPC Eduardo teniendo una contigencia fiscal por impuesto omitido de 13,467,393", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. PASEO DE LA REFORMA/No. 389 PISO 10/CUAUHTEMOC/CDMX/06500", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "KUSPIT / UANALANAPAY, SCOTIABANK, PRIME", "AV. PASEO DE LA REFORMA/No. 389 PISO 10/CUAUHTEMOC/CDMX/06500", "MONICA ROMAN ALVAREZ", "Cuenta Scotiabank cancelada.", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "21,449,939.41", "1,000,468.13", "$210,866,523.42", "$211,590,963.85", "Mario Amkie - $90,493,300.00\nAlejandro Gosain - $36,797,000.00\nTony Geaitani - $84,417,734.25\nMarcos Sacal - $77,572,815.53\nAlejandro Vazquez - $13,022,466.42\nRebeca Buzali dlls - $ 29,157,469.92\nRebeca Buzalli DS - $50,000,000.00\nEduardo Legorreta - $70,000,000.00\nFamilia Guerrero - $65,000,000.00", "$516,460,786.12", "30 septiembre 2028", "NINGUNO", "NINGUNO", "NINGUNO", "$4,046,339.11", "$4,014,339.11", "$32,000.00", "31/08/2026", "$17,619,823.21", "$6,358,883.14", "$11,260,940.07", "30/11/2026", "$2,343,976.58", "$0.00", "$2,343,976.58", "30/11/2026"],
+        ["MEGA ASTRAL, S.A. DE C.V.", "MAS020917RE4", "María Fernanda", "OPERANDO", "13/09/2002", "113 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "SERVICIOS RELACIONADOS CON LA INTERMEDIACIÓN CREDITICIA 100%", "1. Jaim Levy Ferre y Bentsion Levy Ferre del 2002 al 2015\n2. Ramón García González y Rogelio Ríos Sernas 2015 al 2024\n3. Ramón García González 25 y Lidia Martínez Santos del 2024 a la actualidad", "Ramón García González (AU)\nLidia Martínez Santos", "Ramón García González - Positivo", "Lidia Martínez - Mega Astral y Astral Freaks\nRamón García González- Mega Astral y AFRX", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Ramón García González (25)\nRogelio Ríos Sernas (25)", "POSITIVO", "VIGENTE", "$6,767", "$162,432,558.00", "$196,570,189.00", "", "$132,758.00", "$139,055.00", "$2,026,595.00", "$65,199.00", "$755,708.00", "Servicios de auditoria", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Sin Contingencias", "Ninguna.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. TENAYUCA/No.55 INT.401/COL. LETRAN VALLE/BENITO JUAREZ/CDMX/03650", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "KUSPIT / UANALANAPAY, PRIME", "C. TENAYUCA/No.55 INT.401/COL. LETRAN VALLE/BENITO JUAREZ/CDMX/03650", "RAMÓN GARCÍA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$13,123,142.92", "$2,797,817.38", "$122,973,687.96", "$123,830,767.32", "Moises Calderon Zapan - $4,383,083.00\nEduardo Legorreta - $50,000,000.00\nFamilia Guerrero - $95,000,000.00", "$149,383,083.00", "30 septiembre 2028", "NINGUNO", "NINGUNO", "NINGUNO", "$1,585,575.58", "$0.00", "$1,585,575.58", "30/05/2026", "$26,803,642.74", "$15,087,487.99", "$11,716,154.75", "30/11/2026", "$4,000,000.00", "$0.00", "$4,000,000.00", "30/11/2026"],
+        ["SERVICIOS Y ANALISIS DE PROYECTOS EMPRESARIALES EV, S.A. DE C.V.", "SME870717C10", "María Fernanda", "OPERANDO", "04/09/1981", "2 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "COMERCIO AL POR MAYOR DE PRODUCTOS FARMACÉUTICOS 100%", "1. Elvira Elena Ayestaran Sánchez\n2.MERCK B.V. y Tri Holding B.V del 2009 al 2014\n.3Eduardo Enrique García Hidalgo y  Valeria Lujan Ardoino del 2014 al 2015\n4.Eduardo Enrique García Hidalgo, Valeria Lujan Ardoino, Rodolfo Ortíz García, César Ortíz García y Eduardo Ortíz García del 2015 al 2015\n5.Eduardo Enrique García Hidalgo, Valeria Lujan Ardoino, Rodolfo Ortíz García, César Ortíz García, Eduardo Ortíz García, Miguel Ángel Ruíz Reyes, Rafael Martínez Gallardo Prieto, Gonzalo Eduardo Martínez y Javier Ignacio Macías Burdick del 2015 al 2015\n6. Eduardo Enrique García Hidalgo, Valeria Lujan Ardoino, Rodolfo Ortíz García, César Ortíz García, Eduardo Ortíz García, Miguel Ángel Ruíz Reyes, Rafael Martínez Gallardo Prieto, Gonzalo Eduardo Martínez, Javier Ignacio Macías Burdick, Arie Hanono Roffe, Moisés Hanono Roffe,  Alberto Hanono Roffe, Isaac Cherem Dabbah, Salomón Cherem Dabbah, José Cherem Dabbah,  Salomón Kamkhaji Ambe, Moisés Kamkhaji Ambe, David Kamkhaji Ambe, Carlos Kamkhaji Ambe, Sión David Asse Cherem, Moisés Asse Cherem y Raquel Cherem Dabbah del 2015 al 2015\n9. Hector Alejandro Loustaunau, Rodolfo Ortíz García,  César Ortíz García, Eduardo Ortíz García, Miguel Ángel Ruíz Reyes, Rafael Martínez Gallardo Prieto, Gonzalo Eduardo Martínez, Javier Ignacio Macías Burdick, Arie Hanono Roffe, Moisés Hanono Roffe, Alberto Hanono Roffe, Isaac Cherem Dabbah, Salomón Cherem Dabbah, José Cherem Dabbah, Salomón Kamkhaji Ambe, Moisés Kamkhaji Ambe, David Kamkhaji Ambe, Carlos Kamkhaji Ambe, Sión David Asse Cherem, Moisés Asse Cherem, Raquel Cherem Dabbah, Francisco Román Reyes y Lucía Yolanda Colín Ávila del 2017 a la actualidad ", "Ramón García González (AU)", "Ramón García González - Positivo", "Ramón García González - AFRX, y Mega Astral", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Héctor Alejandro Loustaunau Diez (13,011)\nRodolfo Ortíz García (12,779)... (Ver detalle completo en expediente)", "POSITIVO", "VIGENTE", "$0", "$241,713,436.00", "$0.00", "", "$65,497,069.00", "-$243,146.00", "$38,168.00", "$0.00", "$5,420.00", "Intereses generados", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Oficio de Invitación de Vigilancia Profunda", "Pendiente conocer estatus actualizado.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C.LAS PRADERAS /No.12/COL.JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN/CDMX/04500", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "PRIME", "C.LAS PRADERAS /No.12/COL.JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN/CDMX/04500", "RAMÓN GARCÍA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "995,967.88", "873,267.89", "$63,482,426.72", "$63,745,006.17", "NINGUNO", "NINGUNO", "NINGUNO", "Jocelyn Batiz. Monto total: 10,680,000 MONTO OPERADO (2024): 4,971,528 MONTO OPERADO (2025): 3,190,000 MONTO PENDIENTE DE OPERAR: 2,518,472 DOCUMENTO SIN PROTOCOLIZAR", "NINGUNO", "NINGUNO", "$4,197,400.76", "$3,000,000.00", "$1,197,400.76", "30/06/2026", "$16,296,597.16", "$15,813,742.22", "$482,854.94", "30/09/2026", "$6,542,041.10", "$3,000,000.00", "$3,542,041.10", "30/09/2026"],
+        ["STAY FLY, S.A. DE C.V.", "SFL100914AE7","María Fernanda", "OPERANDO", "13/09/2010", "33 EDOMEX", "EDOMEX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Agencias de publicidad 50%\nServicios de consultoria en computación 25%\nOtros servicios de consultoría cientifica y técnica 25%", "1. Ezequiel Alberto Jance , Sebastián Agustín Jance, Nelson Iván Maldonado del Nido y Carlos Jorge Estevani del 2010 al 2021\n2. ESQUINA GLORIETA, S.A.P.I. DE C.V. y Jessica Alejandra Torres Martínez del 2021 a la actualidad.", "Jessica Alejandra Torres Martínez (AU)", "Jessica Alejandra Torres Martínez - Negativo", "Jessica Alejandra Torres Martínez- Administradora Impulso y Stay Fly", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Ezequiel Alberto Jance (25,000)\nSebastián Agustín Jance (25,000)\nNelson Iván Maldonado del Nido (25,000)\nCarlos Jorge Estevani (25,000)", "POSITIVO", "VIGENTE", "$0", "$104,208,856.00", "$116,442,398.00", "", "$93,763.00", "$1,583,349.00", "$16,134,214.00", "$94,291.00", "$710,000.00", "Actividades de venta y promoción de negocios", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Sin Contingencias", "VIGILANCIA PROFUNDA. Estatus: CERRADA EXISTOSO.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR,SOLICITADA", "Recibo de Teléfono (Nov 2025)", "MULTIVA, MIFEL, BANKAOOL, MONEX, PRIME", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "JESSICA ALEJANDRA TORRES MARTINEZ", "Cuenta Multiva cancelada\nMifel - Falta actualizar datos", "Positiva", "Positiva", "Y52-27576-10-4", "No tiene", "6", "Sin Contingencias", "https://www.stayfly.com.mx/", "$189,639,086.76", "$13,007,797.9", "$232,753,629.05", "$238,907,527.67", "Dolores Maricela Cota (Faysal) - $17,894,487.48\nFamilia Smeke 2 - $3,350,000.00", "$21,244,487.48", "31-oct-29", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$2,085,124.84", "$1,297,650.19", "$787,474.65", "30/11/2026", "$2,687,218.66", "$0.00", "$2,687,218.66", "30/05/2026"],
+        ["TELEMEDIX, S.A.P.I. DE C.V.", "TEL130930KLA", "María Fernanda", "OPERANDO", "30/09/2013", "39 Corredor CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variabe $1,950,000.00", "Reparación y mantenimiento de otro equipo electrónico y de equipo de precisión 70%\nComercio al por mayor de mobiliario, equipo e instrumental médico y de laboratorio 30%", "1. CONEXIFARMA MÉXICO\n2.Javier Acuña Fernández y Maurilio Alfonso Acuña Romero del 2020 al 2021\n3.Jessica Alejandra Torres Martínez y Ricardo Climent Flores del 2021 al 2024\n4. Vanesa Celeste González Álvarez y José Alfredo Trujillo Islas del 2024 a la actualidad.", "Vanesa Celeste González Álvarez (Presidente)\nJosé Alfredo Trujillo Islas (Secretario)", "Vanesa - Negativo", "Vanesa Celeste González Álvarez – Telemedix, Sorvi, Villadom", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Vanesa Celeste González Álvarez (25,000)\nJosé Alfredo Trujillo Islas (25,000)", "POSITIVO", "VIGENTE", "$1,137,674", "$184,042,452.00", "$250,728,804.00", "", "$83,952.00", "$2,606,869.00", "$0.00", "$604,789.00", "$7,089.00", "Servicios de consultoría en negocios\nServicios de planificación estrategica\nMantenimiento de equipo médico", "Sin determinar", "F. IV Mutuo o garantía por sujetos distinto a las entidades financieras**", "NO LISTADA", "Oficio de Invitación de Vigilancia Profunda", "Ninguna.", "ONE TO ONE SERVICIOS EMPRESARIALES SA DE CV (2019) (DEFINITIVO)", "C. PRADERAS/12/COL. JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN/CDMX", "DOMICILIO SIN VERIFICAR,SOLICITADA", "Contrato Arrendamiento", "BBVA, BANKAOOL, PRIME", "C. PRADERAS/12/COL. JARDINES DEL PEDREGAL DE SAN ANGEL/COYOACAN/CDMX", "VANESSA CELESTE GONZÁLEZ ÁLVAREZ", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "https://telemedix.com.mx/", "$136,256,539.21", "$57,941,588.98", "$381,679,640.48", "$397,899,341.36", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$2,114,863.26", "$1,337,897.40", "$776,965.86", "01/11/2026", "$67,926,410.68", "$57,520,436.44", "$10,405,974.24", "30/11/2026", "$3,588,800.41", "$0.00", "$3,588,800.41", "31/04/2026"],
+        ["VE OUTSORCING DE MEXICO,  S.A.P.I. DE C.V.", "VOM160714UV2", "María Fernanda", "OPERANDO", "14/07/2016", "45 EDOMEX", "EDOMEX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "OTROS SERVICIOS RELACIONADOS CON LA CONTABILIDAD 100%", "1. Manuel García Hidalgo y Brenda América González Reséndiz del 2016 al 2017\n2. Manuel García Hidalgo y Luis Antonio Velázquez González del 2017 a la actualidad.", "Luis Antonio Velazquez Gonzalez (Presidente)\nManuel García Hidalgo", "Manuel García Hidalgo - Positivo", "Manuel García- Janto y VE SAPI\nLuis Antonio- VE SAPI y Entorno SAPI", "CDMX", "RGLPM", "ACTIVO", "RECHAZADO", "Manuel García Hidalgo (10)\nLuis Antonio Velazquez Gonzalez (9,900)", "POSITIVO", "VIGENTE", "$0", "$99,175,199.00", "$86,860,863.00", "", "$15,399.00", "$2,041,071.00", "$1,035,329.00", "$3,008,931.00", "$193,277.00", "Servicios de consultoría en negocios", "Sin determinar", "N/A", "NO LISTADA", "Invitación de Vigilacia pORFUNDA\nSolicitud de datos en su caracter de tercero\nOficio de restricción temporal del Uso de CSD para la expedición de CFDI Art 17-H BIS CFF", "Estatus: Cancelación CSD", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "INBURSA, PRIME", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "MANUEL GARCIA HIDALGO", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "$144,765,242.79", "$145,163,503.61", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$43,939,093.81", "$37,778,533.55", "$6,160,560.26", "31/10/2026", "$2,343,245.65", "$0.00", "$2,343,245.65", "30/05/2026"],
+        ["ARTE Y PASION CULINARIA, S.A. DE C.V.", "APC170529SK1", "Fernando Juárez", "OPERANDO", "29/05/2017", "103 EDOMEX", "EDOMEX", "Capital Fijo $50,000.00\nCapital Variable $1,400,000.00", "Elaboracion de alimentos frescos para consumo inmediato 60%\nRestaurantes de comida para llevar 40%", "1.ALAN POSTERNAK SACAL \n2. ALAN POSTERNAK SACAL y DAVID POSTERNAK SACAL del 2018 al 2025 \n3. Pamela Soledad Arndt y Edgar Damian Hernández Fernandez del 2025 actualmente.", "Edgar Damian Hernandez Fernandez (AU)\nPamela Soledad Arndt", "Pamela Arndt - Positiva\nEdgar Hernández Fernández - Negativo", "Pamela Soledad Arndt- Inmobiliaria Chapultepec, Frigo, Eximagen", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Pamela Arndt\nEdgar Hernández Fernández", "POSITIVO", "VIGENTE", "$0", "$0", "$2,151,031.56", "Pendiente", "$1,654,254.00", "$0.00", "$1,990,522.00", "$0.00", "$112,542.00", "VENTA DE CONSUMOS POR ALIMENTOS", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ninguno", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR", "Recibo Total Play Sept 2025 (se requiere actualizar información y aparezca RFC)", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Positiva", "Positiva", "En proceso de baja", "No tiene", "0", "Sin Contingencias", "NO TIENE", "143,282,707.17", "$0", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["EXIMAGEN, S.A. DE C.V.", "EXI9703245V0", "Fernando Juárez", "OPERANDO", "28/08/2009", "184 CDMX", "CDMX", "Capital Fijo $500,000\nCapital Variable $22,730,000", "OTROS INTERMEDIARIOS AL COMERCIO POR MENOR 100%", "1. Eduardo Zegaib Saab \n2. Eduardo Zegaib Saab,  Eduardo Zegaib Seba y  Sultane Saab de Zegaib del 2001 al  2014 \n3. Eduardo Zegaib Saab y Héctor Yubelli Zegaib del 2014 al 2019 \n4. Eduardo Zegaib Saab y Eduardo Zegaib Seba del 2019 al 2024 \n5. Pamela Soledad Arndt y Marcos Raúl Arndt del 2024 a la actualidad.", "Pamela Soledad Arndt (AU)\nMarcos Raúl Arndt", "Pamela- Positiva", "Pamela Soledad Arndt- Inmobiliaria Chapultepec, Arte Y Pasión Culinaria, Frigo", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VENCIDA", "Pendiente", "Pendiente", "Pendiente", "", "$0.00", "$0.00", "$503,227.00", "$0.00", "$0.00", "SERVICIOS DE INTERMEDIACION", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Sin Contingencias", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "TOLTECAS 139, SAN PEDRO DE LOS PINOS, ALVARO OBREGON, CDMX CP 01180", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "KUSPIT", "TOLTECAS 139, SAN PEDRO DE LOS PINOS, ALVARO OBREGON, CDMX CP 01180", "PAMELA SOLEDAD ARNDT", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin contingencias", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "Genevieve Batiz. Monto total: 15,150,000. MONTO OPERADO (2025): 11,510,000. MONTO PENDIENTE: 3,640,000. Documento protocolizado. Jaime Mendoza. Monto Total: 29,650,000. MONTO OPERADO (2025): 13,951,342.25 MONTO PENDIENTE: 15,698,355.30", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["FRIGO NAOS, S.A. DE C.V.", "FNA140526RU0", "Fernando Juárez", "OPERANDO", "26/05/2014", "243 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital variable $27,894,563.00", "Comercio al por mayor de helados, paletas de hielo, gelatinas, flanes, budines y otros productos alimenticios para consumo humano no clasificados en otra parte 35%\nAlmacenamiento con refrigeración 20%\nComercio al por mayor de pescados y mariscos frescos, secos, salados y congelados 15%\nCorte y empacado de carne de ganado y aves 10%\nPreparación y envasado de pescados y mariscos 10%\nAlquiler de Otros inmuebles 10%", "1. Armando Vega Jaimes \n2. Armando Vega Jaimes, Eduardo Enrique García Hidalgo, Martín Orozco Macías y David Cureño Díaz de León del 2015 al 2023 \n3. David Cureño Díaz de León,  Maria Isabel Hernández y  Pamela Soledad Arndt del 2023 al 2024 \n4. Ricardo Cureño Orozco, Rosa María Moreno Vazquez y Pamela Soledad Arndt del 2024 a la actualidad.", "Julio Antonio Ruíz Lazcano (AU)\nRicardo Cureño Orozco, Rosa María Moreno Vazquez y Pamela Soledad Arndt", "Pamela Arndt- Positiva", "Pamela Soledad Arndt- Inmobiliaria Chapultepec, Arte Y Pasión Culinaria, Eximagen", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "David Cureño Díaz de León, Maria Isabel Hernández y Pamela Soledad Arndt", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "$29,578,320.00", "$39,189,466.00", "$24,820,501.00", "$68,937,506.52", "$254,888.20", "VENTA DE PRODUCTOS CONGELADOS PARA CONSUMO POR ALIMENTOS", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Sin Contingencias", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV ANILLO DE CIRCUNVALACION LOTE 13 MZ 1,SANTA MARIA AZTAHUACAN IZTAPALAPA, CDMX C.P. 09570", "DOMICILIO LOCALIZADO", "Servicios en instalaciones del frigorifico", "MIFEL, KUSPIT / UANALANAPAY, SCOTIABANK, PRIME", "AV ANILLO DE CIRCUNVALACION LOTE 13 MZ 1,SANTA MARIA AZTAHUACAN IZTAPALAPA, CDMX C.P. 09570", "JULIO ANTONIO RUIZ LAZCANO", "Ninguna", "Positiva", "Positiva", "Y66-66363-10-3", "No tiene", "7", "Sin Contingencias", "https://www.frigonaos.com.mx/", "$8,015,004,714,.82", "$1,442,888,939.56", "$4,104,837,357.00", "$4,111,609,513.95", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$229,994.41", "$226,121.67", "$3,872.74", "31/08/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["AIRIS ADMINISTRACION EMPRESARIAL, S.A. DE C.V.", "AAE131203572", "Alberto González", "OPERANDO", "03/12/2013", "49 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Promotores de espectáculos artísticos... 36%\nAgentes y representantes de artistas... 34%\nOtros servicios de publicidad 20%\nServicios de consultoria en administración 10%", "1. Adriana Lara Malagón\n2. Elena Anahi Garza González y Raúl de Jesús Zurita Garza del 2019 al 2024             3. Alfredo Falcón Ramírez y Sinhue Barrera Vargas del 2024 a la actualidad.", "Alfredo Falcón Ramirez (AU) / Sinhue Barrera Vargas", "Sinhue Barrera Vargas- Positiva    Alfredo Falcón Ramirez - Negativo", "Alfredo Falcón – Airis, Sorvi, Villadom\nSinhue Barrera – Airis, Corporativo FRL, JOSO", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$20,143,589.55", "$192,932,332.55", "$435,988,403.68", "", "$82,314.44", "$17,214,762.05", "$0.00", "$516,913.00", "$1,454,526.16", "Presentaciones artisticas/Asesorias externas/Consultoria fiscal y financiera, Intereses", "Sin determinar", "N/A", "NO LISTADA", "Carta Invitación - Ingresos, IVA Retenido, IVA Causado y acreditable.\nCarta Invitación - Ingresos anuales,Ingresos mensuales, ISR Retenidos por servicios profesionales, Rentención de IVA, Presuntiva de IVA", "Carta Invitación - Ingresos, IVA Retenido, IVA Causado y acreditable. Estatus: Cerrada con contingencia, quedan pendiente de pago ingresos dic 2020, IVA retenido 2021 y 2024.\nCarta Invitación - Ingresos anuales,Ingresos mensuales, ISR Retenidos por servicios profesionales, Rentención de IVA, Presuntiva de IVA. Estatus: Cerrada Exitosa.\nADEUDOS A LA FECHA: $4,055,000.00", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "DOMICILIO LOCALIZADO", "Recibo de teléfono", "KAPITAL BANK, MULTIVA, KUSPIT / UANALANAPAY, ACTINVER, PRIME", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "SINHUE BARRERA VARGAS/ALFREDO FALCON RAMIREZ", "Ninguna", "Positiva", "Positiva", "Y62-43972-10-3", "No tiene", "5", "Sin Contingencias", "https://asesneg.com.mx/", "$1,268,537,737.27", "252,537,321.79", "$1,204,190,097.39", "$1,194,844,585.99", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$986,155.17", "$620,101.15", "$366,054.02", "30/11/2026", "$53,861,992.21", "$35,541,179.28", "$18,320,812.93", "30/11/2026", "$23,734,300.50", "$0.00", "$23,734,300.50", "31/05/2026"],
+        ["INMOBILIARIA CHAPULTEPEC 494,  S.A.P.I. DE C.V.", "ICC130723C58", "Alberto González", "OPERANDO", "11/06/2013", "225 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Inmobiliarias y corredores de bienes raíces 40%\nAlquiler de Oficinas y locales comerciales 30%\nAlquiler de Viviendas amuebladas 30%", "1. Manuel Contreras García, Jorge Ignacio Braga Loret de Mola y Carlos Real González del 2013 al 2019 \n2.Manuel Contreras García y Jorge Ignacio Braga Loret de Mola del 2019 al 2020 \n3. Manuel García Cota y  Rosa Alicia Hidalgo Alarcón del 2020 al 2021 \n4. Manuel García Cota, Rosa Alicia Hidalgo Alarcón y Pamela Soledad Arndt del 2021 a la actualidad", "1. Manuel García Cota \n2. Rosa Alicia Hidalgo Alarcón \n3. Pamela Soledad Arndt", "1. Manuel García Cota - Positivo  \n2. Rosa Alicia Hidalgo Alarcón - Positivo \n3.Pamela Soledad Arndt - Positiva", "Pamela Soledad Arndt- Inmobiliaria Chapultepec, Arte Y Pasión Culinaria, Frigo\nMaite Flores- Inmo Chapultepec, Solutelco", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$70,024,579.00", "$85,548,108.20", "$256,696,918.93", "", "$213,669.32", "$4,334,870.09", "$91,280", "$1,182,920.00", "$514,529.17", "Intereses/Arrendamiento", "Sin determinar", "Compraventa de inmuebles", "NO LISTADA", "Sin Contingencias", "Sin Contingencias", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES L 76 LOCALIDAD BENITO JUAREZ", "DOMICILIO SIN VERIFICAR", "Recibo de Luz", "CITIBANAMEX, KUSPIT / UANALANAPAY, MULTIVA, ACTINVER, BANKAOOL, PRIME", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES L 76 LOCALIDAD BENITO JUAREZ", "MAITE FLORES MOYA / PAMELA SOLEDAD ARNDT", "PROCESO ABIERTO (PTM-MATRICES / PTM-SUBCUENTAS)", "Positiva", "Positiva", "460-66412-10-4", "No tiene", "2", "Sin Contingencias", "https://www.inmobiliariachapultepec494.com.mx/", "$245,561,343.21", "$28,329,801.54", "$375,206,143.57", "$389,829,293.24", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "SIMQRO. Monto total: 20,000,000. MONTO OPERADO (2024): 20,000,000. documentos a protocolizar por cliente", "$2,394,559.23", "$0.00", "$2,394,559.23", "30/05/2026", "$8,524,115.06", "$8,480,034.48", "$44,080.58", "31/10/2026", "$2,947,757.78", "$0.00", "$2,947,757.78", "31/05/2026"],
+        ["VE OUTSORCING DE RECURSOS HUMANOS, S.C.", "VOR061124396", "Alberto González", "OPERANDO", "23/11/2006", "238 CDMX", "CDMX", "Capital $17,420,000.00", "SERVICIOS DE CONSULTORÍA EN ADMINISTRACIÓN 100%", "1. Valeria Lujan Ardoino \n2.  Valeria Ardoino, Eduardo Enrique García Hidalgo y DIMEXPRO, S.A. DE C.V. (Jesús Vilchis Herrera) del 2013 al 2016 \n3. Manuel García Hidalgo y DIMEXPRO, S.A. DE C.V. del 2016 a la actualidad.", "Manuel García Hidalgo (Socio Administrador) DIMEXPRO, S.A. DE C.V.", "Manuel García Hidalgo - Positivo", "Manuel García Hidalgo - Janto, VE SC", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VENCIDA", "34,421,326.90", "$165,492,446.00", "$124,805,884.54", "", "$29,442,774.00", "$0.00", "$73,803", "$4,998,074.00", "$150,882.29", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "FIEL CADUCA, SE ESTA REVISANDO LA SALIDA DIMEXPRO (CONTRIBUYENTE EN EL 69B)", "FIEL CADUCA, SE ESTA REVISANDO LA SALIDA DIMEXPRO (CONTRIBUYENTE EN EL 69B)", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "BLVD PALMAS HILLS # 1 CP 52787 COLONIA VALLE DE LAS PALMAS PISO 15 SUITE 118 LOCALIDAD HUIXQUILUCAN", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "INBURSA", "CUAUHTEMOC 1217, COL SANTA CRUZ ATOYAC, DEL BENITO JUAREZ, CP 03310", "SIN ACTUALIZAR", "PROCESO ABIERTO (Inbursa)", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$55,806,505.71", "$722,603.41", "$185,377,316.46", "$185,484,428.16", "Leon Haber - $10,785,000.00\nLaura Estefania Torres - $40,000,000.00\nJaime Achar Cabasso - $9,466,172.00\nMarcos Sacal - $6,792,020.39\nDolores Maricela Cota (Faysal) - $35,000,000.00\nBenjamin Cherem - $7,000,000.00\nJuan Carlos Ibarra - $27,021,205.70", "$136,064,398.09", "31 octubre 2029", "NINGUNO", "Jocelyn Batiz. Monto total: 8,470,000. MONTO OPERADO (2024): 3,120,000 MONTO OPERADO (2025): 2,700,000 MONTO PENDIENTE: 2,920,000 Suri Cohen. Monto total: 15,500,000. MONTO OPERADO (2024): 7,540,594.91 MONTO OPERADO (2025): 7,803,726.04  Sara Haber. Monto total: 2,000,000 MONTO TOTAL OPERADO (2025): 1,263,635.52 MONTO PENDIENTE: 736,364.48", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$837,732.63", "$299,195.76", "$538,536.87", "30/11/2026", "$9,085,000.90", "$0.00", "$9,085,000.90", "31/05/2026"],
+        ["SOLUCIONES EN COMUNICACIÓN Y TECNOLOGIA, S.A. DE C.V.", "SCT080514DB4", "Alberto González", "OPERANDO", "14/05/2008", "216 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Comercio al por menor por medios masivos... 35%\nAgentes y representantes de artistas... 25%\nPromotores de espectáculos artísticos... 25%\nOtros servicios de publicidad 25%", "1. Ismael Alejandro González García \n2. Ismael Alejandro González y Juan Ramón Ramírez Vargas del 2009 al 2017 \n3. Francisca Irma Vargas Centeno y  Ismael Alejandro González del 2017 al 2017 \n4. Anaid Moreno Ramírez y  Tania Cristina Moreno Ramírez del 2017 al 2020 \n5. Raúl de Jesús Zurita Garza y Elena Anahí Garza Gonzále del 2020 al 2024 \n6. Maite Flores Moya y Analilia Román González del 2024 a la actualidad.", "Maite Flores Moya (AU) \nAnalilia Román González", "Analilia Román González - Sin Obligaciones\nMaite Flores Moya - Sin Obligaciones", "Maite Flores Moya - Inmobiliaria Chapultepec y Solutelco\nAnalilia – Solutelco y AFRX", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$12,917.54", "$326,012,721.00", "$328,360,410.00", "", "$104,288.24", "$12,880,909.26", "$228,840", "$111,208.00", "$1,037,859.09", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "KAPITAL BANK, BANKAOOL", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "MAITE FLORES MOYA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$196,392.52", "$162,055,127.53", "$292,730,805.77", "$290,403,492.02", "Jaime Mendoza - $6,989,219.10\nIsaac Mauricio Levy Kanarek - $32,557,587.19\nSalomon Dabah - $84,655,360.00", "$134,697,141.09", "31-mar-28", "NINGUNO", "NINGUNO", "NINGUNO", "$289,581.91", "$480.44", "$289,101.47", "30/11/2026", "$15,172,413.94", "$1,655,461.82", "$13,516,952.12", "30/11/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["SCE SENTIDOS, S.A. DE C.V.", "SSE160203MP9", "Alberto González", "OPERANDO", "03/02/2016", "39 Corredor CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Comercio al por mayor por medios masivos de comunicación (como correo e internet) 27%\nComercio al por mayor de ropa 26%\nComercio al por mayor de calzado 25%\nComercio al por mayor de artículos de joyeria y otros accesorios de vestir 22%", "1. JANTO CAPITAL, S.A. DE C.V. y Javier Acuña Fernández del 2016 al 2019\n2. JANTO CAPITAL, S.A. DE C.V., Uriel Maximiliano Vladez Aguilar Amante y Helena Espinar Espinar del 2019 a la actualidad .", "Manuel García Hidalgo (Presidente)\nJANTO CAPITAL, S.A. DE C.V. (Secretario)\nUriel Maximiliano Vladez Aguilar Amante y Helena Espinar Espinar.", "Manuel García Hidalgo- Positivo", "Manuel García Hidalgo- Janto, SCE, Ve SC", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$460.00", "$107,741,932.00", "$150,680,150.90", "", "$76,801.00", "$0.00", "$5,500,000", "$137,790.37", "$117,299.00", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "OFICIO DE INVITACION REGULARIZACION.", "OFICIO DE INVITACION REGULARIZACION. Estatus: EN PROCESO", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "BBVA, PRIME", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "MANUEL GARCIA HIDALGO / JAVIER ACUÑA FERNANDEZ", "PROCESO ABIERTO (BBVA)", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$177,137,651.86", "$106,206,039.39", "$243,497,423.01", "$247,224,132.77", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "PUCCU. Moto total: 12,075,000. MONTO OPERADO (2024): 12,075,000. DOCUMENTO PROTOCOLIZADO", "$1,809,422.32", "$0.00", "$1,809,422.32", "31/08/2026", "$13,978,330.17", "$9,517,672.92", "$4,460,657.25", "30/11/2026", "$2,800,000.00", "$0.00", "$2,800,000.00", "30/11/2026"],
+        ["ENTORNO CORPORATIVO Y EMPRESARIAL DE MEXICO, S.A.P.I. DE C.V.", "ECE160714DI6", "Alberto González", "OPERANDO", "14/07/2016", "45 EDOMEX", "EDOMEX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Restaurantes sin bar y con servicio de meseros 70%\nRestaurantes-bar con servicio de meseros 30%", "1. Brenda América González Reséndiz y Érika Gómez Rocha del 2016 al 2017\n2. Adela Georgina Candela Rojas y Érika Gómez Rocha del 2017 al 2018\n3. Pamela Soledad Arndt, Érika Gómez Rocha y Héctor Alejandro Loustaunau Diez Gutiérrez del 2018 a la actualidad.", "Pamela Soledad Arndt - (Presidenta)\nErika Gómez Rocha - (Secretaria)", "Pamela- Positiva", "Pamela Soledad Arndt- Inmobiliaria Chapultepec, Arte Y Pasión Culinaria, Frigo, Entorno SAPI", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$1,000,738.00", "$60,172,219.61", "$55,159,510.67", "", "$76,324,497.62", "$8,574,752.58", "$571,141", "$573,407.74", "$1,170,195.00", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "Ninguna", "1. REDUCCION DE MULTA ESTIMULO Y 74 CFF. Estatus CERRADA CON CONTINGENCIA\n2. ASESORIA Y CONSULTORIA FISCAL RESTRICCIÓN CSD- CERRADA EXITOSA", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "INBURSA", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "BRENDA GONZALEZ", "Ninguna", "Pendiente", "Pendiente", "Y624579710-2\nY624579810-0\nY624579910-8\nY624580010-4\nY624580110-2", "No tiene", "Pendiente", "Ninguna", "https://asesneg.com.mx/", "$28,931,331.80", "$10,950,482.19", "$100,855,718.19", "$99,976,270.93", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$14,570,949.13", "$8,936,594.80", "$5,634,354.33", "30/11/2026", "$1,543,031.56", "$1,541,815.18", "$1,216.38", "31/05/2026"],
+        ["IT SKIL, S.A. DE C.V.", "ISK1001269I3", "Alberto González", "OPERANDO", "26/01/2010", "222 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "SERVICIOS DE CONSULTORÍA EN COMPUTACIÓN 100%", "1. Javier Téllez Garzo y  Francisco Emilio Moreno Bazan del 2010 al 2010 \n2. SISTEMAS Y PROYECTOS RED, S.A. DE C.V., GRUPO CALVITE, S.A. DE C.V., José Luis Juzgado Lucas, José Alberto Pérez de Acha, Luis Fernando Matute Quiñonez  y Jaime López Meya del 2010 al 2014 \n3 SISTEMAS Y PROYECTOS RED, S.A. DE C.V., GRUPO CALVITE, S.A. DE C.V. , José Luis Juzgado Lucas, Luis Fernando Matute Quiñonez y Jaime López Meya del 2014 al 2014 \n4. SISTEMAS Y PROYECTOS RED, S.A. DE C.V., GRUPO CALVITE, S.A. DE C.V.,  José Luis Juzgado Lucas y Luis Fernando Matute Quiñonez del 2014 al 2015 \n5. SISTEMAS Y PROYECTOS RED, S.A. DE C.V., GRUPO CALVITE, S.A. DE C.V. y José Luis Juzgado Lucas del 2015 al 2019 \n6. SISTEMAS Y PROYECTOS RED, S.A. DE C.V. y Javier Téllez Garzo del 2019 al 2020 \n7. Victor Hiram Zurita Alarcón y José Antonio Navarro García del 2020 a la actualidad.", "Victor Hiram Zurita Alarcón (AU)\nJosé Antonio Navarro García", "Pendiente", "Sin Coincidencias", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$16,742.00", "$82,803,055.30", "$68,771,191.60", "", "$190,028.81", "$3,570,972.79", "$34,000,000)", "$603.00", "$27,339.31", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ningua", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. JESUS DEL MONTE 7 CP 52763 COL FRACC HACIENDA DE LAS PALMAS LOCALIDAD HUIXQUILUCAN", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "BBVA, PRIME", "AV. JESUS DEL MONTE 7 CP 52763 COL FRACC HACIENDA DE LAS PALMAS LOCALIDAD HUIXQUILUCAN", "VICTOR HIRAM ZURITA ALARCON", "PROCESO ABIERTO EN BBVA", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$52,874,934.99", "$995,618.43", "$125,034,983.23", "$125,365,620.76", "Laura Estefania Torres - $15,000,000.00", "$15,000,000.00", "31 marzo 2028", "Alma Aguirre. Monto total: 8,100,000. MONTO OPERADO (2024): 2,990,000 MONTO OPERADO (2025): 2,179,999.98 MONTO PENDIENTE: 2,930,000.02", "NINGUNO", "NINGUNO", "$16,479,960.04", "$10,352,500.00", "$6,127,460.04", "30/11/2026", "$22,635,313.44", "$15,578,430.54", "$7,056,882.90", "30/11/2026", "$2,500,000.00", "$0.00", "$2,500,000.00", "30/09/2027"],
+        ["CORPORATIVO FRL INNOVACIÓN EN RECURSOS, S. DE R.L. DE C.V.", "CFI120827EG0", "Alberto González", "OPERANDO", "27/08/2012", "193 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Servicios de consultoría en administración 34%\nVenta en territorio nacional de gasolina y diésel 33%\nFabricación de botellas, botellones y frascos de plástico. Incluye la fabricación de preformas de botellas 33%", "1. Victor Hugo González González \n2. Anaid Moreno Ramírez y Tania Cristina Moreno Ramírez del 2017 al 2020 \n3.  Raúl de Jesús Zurita Garza y Elena Anahí Garza González del 2020 al 2024 \n4. Sinhue Barrera Vargas y Edgar Vidal Sotelo del 2024 a la actualidad.", "Sinhue Barrera Vargas (AU)\nEdgar Vidal Sotelo", "Sinhue Barrera Vargas- Positiva", "Sinhue Barrera Vargas- Airis, Corporativo FRL, JOSO\nEdgar Vidal- Corporativo FRL, Astral", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$5,357,270.00", "$538,095,233.34", "$507,533,155.80", "", "$8,626.14", "$380,476.36", "$0.00", "$16,557.80", "$2,183,857.74", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "CARTA INVITACION MAYO 2025\nCARTA INVITACION OCTUBRE 2025", "CARTA INVITACION MAYO 2025. Estatus: Cerrada con contingencias.Contingencia: existen deducciones de intereses sin soporte documental.\nCARTA INVITACION OCTUBRE 2025. Estatus: Cerrada con contingencias. Contingencia: existen deducciones de intereses sin soporte documental.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV.PASEO DE LA REFORMA 389 COL CUAUHTEMOC CP 06500 PISO 7 LOCALIDAD CUAUHTEMOC", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "KUSPIT / UANALANAPAY, PRIME", "AV.PASEO DE LA REFORMA 389 COL CUAUHTEMOC CP 06500 PISO 7 LOCALIDAD CUAUHTEMOC", "SINHUE BARRERA VARGAS", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$21,909,641.24", "$40,133,613.00", "$142,293,563.80", "$143,933,499.99", "Jacobo David Laniado - $19,000,000.00\nJosefa Magaña - $18,188,270.63\nRicardo Cervantes - $17,500,000.00\nRodrigo Corrales - $17,320,000.00\nCristian Carmona - $6,999,217.47\nHoracio Palencia - $28,000,000.00\nFamilia Guerrero - $80,000,000.00\nAntonio Leyva - $90,000,000.00", "$308,987,488.10", "30 septiembre 2028", "NINGUNO", "NINGUNO", "NINGUNO", "$18,828.05", "$0.00", "$18,828.05", "agosto 2026", "$17,430,216.33", "$1,325,656.53", "$16,104,559.80", "30/11/2026", "$7,837,528.66", "$0.00", "$7,837,528.66", "31/07/2026"],
+        ["ESQUINA GLORIETA, S.A.P.I. DE C.V.", "EGL1711286X2", "Alberto González", "OPERANDO", "28/11/2017", "20 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "ADMINISTRACIÓN Y SUPERVISIÓN DE CONSTRUCCIÓN DE OTRAS OBRAS DE INGENIERÍA CIVIL U OBRA PESADA 100%", "1. David Cásarez Gutiérrez \n2.SERVICIOS DE DISTRIBUCIÓN LOGÍSTICA FARMACEÚTICA, S.A. DE C.V. (Rep. Emilio Uriel Torres García) y Javier Acuña Fernández del 2019 al 2021 \n3.Jessica Alejandra Torres Martínez y Ricardo Climent Flores del 2021 al 2024 \n4. Alejandra Jain Hernandez y Marilú Ramírez Villanueva del 2024 a la actualidad.", "Alejandra Jain Hernández (Presidente)\nMarilú Ramírez Villanueva (Secretario)", "Marilú Ramírez- Positiva\nAlejandra Jain Hernández- Negativo", "Alejandra Jain Hernández - Esquina Glorieta\nMarilú Ramírez Villanueva- Esquina Glorieta, Nuevo Concepto", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$33,106.00", "$107,351,486.39", "$197,258,151.30", "", "$141,168.00", "$3,020,728.08", "$199,179", "$1,137,149.00", "$357,987.41", "Intereses/IMPLEMENTACIÓN DE INDICADORES DE DESEMPEÑO EMPRESARIAL/INTERMEDIACIÓN MERCANTIL", "Sin determinar", "Construcción", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "BX+, BANKAOOL, MULTIVA, PRIME", "CUERNAVACA 159, COL HIPODROMO CONDESA, DEL CUAUHTEMOC, CP06170", "Alejandra Jain Hernández \nMarilú Ramírez Villanueva", "PROCESO ABIERTO (BX+)", "Positiva", "Positiva", "764-87293-10-9", "No tiene", "5", "Sin Contingencias", "https://www.esquinaglorieta.com.mx/", "$95,231,681.87", "$43,379,775.20", "$296,816,253.47", "$299,185,708.98", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$200,000.00", "$0.00", "$200,000.00", "31/06/2026", "$70,845,954.23", "$68,903,059.93", "$1,942,894.30", "30/09/2026", "$1,578,990.01", "$0.00", "$1,578,990.01", "30/09/2027"],
+        ["ENTORNO CORPORATIVO Y EMPRESARIAL, S.C.", "ECE0408275P5", "Alberto González", "SIN OPERAR", "27/08/2004", "99 CDMX", "CDMX", "Capital $3'468,822.00", "OTROS SERVICIOS DE APOYO A LOS NEGOCIOS 100%", "1. Eduardo Enrique García Hidalgo \n2. Eduardo Enrique García Hidalgo, Claudia Escobedo Arriaga, Elide Luque Andrade, Magdalena Domínguez Prieto y Ruperto Flores y Fernández del 2013 al 2016 \n3. Brenda América González Reséndiz y Ruperto Flores y Fernández del 2016 al 2017 \n4. Luis Antonio Velázquez González y Ruperto Flores y Fernández del 2017 a la actualidad.", "Luis Antonio Velázquez González (Socio Administrador)\nRuperto Flores y Fernández", "Pendiente", "Luis Antonio Velázquez - Entorno SC, VE SAPI", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VIGENTE", "$2,041,260.00", "$180,666,868.22", "$107,389,356.20", "", "$6,098,937.13", "$48,238.00", "$199,179", "$180,889.09", "$131,867.00", "No ha emitido CFDI", "Sin determinar", "N/A", "NO LISTADA", "Ninguna", "1. CARTA INVITACION- ISR retenciones por SyS, subsidio par el empleo, IVA trasladado. Estatus: CERRADA EXITOSO.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "Inbursa", "AV INSURGENTES SUR 1605, NIVEL 2, COL SAN JOSE INSURGENTES, DEL BENITO JUAREZ, CP 03900", "Cuenta Bloquada", "Cuenta Bloqueada", "Pendiente", "Pendiente", "Y6240052107\nY6446984103\nY6240055100\nY6240056108\nY6240057106\nB7039016102\nB7039340106", "No tiene", "Pendiente", "Ninguna", "NO TIENE", "$16,450,771.83", "$0.00", "$18,656,823.86", "$24,609,752.14", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["JANTO CAPITAL, S.A. DE C.V.", "JCA130709MB4", "Alberto González", "OPERANDO", "08/07/2013", "137 CDMX", "CDMX", "Capital Fijo $75,000.00", "Servicios de consultoria en administración 35%\nOtros servicios de publicidad 15%\nPromotores de espectaculos artísticos, deportivos y similares que no cuentan con instalaciones para presentarlos 25%\nAgentes y representantes de artistas, deportistas y similares 25%", "1. Javier Acuña Fernández \n2. Javier Acuña Fernández, Árbol asesores y asociados, Eduardo García Hidalgo y Miguel Font Sotelo del 2015 al 2018 \n3. Javier Acuña Fernández 50 acciones con valor de $50,000.00 PISANO PARTNERS, S.A. DE C.V. y Valeria Lujan Ardoino del 2018 al 2018 \n4. Manuel García Hidalgo y  Valeria Lujan Ardoino del 2018 al 2024 \n5. Manuel García Hidalgo y Julio Antonio Ruiz Lozano del 2024 a la actualidad.", "Julio Antonio Ruíz Lazcano\nManuel García Hidalgo", "Manuel García Hidalgo - Positivo", "Julio Antonio Ruiz Lazcano - Janto Capital y Frigo Naos\nManuel García Hidalgo- Janto Capital, SCE Sentidos y Ve SC", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$9,452,087.00", "$1,126,024,719.13", "$1,237,329,777.83", "", "$81,779.52", "$8,785,151.64", "$0.00", "$1,683,800.00", "$1,693,814.00", "Desarrollo de estrategias para eventos/ Asesoria Legal/ Consultoria en negocios/ intereses", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "HONORARIOS PROFESIONALES CIERRE REVISION DE GABINETE. Estatus: CERRADA EXITOSO", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO SIN VERIFICAR", "Contrato Arrendamiento", "MIFEL, MULTIVA, KUSPIT / UANALANAPAY, PRIME, ACTINVER", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "JULIO ANTONIO RUIZ LAZCANO", "Ninguna", "Positiva", "Positiva", "Y64-83212-10-3", "Folio: 06391ec5-513b-4679-b9e8-4fe7ff81dd2c Actividad: q) La producción, coordinación y organización general de eventos especiales, conciertos, festivales de música, conferencias,simposium, banquetes, congresos, exposiciones, exhibiciones culturales y campañas publicitarias", "9", "Sin Contingencias", "https://www.jantocapital.com.mx/", "$2,131,687,206.25", "$268,723,224.70", "$2,664,649,593.25", "$2,651,275,680.42", "Moises Tawil - $4,833,647.17\nMaria Tawil - $5,897,449.64\nDavid Tawil - $7,110,300.46\nOsam Buchain - $8,720,126.53", "$24,421,523.80", "31 diciembre 2025", "NINGUNO", "NINGUNO", "Sterling. Monto total: 75,000,000.00 MONTO OPERADO (2023): 54,635,005.52 MONTO OPERADO (2024): 20,364,994.97 Documento protocolizado. Dasabe. Monto total: A REVISAR. MONTO OPERADO (2023): 25,038,431.08 MONTO OPERADO ( 2024): 68,646,075.79 no se tiene documento protocolizado. DEPSIM. Monto total: 84,252,455.88 MONTO OPERADO (2023): 52,174,428 MONTO OPERADO (2024): 17,825,572.20 MONTO OPERADO (2025): 14,252,455.88 Documentos a protocolizar por cliente", "$7,181,183.09", "$3,545,530.12", "$3,635,652.97", "31/08/2026", "$69,790,930.45", "$31,583,706.84", "$38,207,223.61", "30/11/2026", "$25,417,874.86", "$0.00", "$25,417,874.86", "30/11/2026"],
+        ["NUEVO CONCEPTO EN RECURSOS HUMANOS, S.C.", "NCR0611299Q7", "Alberto González", "OPERANDO", "28/11/2006", "238 CDMX", "CDMX", "Capital $20,000.00", "Servicios de contabilidad y auditoría 60%\nAgentes y representantes de artistas, deportistas y similares 20%\nPromotores de espectáculos artísticos, deportivos y similares que no cuentan con instalaciones para presentarlos 20%", "1. Valeria Ardoino \n2. Valeria Ardoino (Valería Luján Ardoino) y Ricardo Climent Flores del 2009 al 2019 \n3.  Valeria Ardoino (Valería Luján Ardoino) y Elva Elizabeth Yañez Soto del 2019 al 2022 \n4. Jessica Andrea Romero Castro y  Ricardo Climent Flores del 2022 al 2024 \n5. Marilú Ramírez Villanueva (RL) y Eduardo Carmona Solano del 2024 a la actualidad.", "Marilú Ramírez Villanueva (RL)\nEduardo Carmona Solano", "Eduardo Carmona - Negativo\nMarilú Ramírez Villanueva - Positivo", "Marilú Ramírez Villanueva- Esquina Glorieta, Nuevo Concepto\nEduardo Carmona- Nuevo Concepto e Impulso", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VIGENTE", "$0.00", "$768,005,585.00", "$970,007,006.62", "", "$2,977,329.15", "$929,452.37", "$3,050,394", "$223,999.00", "$2,955,339.08", "Intereses", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Sin Contingencias", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "DOMICILIO LOCALIZADO", "Recibo de Teléfono (Nov 2025)", "CITIBANAMEX, KUSPIT / UANALANAPAY, PRIME", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "MARILU RAMIREZ", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "https://nuevo-concepto.com.mx", "$319,672,873.56", "$49,300,151.14", "$1,203,510,356.44", "$1,205,377,131.18", "Salomon Sacal - $139,680,018.73\nJavier Acuña - $96,087.50\nDavid Cherem Metta - $2,710,175.00\nMauricio Levy Micha - $38,186,265.41\nEduardo Legorreta - $48,033,061.37", "$228,705,608.01", "31 marzo 2028", "NINGUNO", "Alma Agurre. Monto total: 11,900,000. MONTO OPERADO (2024): 4,199,999.97 MONTO OPERADO (2025): 3,410,000 MONTO PENDIENTE: 4,290,000.03", "Grimatex. Monto total 59,000,000 MONTO OPERADO (2024): 32,303,667.67 MONTO OPERADO (2025): 9,791,303.01 MONTO PENDIENTE: 16,935,029.32 DOCUMENTO PROTOCOLIZADO", "$5,233,682.90", "$0.00", "$5,233,682.90", "31/08/2026", "$299,685,029.18", "$255,114,420.17", "$44,570,609.01", "31/10/2027", "$32,699,813.57", "$1,031,678.29", "$31,668,135.28", "30/09/2027"],
+        ["IPM SANTA FE, S.A.P.I. DE C.V.", "ISF110323HU6", "Georgina Olivos", "OPERANDO", "23/03/2011", "171 CDMX", "CDMX", "Capital Fijo $100,000.00\nCapital Variable $0.00", "Guarderías del sector privado 100%", "1. Operadora IPM \n2. Operadora IPM, Carlos Guillermo Martorell Nieto, Lorena RevelesRamírez, Alvaro Berberena Aramburu, Diego Berberena Aramburu 2017 al 2022.\n3.Manuel García Hidalgo y Pamela Soledad Arndt 2022 al 2024 \n4. Sarahi Martínez Molina y Mario Cortés 2024 a la actualidad.", "Sarahi Martínez Molina (RL)\nMario Alberto Cortes González (RL)", "Sarahi Martínez Molina- Sin Obligaciones\nMario Cortes - Negativo", "Sarahi Martínez Molina (Operadora IPM)\nMario Alberto Cortes González (Operadora IPM)", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Presentado en espera de actualización", "POSITIVO", "VIGENTE", "184,778.00", "$16,817,524.00", "39,315,591.00", , "$532,600.00", "$4,490,248.00", "$3,673,210.00", "$58,372.00", "$5,619,183.00", "84101700 - Manejo de deuda", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Av. Insurgentes Sur 1605, Int. Nivel 2, Colonia San Jose Insurgentes C.P. 03900 Benito Juarez CDMX", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "PRIME", "Av. Insurgentes Sur 1605, Int. Nivel 2, Colonia San Jose Insurgentes C.P. 03900 Benito Juarez CDMX", "SARAHI MARTINEZ MOLINA", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "Sin Registro Patronal", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$529,917.04", "$516,168.67", "$47,398,529.21", "$47,398,529.21", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$8,967,122.71", "$8,235,000.00", "$732,122.71", "30/06/2026", "$18,487,498.47", "$16,305,796.81", "$2,181,701.66", "30/11/2026", "$2,028,027.40", "$2,000,000.00", "$28,027.40", "30/09/2027"],
+        ["OPERADORA IPM,  S.A.P.I. DE C.V.", "OIP101222KK1", "Georgina Olivos", "OPERANDO", "22/12/2010", "208 CDMX", "CDMX", "Capital Fijo $100,000.00\nCapital Variable $10,316,273.00", "Otros servicios educativos proporcionados por el sector privado 75%\nOtros servicios de apoyo a los negocios 25%", "1. Javier Acuña Fernandez \n2. Manuel García Hidalgo y Pamela Soledad Arndt 2022 al 2024 \n3. Sarahi Martínez Molina y Mario Cortés 2024 a la actualidad.", "Sarahi Martínez Molina (RL)\nMario Alberto Cortes González (RL)", "sarahi Martínez Molina- Sin Obligaciones\nMario Alberto Cortes González Negativo", "Sarahi Martínez Molina (IPM Santa Fe)\nMario Alberto Cortes González (IPM Santa Fe)", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Presentado, en espera de actualización", "POSITIVO", "VIGENTE", "63,269.00", "$7,790,727.00", "$10,874,551.00", "", "$6,128,374.00", "$941,636.00", "$421,772.00", "$130,140.00", "$6,706.00", "84101700 - Manejo de deuda", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "NINGUNA", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Av. Insurgentes Sur 1605, Int. Nivel 2, Colonia San Jose Insurgentes C.P. 03900 Benito Juarez CDMX", "DOMICILIO LOCALIZADO", "Contrato Arrendamiento", "PRIME", "Av. Insurgentes Sur 1605, Int. Nivel 2, Colonia San Jose Insurgentes C.P. 03900 Benito Juarez CDMX", "MARIO CORTES GONZALEZ", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "Sin Registro Patronal", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$267,932.61", "$196,071.91", "$13,635,241.38", "$13,693,130.19", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$4,921,583.54", "$4,880,586.22", "$40,997.32", "30/11/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["JOSO, S.A. DE C.V.", "JOS8201218D9", "Sergio Ávila", "SIN OPERAR", "20/01/1982", "21 CDMX", "CDMX", "Capital Fijo $25,000.00\nCapital Variable $0.00", "Comercio al por mayor de maquinaria y equipo para la construccion y la mineria 100%", "1. Jorge Antonio Somerville Ramos\n2.Jorge Antonio Somerville Ramos por medio de Silvia María Somerville Ramos, Jorge Villarreal Martínez, María Cristina Ramos Ochoa Viuda de Somerville, Luis Bernardo Argüelles Medrano y María de Lourdes Urias López del 2016 al 2019 \n3. Marcos Raúl Arndt y Víctor Hiram Zurita Alarcón del 2019 al 2023 \n4. Cecile Hayaux Du Tilly Gayon y Cecile Fanghanel Hayaux Du Tilly del 2023 a la actualidad.", "Cecile Hayaux Du Tilly Gayon (AU)\nCecile Fanghanel Hayaux Du Tilly", "Pendiente", "Sinhue Barrera Vargas- Airis, Corporativo FRL, JOSO", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$28,000,000.00", "7,025,011.99", "$194,106.00", "", "$41.45", "$86,737.92", "$106,608.00", "$54,466.51", "$6.00", "Sin CFDI", "Sin determinar", "Pendiente", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Av, De los Poetas, 100 Edif. Basalto T2, Dpto 1503, Santa Fe Cuajimalpla, C.P. 05348.", "DOMICILIO SIN VERIFICAR", "Recibo Predial", "MULTIVA", "Av, De los Poetas, 100 Edif. Basalto T2, Dpto 1503, Santa Fe Cuajimalpla, C.P. 05348.", "Sinhue Barrera Vargas", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$0", "$0", "$24,360.00", "$276,159.40", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["RECOMINTE, S.A. DE C.V.", "REC120424QW7", "María Guadalupe Olivos", "OPERANDO", "24/04/2012", "201 CDMX", "CDMX", "Capital Fijo $100,000.00\nCapital Variable $10,000,000.00", "Comercio al por menor de artículos de perfumería y cosméticos 20%\nFabricación de otros productos químicos 10%\nFabricación de otros productos de plástico 10%...", "1. RODOLFO TINAJERO JIMÉNEZ y CAROLINA ALMEIDA RUZ del 2012 al 2021\n2. RODOLFO TINAJERO JIMÉNEZ... del 2021 al 2025\n3. José Adrián Carrillo Gallardo y César Guillermo Trinidad Bermúdez 2025 actualmente.", "José Adrián Carrillo (Presidente)\n César Guillermo Trinidad Bermúdez", "José Adrián Carrillo - Negativo", "Jose Adrian Carrillo GallardO- Recominte y Steel Signs", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "RODOLFO TINAJERO JIMÉNEZ, CAROLINA ALMEIDA RUZ", "NEGATIVO", "VIGENTE", "Pendiente", "$311,956.46", "6,035,204.69", "", "10,176,111.00", "-1,562,656.00", "18,522,758.00", "$197,518.48", "NO TIENE", "Jabon Whoop", "Sin determinar", "N/A", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Calle Emilio Carranza No. 125, Colonia La Magdalena, C.P. 10910, La Magdalena Contreras, CDMX.", "DOMICILIO LOCALIZADO", "Recibo de Teléfono (Nov 2025)", "BBVA", "Calle Emilio Carranza No. 125, Colonia La Magdalena, C.P. 10910, La Magdalena Contreras, CDMX.", "José Adrián Carrillo", "Ninguna", "Pendiente", "Pendiente", "Pendiente", "No tiene", "Pendiente", "Ninguna", "https://www.recominte.com.mx/", "Pendiente", "Pendiente", "$61,846.60", "$0.00", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["SORVI, S.A. DE C.V.", "SOR820121T96", "Sergio Ávila", "SIN OPERAR", "19/02/1982", "21 CDMX", "CDMX", "Capital Fijo $25,000.00\nCapital Variable $0.00", "Comercio al por mayor de maquinaria y equipo para la construcción y la minería 100%", "1. Jorge Antonio Somerville Ramos\n2.Silvia María Cristina Somerville Ramos, Martha Villafuerte Domenzain, Margarita Villafuerte Domenzain, Leopoldo Ruvalcaba Ramos y María de Lourdes Urias López del 2016 al 2018 \n3.Luis Alberto Cazares Hernández y José Antonio Navarro García del 2018 al 2023 \n4. Vanesa Celeste González Álvarez y Alfredo Falcón Ramírez del 2023 a la actualidad.", "Vanesa Celeste González Álvarez (Presidente)\nAlfredo Falcón Ramírez (secretario)", "Vanesa González - Negativo Alfredo Falcón Ramírez - Negativo", "Alfredo Falcón Ramíres- Airis, Sorvi, Villadom\nVanesa González- Sorvi, Telemedix, Villadom", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "Vigente", "$31,640,810.19", "$834,160.40", "$0", "", "$41,451.84", "$0", "$9,016.00", "$159,246.96", "$19,206.15", "No se ha emitifo CFDI", "Sin determinar", "Pendiente", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Capulin 46, Int. 608, C.P. 03100, Valle Benito Juarez. 03100 CDMX", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "BANCREA", "Capulin 46, Int. 607, C.P. 03100, Valle Benito Juarez. 03100 CDMX", "Vanesa Celeste González Álvarez", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$0", "$0", "$0", "$0", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["PRESTADORA DE SERVICIOS AMBIENTALES SAI, S.C.", "PSA0509287M6", "María Fernanda", "OPERANDO", "27/09/2005", "210 CDMX", "CDMX", "Capital $2,160,000.00", "Agencias de empleo temporal 100%", "1. Ana Lorena Gutiérrez Escolano... (Histórico Resumido)\n4. Pamela Soledad Arndt y ENTORNO CORPORATIVO Y EMPRESARIAL S.C 2018 a la actualidad", "Pamela Soledad Arndt ENTORNO CORPORATIVO Y EMPRESARIAL S.C", "Pamela Soledad Arndt - Positivo", "Inmobiliaria Chapultepec, Arte y Pasión, Frigo Naos, Entorno Sapi, PSA, Eximagen", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Entorno Corporativo Empresarial SC (1)\nPamela Soledad Arnt (1)", "POSITIVO", "VIGENTE", "Pendiente", "$33,256,775.00", "$58,642,960.00", "", "$5,019,992.00", "-$170,576", "$4,354,000.00", "$304,561.00", "$6,031.00", "Intereses", "Sin determinar", "Pendiente", "NO LISTADA", "VIGILANCIA PROFUNDA", "VIGILANCIA PROFUNDA. Estatus: CERRADA CON CONTINGENCIA, En fecha 27 de junio de 2025, se dio 6° contestación parcial teniendo pendiente los temas de pagos de ISR de sueldos y salarios por 29,507, IVA 1,385,917, IVA Retenido 6,524., ISR Servicios profesionales, 6,105.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "BLVD PALMAS HILLS # 1 CP 52787 COLONIA VALLE DE LAS PALMAS PISO 9 SUITE 107 LOCALIDAD HUIXQUILUCAN", "No existe coloni, cita pendiente SAT (cambio de domicilio)", "No hay comprobante domicilio", "PRIME", "BLVD PALMAS HILLS # 1 CP 52787 COLONIA VALLE DE LAS PALMAS PISO 9 SUITE 107 LOCALIDAD HUIXQUILUCAN", "PAMELA SOLEDAD ARNDT (SOCIA ADMINISTRADORA)", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "$93,544,689.80", "$93,617,147.41", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "JG DELTA. Monto total: 39,500,000. MONTO OPERADO (2024): 19,070,748.98 MONTO OPERADO (2025): 2,853,008.37MONTO PENDIENTE: 17,576,242.65DOCUMENTO PROTOCOLIZADO. MINSHA. Monto total: 12,075,000 MONTO OPERADO (2025): 12,075,000. DOCUMENTO PROTOCOLIZADO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$2,510,013.10", "$1,613,120.15", "$896,892.95", "30/05/2026", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["VILLADOM, S.A. DE C.V.", "VIL820121U27", "Sergio Ávila", "OPERANDO", "20/01/1982", "21 CDMX", "CDMX", "Capital Fijo $25,000.00\nCapital Variable $0.00", "Otros servicios profesionales, científicos y técnicos 100%", "1. Margarita Villafuerte Domenzain\n2.Silvia María Somerville Ramos, Martha Villafuerte Domenzain, Margarita Villafuerte Domenzain, Jorge Salmón Esparza y María Teresa Villafuerte Domenzain del 2016 al 2018\n3.Luis Alberto Cazares Hernández y José Antonio Navarro García del 2018 al 2023\n4. Vanesa Celeste González Álvarez 125 y Alfredo Falcón Ramírez del 2023 a la actualidad.", "Alfredo Falcón Ramirez (AU)\nVanesa Celeste González Álvarez", "Vanesa Celeste González Álvarez - Negativo Alfredo Falcón Ramírez - Negativo.", "Alfredo Falcón Ramíres- Airis, Sorvi, Villadom\nVanesa González- Sorvi, Telemedix, Villadom", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "$VIGENTE", "$23,000,000.00", "$2,063,485.65", "$49,068.00", "", "$41,451.84", "$0", "$509,116.00", "$1,062,818.66", "$9.67", "Arrendamiento de Residencias", "Sin determinar", "Pendiente", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Capulin 46, Int. 608, C.P. 03100, Valle Benito Juarez. 03100 CDMX", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "BANCREA", "Capulin 46, Int. 607, C.P. 03100, Valle Benito Juarez. 03100 CDMX", "LUIS ALBERTO CAZARES HERNANDEZ", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "No tiene", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$11,319,005.72", "$1,922,465.51", "$5,800,994.64", "$6,160,151.28", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["ARRENDA CLICK,  S.A. DE C.V.", "ASC940111FZ2", "Alberto González", "OPERANDO", "11/01/1994", "Notaría 1", "CDMX", "75,000", "ARRENDAMIENTO DE MAQUINARIA Y EQUIPO 100%", "1. Alfredo Porraz Ortiz De La Huerta, Emilio Cabrero Porraz y Alfredo Porraz Del Amo\n2. Jessica Alejandra Torres Martínez, Pamela Soledad Arndt y Janto Capital, S.A. de C.V.", "Nallely Sandoval Pineda (AU)\nJessica Alejandra Torres Martínez, Pamela Soledad Arndt y Janto Capital, S.A. de C.V.", "Pendiente", "Jessica Alejandra Torres Martínez- Administradora Impulso y Stay Fly\nPamela - Inmobiliaria Chapultepec, Arte y Pasión Culinaria, Frigo Naos, ECE SAPI, PSA, Eximagen", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Arrendamiento de vehiculos,  vta de vehiculos usados, Gestoria de tramites vehiculares", "Sin determinar", "Compra venta de vehículos", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 PISO 18, MODULO 1, OFICINA L, SAN JOSÉ INSURGENTES, BENITO JUAREZ", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "PTM Prime, Multiva, Banamex", "AV INSURG SUR 1605 PISO 18 MD1 OF L SAN JOSE INSURGENTES CH 03900 BENITO JUAREZ, CIUDAD DE MEXICO C.R.03901", "JESSICA ALEJANDRA TORRES MARTINEZ", "Ninguna", "Positiva", "Positiva", "Y65-10561-10-0", "NO TIENE", "4", "Ninguna", "https://arrendaclick.mx/", "Pendiente", "Pendiente", "$74,873,687.83", "7,111,947.48", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente"],
+        ["RGA BUSINESS DEVELOPMENT, S.C.", "RBD1202245A0", "Juan Manuel", "SIN OPERAR", "24/02/2012", "160 EDOMEX", "EDOMEX", "Capital Fijo $425,000.00\nCapital Variable $0.00", "Otros servicios de consultoría científica y técnica 100%", "1. Ricardo Pierdant Grunstein y Silvia Campuzano Delgadillo del 2012 al 2013\n2. Ricardo Pierdant Grunstein y Guadalupe Campuzano Delgadillo del 2013 al 2013\n3. Ricardo Pierdant Grunstein. Aurora Pierdant Grunstein y Guadalupe Campuzano Delgadillo del 2013 al 2014\n4.  Oscar Brauer Araujo y Aurora Pierdant Grunstein del 2016 a 2025\n5. Oscar Brauer Araujo y Aurora Pierdant Grunstein del 2016 a 2025.\n6.  Mariana Martínez y Fabiola Cruz 2025 a la fecha.", "Mariana Martínez Presidente)", "Fabiola Cruz - Positivo", "Mariana Martínez - RGA, Pierpont\nFabiola cruz - RGA, Pierpont", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "Pendiente", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Avenida RIO MAGDALENA.326.Colonia: LA OTRA BANDA, ÁLVARO OBREGÓN, CP 01090, CDMX", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno"],
+        ["ASESORIAS ESPECIALIZADAS EN NEGOCIOS, S.C.", "AEN971124RGA", "Juan Manuel", "OPERANDO", "24/11/1997", "Pendiente", "CDMX", "Pendiente", "SERVICIOS DE CONTABILIDAD Y AUDITORIA", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR", "Varios Servicios", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Positiva", "Positiva", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "https://asesneg.com.mx/", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente"],
+        ["DERSA INMOBILIARIA,  S.A. DE C.V.", "DIN920709SR3", "Nancy Mayorga", "OPERANDO", "09/07/1992", "Pendiente", "Pendiente", "Pendiente", "CONSTRUCCION DE INMUEBLES COMERCIALES...", "SERGIO RAYMUNDO CAMACHO PEREZ 49,500 ACCIONES\nJESUS MARIO CARDENAS GODINEZ 500 ACCIONES", "JOSE ALFREDO TRUJILLO ISLAS\nVANESA CELESTE GONZALEZ ALVAREZ", "Vanesa - Negativo", "Vanesa González-Telemedix", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "$3,993.00", "$3,202,110.00", "$1,203,329.00", "$0.00", "$1,570,568.00", "Servicios de renovación y reparación de edificios comerciales y de oficinas", "Sin determinar", "N/A", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "CALLE LAS PRADERAS 12 OFICINA D COL. JARDINES DEL PEDREGAL DE SAN ANGEL ALCALDIA COYOACAN C.P. 04500 CIUDAD DE MEXICO", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Positiva", "Positiva", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$0.00", "$0.00", "$0.00", "$0.00", "$66,500.00", "$66,500.00", "$0.00", "31/08/2026", "$0.00", "$0.00", "$0.00", "$0.00"],
+        ["GARCIA HIDALGO VELAZQUEZ GONZALEZ Y ASOCIADOS", "GHV981118V38", "Pendiente", "OPERANDO", "Pendiente", "Pendiente", "CDMX", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "https://asesneg.com.mx/", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente"],
+        ["GARCIA HIDALGO TAX ADVISOR DE MEXICO,  S.A.P.I. DE C.V.", "GHT160721DY5", "María Fernanda", "OPERANDO", "21/07/2016", "45 CDMX", "CDMX", "CAPITAL FIJO $10,000.00", "Otros Servicios profesionales. Científicos y técnicos 100%", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Rodrigo Rosales Rangel(5,000)\n Manuel Garcia Hidalgo(5,000)", "Positivo", "VIGENTE", "$650,797.00", "$131,133.00", "$77,176.00", "", "$15,398.00", "$2,397,022.00", "$0", "$0", "$0", "Asesoría fiscal\nHonorarios profesionales", "Sin determinar", "Pendiente", "NO LISTADA", "Sin Continguencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Inbursa", "Av. Cuautemoc 1217", "Pendiente", "Ninguna", "Positiva", "Positiva", "Y6246835109", "No tiene", "24", "Sin Contingencias", "https://asesneg.com.mx/", "$20,987,071.04", "$23,954,607.83", "Pendiente", "Pendiente", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente"],
+        ["GARCIA HIDALGO TAX ADVISORS, S.C.", "GHT110920CBA", "María Fernanda", "OPERANDO", "29/09/2011", "49 CDMX", "CDMX", "Capital Fijo $50,000.00", "Servicios de contabilidad y auditoría 100%", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Gabriela Rivera Fernández (25,000)\nCésar Aguilar Aguilar (25,000)", "Positivo", "VIGENTE", "$2,269,673.00", "$71,461.00", "$58,464.00", "", "$90,923.00", "$0", "$5,718,766.00", "$0", "$485,083.00", "Asesoría y consultoría fiscal", "Sin determinar", "Pendiente", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR/No. 1605 NIVEL 2/COL. SAN JOSE INSURGENTES/BENITO JUAREZ/03900", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Banorte\nBanamex", "Insurgentes Sur 1605,piso2", "pendiente", "Ninguna", "Positiva", "Positiva", "Y6244322100", "No tiene", "26", "Sin Contingencias", "https://asesneg.com.mx/", "$15,659,775.55", "$16,716,834.63", "Pendiente", "Pendiente", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Ninguno", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente"],
+        ["MAXWAY, S. DE R.L. DE C.V.", "PIN090820711", "Nancy Mayorga", "OPERANDO", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "ADMINISTRACIÓN Y SUPERVISIÓN DE CONSTRUCCIÓN...", "JOSE JUAN DESIDERIO SANCHEZ SANCHEZ 1 PARTE SOCIAL\nALEJANDRO POLO RUIZ 1 PARTE SOCIAL", "INMOBILIARIA CHAPULTEPEC 494 SAPI DE CV\nADAN EDMUNDO NUÑEZ DURAN", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "$3,993.00", "$12,921,194.00", "$31,138,350.00", "$5,686,782.00", "$1,224,264.00", "Pendiente", "Sin determinar", "pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 PISO 18 OFICINA 2 COL. SAN JOSE INSURGENTES ALCALDIA BENITO JUAREZ C.P. 03900 CIUDAD DE MEXICO", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Pendinete", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00", "$0.00"],
+        ["MCY SUMINISTROS, S.A. DE C.V.", "MSU1802237A7", "Nancy Mayorga", "OPERANDO", "Pendiente", "Pendiente", "Pendiente", "Capital Fijo $50,000.00\nCapital Variable $0.00", "CONSTRUCCION DE INMUEBLES COMERCIALES, INSTITUCIONES Y DE SERVICIOS/OTROS INTERMEDIARIOS DE COMERCIO AL POR MAYOR/ OTRAS INSTALACIONES Y EQUIPAMIENTO EN CONSTRUCCIONES/OTROS SERVICIOS DE APOYO A LOS NEGOCIOS", "1. Paulina Ortiz Vazquez y Joel Alonso Cadena Gonzalez del 2018 al 2023\n2. Inmobiliaria Chapultepec 494 S.A.P.I. de C.V. y Adan Edmundo Nuñez Duran del 2023 a la actualidad.", "Adan Edmundo Nuñez Duran (AU)", "Stephanie Rivera -Positiva", "Steph Rivera – CPC y LCK", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "Pendiente", "Pendiente", "", "$4,286,231.98", "$5,453,572.35", "$0", "$2,000,782.86", "$715,981.80", "Servicios de renovación y reparación de edificios comerciales y de oficinas", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 INT. LOCAL 76 OFICINA 101 CP. 03900 COL. SAN JOSE INSURGENTES LOCALIDAD BENITO JUAREZ", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "nO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "$0.00", "$0.00", "$0.00", "$0.00", "$6,139,277.07", "$5,180,162.34", "$959,114.73", "31/10/2026", "$0.00", "$0.00", "$0.00", "$0.00"],
+        ["CENTRO DE NEGOCIOS LAS DALIAS, S.A. DE C.V.", "CND061116T19", "Adriana / Juan Manuel", "SIN OPERAR", "16/11/2006", "91 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Alquiler de Oficinas y locales comerciales 100%", "1. Emilio Bettehc Shamosh... (Histórico Resumido)\n2. Bonilla Consultores en Recursos Humanos, S.C. y Consultores y proveedores en Recursos Humanos Valencia, S.C. del 2011 a la actualidad", "Ricardo Climent Flores (AU)", "Ricardo Climent Flores - Negativo", "Ricardo Climent Flores- Inmo Chapultpec, Dalias", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Av. Cuauhtemoc No. 1217, Colonia San Cruz Atoyac, C.P. 03310, Benito Juarez, CDMX.", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["COMERCIALIZADORA DRY LINE, S.A. DE C.V.", "PENDIENTE", "Adriana / Juan Manuel", "SIN OPERAR", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO PRESENTADO", "Pendiente Identificar", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Pendiente", "Pendiente", "No hay comprobante domicilio", "BBVA", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["STK PROJECT MÉXICO, S.A. DE C.V.", "SPM1712131Y9", "Fernando Juárez", "SIN OPERAR", "12/12/2017", "180 CDMX", "CDMX", "Capital Fijo $50,000\nCapital Variable $24,500", "Restaurantes-bar con servicio de meseros 100%", "1. Javier Romo Aramburo y Guillermo Mark Arcieniega Kunz del 2017 al 2018\n2. Javier Romo Aramburo, Guillermo Mark Arcieniega Kunz y Raymundo Rodrigo Hernández Velázquez del 2018 a la actualidad", "Javier Romo Aramburo (AU)\nGuillermo Mark Arcieniega Kunz y  Raymundo Rodrigo Hernández Velázquez", "Pendiente", "Sin Coincidencias", "Pendiente", "RGLPM", "Pendiente", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Calle, Alejandro Dumas 105, Polanco, Miguel Hidalgo, Cp 11560, CDMX", "Pendiente", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin contingencias", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["DISTRIBUIDORA COMERCIAL FANIX, S.A. DE C.V.", "DCF091218AZ6", "Pendiente", "SIN OPERAR", "27/11/2009", "17 EDOMEX", "EDOMEX", "Capital Fijo $65.093.000.00\nCapital Variable $0.00", "Otros intermediarios de comercio al por mayor. 100%", "1. Enrique Vargas Martínez y José Bolaños Salas del 2009 al 2014\n2. Ramón García González y Rogelio Ríos Sernas del 2014 al 2014\n3. Ramón García González, Rogelio Ríos Sernas y GRUPO KOSLA, S.A. DE C.V. del 2014 al 2015\n4. Ramón García González, Rogelio Ríos Sernas, GRUPO KOSLA, S.A. DE C.V. y César Ortíz García del 2015 a la actualidad", "Rogelio Rios Sernas (AU)", "Pendiente", "Sin Coincidencias", "Pendiente", "RGLPM", "Pendiente", "NO PRESENTADO", "Pendiente Identificar", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AVENIDA PASEO DE LA REFORMA 42 A PISO 1 CENTRO DE LA CIUDAD DE MEXICO AREA 2 DISTRITO FEDERAL 06010.", "Pendiente", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["INMOBILIARIA SOFEMVI, S.A.P.I. DE C.V.", "ISO140305LHA", "Alberto González", "SIN OPERAR", "28/02/2014", "122 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "Construcción de vivienda multifamiliar 1, con un porcentaje del 100%", "1. José Manuel Moran Viñuela, José Arturo Flores Rodríguez y Eduardo Enrique García Hidalgo del 2014 al 2016\n2. José Manuel Moran Viñuela, José Arturo Flores Rodríguez y Valeria Lujan Ardoino del 2016 a la actualidad", "José Manuel Moran Viñuela (Presidente)", "Pendiente", "Sin Coincidencias", "CDMX", "RGLPM", "Pendiente", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VENCIDA", "Pendiente", "Pendiente", "Pendiente", "", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Sin determinar", "Pendiente", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AVENIDA (AV.) INSURGENTES SUR, Número Exterior 1605, Número Interior NIVEL 2, Colonia SAN JOSE INSURGENTES, Código Postal 03900", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["INMOBILIARIA FISSTEIN, S.A. DE C.V.", "GIG0008028HA", "Sergio Ávila", "SIN OPERAR", "02/08/2000", "230 CDMX", "CDMX", "Capital Fijo $160,000.00\nCapital Variable$0.00", "Otros servicios relacionados con los servicios inmobiliarios", "1.Maria celina galindo medina, Jorge alejandro Galindo Medina y Jorge Alejandro galindo palacios del 2000 al 2005\n2.Maria celina galindo medina y Jorge Alejandro galindo palacios del 2005 al 2007\n3.Maria celina galindo medina y Gerardo jose miguel chavira del 2007 al 2017\n4.Jose federico Nolasco Silva y Gustavo dioney vera roman del 2017 a julio 2018\n5. Gabriel simon romero y gustavo dioney vera roman de julio 2018 a la actualidad", "Gabriel Simon Romero\nGustavo Dioney Vera Román", "Pendiente", "Sin Coincidencias", "CDMX", "Resico", "activo", "NO PRESENTADO", "Pendiente Identificar", "Positivo", "VENCIDO", "$14,544,151.01", "$8,007.98", "$172,583.29", "", "$488,027.81", "0", "$1,059,375", "$42,217.89", "$0", "Arrendamiento de casa Habitación", "Sin determinar", "Pendiente", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "Calle Las Praderas 12, Jardines del Pedregal, Coyoacán", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Unalanapay", "Calle Praderas 12, Jardines del Pedregal, Coyoacan", "Pendiente", "Ninguna", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$0", "$0", "$892,997.51", "$892,997.51", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["ESPECIALISTAS EN CONTABILIDAD Y FISCAL", "ECF980506CQ1", "María Fernanda", "SIN OPERAR", "06/05/1998", "192", "CDMX", "Capital Fijo $10,000.00\nCapital Variable $0.00", "SERVICIOS DE CONTABILIDAD Y AUDITORÍA", "1. Manuel García Cota y Eduardo Enrique García Hidalgo de 1998 a la fecha", "Manuel García Cota (Presidente)", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Manuel García($9,000)\nEduardo Enrique García($1,000)", "NEGATIVO", "VENCIDA", "N/A", "N/A", "N/A", "", "$34,912.00", "$339,726.00", "289,864", "$0", "$0", "Sin Facturación", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Sin Contingencias", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS/No.12/COL. JARDINES DEL PEDREGAL/COYOACAN/CDMX/04500", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Sin Cuenta", "Sin Cuenta", "Sin Cuenta", "Sin Cuenta", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "$0", "$0", "$0", "$0", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["OUT BUILDING HUMAN TALENT, S.A.P.I. DE C.V.", "OBH191216TG8", "María Fernanda", "SIN OPERAR", "12/16/2019", "DESCONOCIDO", "DESCONOCIDO", "Capital Fijo $50,000.00\nCapital Variable $0.00", "CONSTRUCCIÓN DE VIVIENDA MULTIFAMILIAR 100%", "1. Adriana Rito Dorado y Patricio Carreon Rosillo de 2019 a la fecha", "Adriana Rito Dorado (Presidente)", "Pendiente", "Ninguna", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Patricia Carreon Rosillo($25,000)\nEduardo Enrique García($25,000)", "POSITIVO", "NEGATIVO", "N/A", "N/A", "$268,270.00", "", "$65,101.00", "-$2,069", "$351,411.00", "$0", "$0", "Sin facturación", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C.PRADERAS/No.12/COL. JARDINES DEL PEDREGAL/COYOACAN/CDMX/04500", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "SANTANDER", "Pendiente", "Pendiente", "Pendiente", "SIN OPINIÓN", "SIN OPINIÓN", "Y6474462105", "No tiene", "0", "Ninguna", "NO TIENE", "$0", "$0", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["RHV OUTSOURCING", "ROU041129J36", "María Fernanda", "SIN OPERAR", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "AGENCIAS DE COLOCACIÓN", "Pendiente", "Pendiente", "Pendiente", "Jessica Alejandra Torres Martínez- Administradora Impulso y Stay Fly", "CDMX", "RGLPM", "ACTIVO", "RECHAZADO", "Bonilla Consultores en Recursos Humanos SC(1)\nConsultores y Proveedores de R.H Valencia SC(1)", "POSITIVO", "Vigente", "N/A", "N/A", "$4,865,000.00", "", "$24,867", "$0", "$0", "$0", "$0", "Sin facturación", "Sin determinar", "N/A", "NO LISTADA", "Sin Contingencias", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C.PRADERAS/No.12/COL. JARDINES DEL PEDREGAL/COYOACAN/CDMX/04500", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "Sin Cuenta", "Sin Cuenta", "Sin Cuenta", "Sin Cuenta", "Sin Opinion", "Sin Opinion", "Pendiente", "No tiene", "Pendiente", "Ninguna", "NO TIENE", "$0", "$0", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["INGENIERIA Y LOGISTICA DE CAPITAL HUMANO, S.A.P.I. DE C.V.", "ILC1912166JA", "Alberto González", "SIN OPERAR", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "SERVICIOS DE CONSULTORÍA EN COMPUTACIÓN", "Pendiente", "Pendiente", "Pendiente", "CARLOS JOSE ARANDA/ BETSABE SUAREZ", "CDMX", "RESICO", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "$60,526.84", "$1,924,366.75", "", "$116,246.00", "$0.00", "$28,440", "$3,638.00", "$543.00", "No ha emitido CFDI", "Sin determinar", "N/A", "NO LISTADA", "Ninguna", "Ninguna", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "SANTANDER", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["RHS SERVICIOS ESTRATEGICOS, S.A. DE C.V.", "RSE051026LE4", "Alberto González", "SIN OPERAR", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "AGENCIAS DE COLOCACIÓN", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "Pendiente", "$1,087,099.00", "$894,064.76", "", "$231,835.07", "$0.00", "$3,942", "$0.00", "$0.00", "No ha emitido CFDI", "Sin determinar", "N/A", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "C. PRADERAS 12 CP 04500 COL JARDINES DEL PEDREGAL DE SAN ANGEL LOCALIDAD COYOACAN", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "DESCONOCIDO", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["BGC ARQUITECTOS, S.A. DE C.V.", "BAR110505Q71", "Alberto González", "SIN OPERAR", "05/05/2011", "49 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "OTROS TRABAJOS ESPECIALIZADOS PARA LA CONSTRUCCIÓN", "1. Sergio Octavio González Saavedra, Roberto Barraza Salvatori y Edgar Roberto Corado Nava del 05 de mayo de 2011 a la actualidad", "Edgar Roberto Corado Nava (Presidente)", "Pendiente", "Sin Coincidencias", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "POSITIVO", "VIGENTE", "$826,166.00", "$7,779,085.60", "$2,757,071.88", "", "$88,631.00", "$0.00", "$2,019", "$0.00", "$0.00", "No ha emitido CFDI", "Sin determinar", "Sin Operar", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCALIDAD BENITO JUAREZ", "DOMICILIO SIN VERIFICAR", "No hay comprobante domicilio", "No tiene operación", "No tiene operación", "No tiene operación", "No tiene operación", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Registro Patronal", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["CONSULTORES Y PROVEEDORES EN RECURSOS HUMANOS VALENCIA,S.C.", "CPR071002QH9", "Alberto González", "SIN OPERAR", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "OTROS SERVICIOS PROFESIONALES, CIENTÍFICOS Y TÉCNICOS", "Pendiente", "Pendiente", "Pendiente", "RICARDO CLIMENT- consutores, Inmo Chapultepec", "CDMX", "RGLPM", "ACTIVO", "NO PRESENTADO", "Pendiente Identificar", "NEGATIVO", "VIGENTE", "$89,987.20", "$17,488,242.01", "$4,107,307.62", "", "$12,098,126.14", "$0.00", "$25,973", "$0.00", "$0.00", "No ha emitido CFDI", "Sin determinar", "N/A", "NO LISTADA", "Pendiente", "Pendiente", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. CUAUHTEMOC 1217 CP 03310 COL SANTA CRUZ ATOYAC LOCALIDAD BENITO JUAREZ", "DOMICILIO LOCALIZADO", "No hay comprobante domicilio", "DESCONOCIDO", "No tiene operación", "No tiene operación", "No tiene operación", "SIN OPINIÓN", "SIN OPINIÓN", "NO TIENE", "NO TIENE", "Sin Registro Patronal", "Sin Contingencias", "NO TIENE", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["PARQUE CENTRAL RESIDENCIAS, S.A. DE C.V.", "PCR110617EGA", "Daniel Patiño", "SIN OPERAR", "17/06/2011", "214 CDMX", "CDMX", "Capital Fijo $50,000.00\nCapital Variable $0.00", "CONSTRUCCION VIVIENDA MULTIFAMILIAR", "Del 2011 al 2020 los socios eran: Salomon Cherem Dabbah, David Hanono Zonana, Moises Hanono Roffe, Arie Hanono Roffe, Jose Cherem Dabbah, Sion Cherem Dichi, Braulio Rene Vargas Luna, Jose Chacalo Tuachi,Abud Chacalo Tuachi, Antonio Tuachi Ezban, Jaime Tuachi Ezban, Jacobo Tuachi Ezban y Alberto Abraham Tuachi Ezban.", "SOCIOS: JUAN PABLO TRINIDAD, INMOBILIARIA CHAPULTEPEC. REPRESENTANTE LEGAL: EDUARDO CARMONA", "Pendiente", "Pendiente", "CDMX", "RGLPM", "ACTIVO", "PRESENTADO", "Juan pablo Trinidad 1%\nInmobiliaria Chapultepec 99%", "POSITIVO", "VIGENTE", "$0", "$0", "$0", "", "$548,000.00", "$1,800,000.00", "$39,000,000.00", "$26,000,000.00", "$3,000,000.00", "Venta de departamentos", "Sin determinar", "Enajenacion Inmuebles", "NO LISTADA", "Oficio de Restriccion temporal de uso de CFDI por no haber localizado el domicilio fiscal del contribuyente", "Pendiente conocer estatus actualizado.", "NO SE RELACIONA CON ALGÚN PROVEEDOR DE PLATAFORMA QUE ESTÁN LISTADOS", "AV. INSURGENTES SUR 1605 CP. 03900 COL. SAN JOSE INSURGENTES PISO 2 LOCAL 76 ALCALDIA BENITO JUAREZ CDMX", "DOMICILIO NO LOCALIZADO", "Contrato Arrendamiento", "SANTANDER", "Palmas hills 1 Piso 21 Oficina 122 Valle de las Palmas C.P. 52787 Huixquilucan Edomex", "SOCIOS ACTUALES: JUAN PABLO TRINIDAD, INMOBILIARIA CHAPULTEPEC\nREPRESENTANTE LEGAL: EDUARDO CARMONA", "Ninguna", "Sin opinion", "Sin opinion", "C3724163100", "No tiene", "0", "Sin contingencias", "NO TIENE", "$0", "$0", "$0", "$0", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["Bonilla Consultores en Recursos Humanos  SC", "Pendiente", "Adriana / Juan Manuel", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "#¡VALOR!", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["Grupo Papelero Ardano SA de CV", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "#¡VALOR!", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["DIVCM MARKETING AND DESIGN, S.A.P.I. DE C.V.", "DMD191216197", "Fabián Salgado / Juan Manuel", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "#¡VALOR!", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"],
+        ["MANAGEMENT INNOVATION PEOPLE, S.A.P.I. DE C.V.", "MIP191216VD9", "Fabián Salgado / Juan Manuel", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "#¡VALOR!", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "Pendiente", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO", "NINGUNO"]
+    ];
+
+    // Inicialización y Mapeo
+    const companies = [];
+    
+    // Procesamiento de datos crudos
+    rawCompaniesData.forEach((values, index) => {
+        const obj = {};
+        
+        // Datos Básicos
+        obj['Razón Social'] = values[0];
+        obj['RFC'] = values[1];
+        obj['Director Contabilidad'] = values[2];
+        obj['Estatus de operatividad'] = values[3];
+        
+        // Modal - Identificación y Legal
+        obj['Fecha de constitución'] = formatDate(values[4]);
+        obj['Notaria'] = values[5];
+        obj['Lugar de constitución'] = values[6];
+        obj['Capital Social'] = values[7];
+        obj['Actividad ecónomica (CSF)'] = values[8];
+        obj['Cambios Accionarios Histórico'] = values[9];
+        obj['Accionistas'] = values[10];
+        obj['Opinión Accionistas'] = values[11];
+        obj['Empresas COINCIDE'] = values[12];
+        
+        // Fiscal
+        obj['AD'] = values[13];
+        obj['Régimen'] = values[14];
+        obj['Buzón'] = values[15];
+        obj['Aviso Socios'] = values[16];
+        obj['Aviso Socios Act'] = values[17];
+        obj['Opinión SAT'] = values[18];
+        obj['Vigencia FIEL'] = values[19];
+
+        // Financiero / Riesgo Cuentas
+        obj['Activo Fijo'] = formatMoney(values[20]);
+        obj['CxC'] = formatMoney(values[21]);
+        obj['CxP'] = formatMoney(values[22]);
+        obj['Riesgo Cuentas'] = formatMoney(values[23]);
+        obj['CUCA'] = formatMoney(values[24]);
+        obj['CUFIN'] = formatMoney(values[25]);
+        obj['Pérdidas'] = formatMoney(values[26]);
+        obj['IVA'] = formatMoney(values[27]);
+        obj['ISR'] = formatMoney(values[28]);
+        obj['Conceptos'] = values[29];
+        
+        // Riesgo y Cumplimiento
+        obj['Beneficiario'] = values[30];
+        obj['Vulnerables'] = values[31];
+        obj['Lista 69-B'] = values[32];
+        obj['Contingencias'] = values[33];
+        obj['Estatus Contingencias'] = values[34];
+        obj['Relación 69-B'] = values[35];
+
+        // Domicilios
+        obj['Domicilio'] = values[36];
+        obj['Verificación Dom'] = values[37];
+        obj['Tipo Comprobante'] = values[38];
+
+        // Bancos
+        obj['Bancos'] = values[39];
+        obj['Dom Bancos'] = values[40];
+        obj['Acc Bancos'] = values[41];
+        obj['Cont Bancos'] = values[42];
+
+        // SS
+        obj['IMSS'] = values[43];
+        obj['INFONAVIT'] = values[44];
+        obj['RP'] = values[45];
+        obj['REPSE'] = values[46];
+        obj['Empleados'] = values[47];
+        obj['Contingencia SS'] = values[48];
+
+        // Web y Finanzas (Orden ajustado al input proporcionado)
+        obj['Web'] = values[49];
+        obj['Facturacion Acum'] = formatMoney(values[50]);
+        obj['Facturacion Ejer'] = formatMoney(values[51]);
+        obj['Acum Ret'] = formatMoney(values[52]);
+        obj['Acum Ing'] = formatMoney(values[53]);
+
+        // Compromisos
+        obj['Don Cte'] = values[54];
+        obj['Don Monto'] = formatMoney(values[55]);
+        obj['Don Fecha'] = values[56];
+        obj['Mod CUFIN'] = values[57];
+        obj['Mod CUCA'] = values[58];
+        obj['Prima'] = values[59];
+
+        // Saldos C+V
+        obj['CV Saldo'] = formatMoney(values[60]);
+        obj['CV B2B'] = formatMoney(values[61]);
+        obj['CV Inv'] = formatMoney(values[62]);
+        obj['Fecha 1'] = values[63];
+
+        // Saldos Sinergia
+        obj['Sin Saldo'] = formatMoney(values[64]);
+        obj['Sin B2B'] = formatMoney(values[65]);
+        obj['Sin Inv'] = formatMoney(values[66]);
+        obj['Fecha 2'] = values[67];
+
+        // Saldos MUGA
+        obj['Mug Saldo'] = formatMoney(values[68]);
+        obj['Mug B2B'] = formatMoney(values[69]);
+        obj['Mug Inv'] = formatMoney(values[70]);
+        obj['Fecha 3'] = values[71];
+
+        // ---------------------------------------------------------
+        // ASIGNACIÓN MANUAL DE PORCENTAJES DE RIESGO
+        // ---------------------------------------------------------
+        const manualRisks = {
+            "ADMINISTRADORA IMPULSO, S.A. DE C.V.": 37.00,
+            "AFRX, S.A. DE C.V.": 53.00,
+            "ASTRAL FREAKS, S.A. DE C.V.": 46.00,
+            "CONSULTORIA PROFESIONAL DE CALIDAD,  S.A. DE C.V.": 38.00,
+            "GRUPO INMOBILIARIO USA SHOES,  S.A.P.I. DE C.V.": 43.00,
+            "LCK ESPECIALISTAS Y ASESORES EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.": 51.00,
+            "LCR ADMINISTRACION PROFESIONAL EN RECURSOS HUMANOS,  S. DE R.L. DE C.V.": 48.00,
+            "MEGA ASTRAL, S.A. DE C.V.": 46.00,
+            "SERVICIOS Y ANALISIS DE PROYECTOS EMPRESARIALES EV, S.A. DE C.V.": 50.00,
+            "STAY FLY, S.A. DE C.V.": 38.00,
+            "TELEMEDIX, S.A.P.I. DE C.V.": 43.00,
+            "VE OUTSORCING DE MEXICO,  S.A.P.I. DE C.V.": 40.00,
+            "ARTE Y PASION CULINARIA, S.A. DE C.V.": 38.00,
+            "EXIMAGEN, S.A. DE C.V.": 54.00,
+            "FRIGO NAOS, S.A. DE C.V.": 14.00,
+            "AIRIS ADMINISTRACION EMPRESARIAL, S.A. DE C.V.": 30.00,
+            "INMOBILIARIA CHAPULTEPEC 494,  S.A.P.I. DE C.V.": 38.00,
+            "INMOBILIARIA CHAPULTEPEC 494,  S.A.P.I. DE C.V. ": 38.00,
+            "VE OUTSORCING DE RECURSOS HUMANOS, S.C.": 70.00,
+            "SOLUCIONES EN COMUNICACIÓN Y TECNOLOGIA, S.A. DE C.V.": 48.00,
+            "SCE SENTIDOS, S.A. DE C.V.": 57.00,
+            "ENTORNO CORPORATIVO Y EMPRESARIAL DE MEXICO, S.A.P.I. DE C.V.": 41.00,
+            "IT SKIL, S.A. DE C.V.": 53.00,
+            "CORPORATIVO FRL INNOVACIÓN EN RECURSOS, S. DE R.L. DE C.V.": 59.00,
+            "ESQUINA GLORIETA, S.A.P.I. DE C.V.": 43.00,
+            "ENTORNO CORPORATIVO Y EMPRESARIAL, S.C.": 56.00,
+            "JANTO CAPITAL, S.A. DE C.V.": 40.00,
+            "NUEVO CONCEPTO EN RECURSOS HUMANOS, S.C.": 53.00,
+            "IPM SANTA FE, S.A.P.I. DE C.V.": 46.00,
+            "OPERADORA IPM,  S.A.P.I. DE C.V.": 42.00,
+            "JOSO, S.A. DE C.V.": 50.00,
+            "RECOMINTE, S.A. DE C.V.": 41.00,
+            "SORVI, S.A. DE C.V.": 46.00,
+            "PRESTADORA DE SERVICIOS AMBIENTALES SAI, S.C.": 51.00,
+            "VILLADOM, S.A. DE C.V.": 51.00,
+            "ARRENDA CLICK,  S.A. DE C.V.": 39.00,
+            "RGA BUSINESS DEVELOPMENT, S.C.": 59.00,
+            "ASESORIAS ESPECIALIZADAS EN NEGOCIOS, S.C.": 63.00,
+            "DERSA INMOBILIARIA,  S.A. DE C.V.": 54.00,
+            "GARCIA HIDALGO VELAZQUEZ GONZALEZ Y ASOCIADOS": 71.00,
+            "GARCIA HIDALGO TAX ADVISOR DE MEXICO,  S.A.P.I. DE C.V.": 46.00,
+            "GARCIA HIDALGO TAX ADVISORS, S.C.": 42.00,
+            "MAXWAY, S. DE R.L. DE C.V.": 68.00,
+            "MCY SUMINISTROS, S.A. DE C.V.": 62.00,
+            "CENTRO DE NEGOCIOS LAS DALIAS, S.A. DE C.V.": 73.00,
+            "COMERCIALIZADORA DRY LINE, S.A. DE C.V.": 78.00,
+            "STK PROJECT MÉXICO, S.A. DE C.V.": 68.00,
+            "DISTRIBUIDORA COMERCIAL FANIX, S.A. DE C.V.": 73.00,
+            "INMOBILIARIA SOFEMVI, S.A.P.I. DE C.V.": 73.00,
+            "INMOBILIARIA FISSTEIN, S.A. DE C.V.": 62.00,
+            "ESPECIALISTAS EN CONTABILIDAD Y FISCAL": 68.00,
+            "OUT BUILDING HUMAN TALENT, S.A.P.I. DE C.V.": 59.00,
+            "RHV OUTSOURCING": 63.00,
+            "INGENIERIA Y LOGISTICA DE CAPITAL HUMANO, S.A.P.I. DE C.V.": 58.00,
+            "RHS SERVICIOS ESTRATEGICOS, S.A. DE C.V.": 62.00,
+            "BGC ARQUITECTOS, S.A. DE C.V.": 62.00,
+            "CONSULTORES Y PROVEEDORES EN RECURSOS HUMANOS VALENCIA,S.C.": 67.00,
+            "PARQUE CENTRAL RESIDENCIAS, S.A. DE C.V.": 47.00,
+            "Bonilla Consultores en Recursos Humanos  SC": 88.00,
+            "Grupo Papelero Ardano SA de CV": 88.00,
+            "DIVCM MARKETING AND DESIGN, S.A.P.I. DE C.V.": 88.00,
+            "MANAGEMENT INNOVATION PEOPLE, S.A.P.I. DE C.V.": 88.00
+        };
+
+        // Buscar en el diccionario (quitando espacios extra en los extremos del nombre que viene de la BD)
+        let nameKey = obj['Razón Social'].trim();
+        
+        if (manualRisks.hasOwnProperty(nameKey)) {
+            obj.risk = manualRisks[nameKey].toFixed(2);
+        } else {
+            // Si no encuentra el nombre exacto, pone 0.00 o puedes reactivar la lógica anterior aquí
+            obj.risk = "0.00";
+        }
+        
+        companies.push(obj);
+    });
+
+    // --- ORDENAR ALFABÉTICAMENTE ---
+    companies.sort((a, b) => a['Razón Social'].localeCompare(b['Razón Social']));
+
+    // --- REASIGNAR IDs CONSECUTIVOS DESPUÉS DE ORDENAR ---
+    companies.forEach((c, index) => {
+        c.id = index + 1;
+    });
+
+    let chartFielInstance, chartRiskInstance;
+
+    function renderDashboard(data) {
+        // KPIs
+        document.getElementById('kpiTotal').innerText = data.length;
+        
+        const avgRisk = data.reduce((sum, c) => sum + parseFloat(c.risk), 0) / (data.length || 1);
+        document.getElementById('kpiAvgRisk').innerText = avgRisk.toFixed(2) + "%";
+        
+        const highRiskCount = data.filter(c => parseFloat(c.risk) >= 50).length;
+        document.getElementById('kpiHighRisk').innerText = highRiskCount;
+        
+        const contingencyCount = data.filter(c => c['Contingencias'] && !c['Contingencias'].includes('Sin Contingencias') && !c['Contingencias'].includes('Pendiente')).length;
+        document.getElementById('kpiContingencies').innerText = contingencyCount;
+
+        // Tabla Dinámica
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach((c) => {
+            const riskVal = parseFloat(c.risk);
+            const riskColor = riskVal >= 50 ? 'text-red-400 font-bold' : (riskVal > 25 ? 'text-orange-400' : 'text-green-400');
+            const iconDom = (c['Verificación Dom'] && c['Verificación Dom'].includes('LOCALIZADO')) ? '<i class="fa-solid fa-check text-green-400"></i>' : '<i class="fa-solid fa-xmark text-red-400"></i>';
+            const badgeStatus = c['Estatus de operatividad'] === 'OPERANDO' ? 'badge-ok' : 'badge-danger';
+            
+            // Lógica para Badges
+            const opSat = c['Opinión SAT'] ? c['Opinión SAT'].toUpperCase() : '';
+            const fielStat = c['Vigencia FIEL'] ? c['Vigencia FIEL'].toUpperCase() : '';
+
+            let badgeOp = 'badge-neutral';
+            if(opSat.includes('POSITIVO')) badgeOp = 'badge-ok';
+            else if(opSat.includes('NEGATIVO')) badgeOp = 'badge-danger';
+
+            let badgeFiel = 'badge-neutral';
+            if(fielStat.includes('VIGENTE')) badgeFiel = 'badge-ok';
+            else if(fielStat.includes('VENCIDA')) badgeFiel = 'badge-danger';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${c.id}</td>
+                <td class="font-bold text-white text-xs">${c['Razón Social']}</td>
+                <td class="text-cyan-400 font-mono text-xs">${c['RFC']}</td>
+                <td class="text-xs">${c['Director Contabilidad']}</td>
+                <td><span class="badge ${badgeStatus}">${c['Estatus de operatividad']}</span></td>
+                <td><span class="badge ${badgeOp}">${c['Opinión SAT']}</span></td>
+                <td><span class="badge ${badgeFiel}">${c['Vigencia FIEL']}</span></td>
+                <td class="text-center">${c['Empleados']}</td>
+                <td class="text-center">${iconDom}</td>
+                <td class="text-right ${riskColor}">${c.risk}%</td>
+                <td class="text-center"><button class="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded text-xs">Ver</button></td>
+            `;
+            tr.onclick = () => openModal(c['Razón Social']);
+            tbody.appendChild(tr);
+        });
+
+        updateCharts(data);
+    }
+
+    function updateCharts(data) {
+        // Chart FIEL
+        const fielCounts = { 'VIGENTE': 0, 'VENCIDA': 0, 'PENDIENTE': 0 };
+        data.forEach(c => {
+            const f = c['Vigencia FIEL'] ? c['Vigencia FIEL'].toUpperCase() : ''; 
+            if (f.includes('VIGENTE')) fielCounts['VIGENTE']++;
+            else if (f.includes('VENCIDA')) fielCounts['VENCIDA']++;
+            else fielCounts['PENDIENTE']++;
+        });
+
+        if (chartFielInstance) chartFielInstance.destroy();
+        chartFielInstance = new Chart(document.getElementById('chartFiel'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Vigente', 'Vencida', 'Pendiente'],
+                datasets: [{ 
+                    data: [fielCounts['VIGENTE'], fielCounts['VENCIDA'], fielCounts['PENDIENTE']], 
+                    backgroundColor: ['#4ade80', '#f87171', '#94a3b8'], 
+                    borderWidth: 0 
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
+        });
+
+        // Chart Top 10 Risk (Descendente)
+        const topRisk = [...data]
+            .sort((a, b) => parseFloat(b.risk) - parseFloat(a.risk)) // Orden DESC
+            .slice(0, 10); // Top 10
+
+        if (chartRiskInstance) chartRiskInstance.destroy();
+        chartRiskInstance = new Chart(document.getElementById('chartRisk'), {
+            type: 'bar',
+            data: {
+                labels: topRisk.map(c => c['Razón Social'].substring(0, 10) + '...'),
+                datasets: [{ 
+                    label: 'Riesgo Calc %', 
+                    data: topRisk.map(c => c.risk), 
+                    backgroundColor: topRisk.map(c => parseFloat(c.risk) >= 50 ? '#f87171' : '#38bdf8'),
+                    borderRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, max: 100, grid: { color: '#334155' } }, x: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // Modal
+    function openModal(name) {
+        const c = companies.find(comp => comp['Razón Social'] === name);
+        if (!c) return;
+
+        // Header
+        document.getElementById('m_title').innerText = c['Razón Social'];
+        document.getElementById('m_rfc_header').innerText = c['RFC'];
+        document.getElementById('m_director_header').innerText = c['Director Contabilidad'];
+        document.getElementById('m_status_header').innerText = c['Estatus de operatividad'];
+        const risk = parseFloat(c.risk);
+        const rEl = document.getElementById('m_risk_score');
+        rEl.innerText = c.risk + '%';
+        rEl.className = `text-3xl font-bold ${risk >= 50 ? 'text-red-500' : (risk > 25 ? 'text-orange-400' : 'text-green-400')}`;
+
+        // Llenar campos simples
+        const set = (id, key) => { 
+            const el = document.getElementById(id);
+            if(el) el.innerText = c[key] || '-'; 
+        };
+
+        set('d_rfc', 'RFC'); set('d_director', 'Director Contabilidad'); set('d_estatus', 'Estatus de operatividad');
+        set('d_fecha_const', 'Fecha de constitución'); set('d_notaria', 'Notaria'); set('d_lugar', 'Lugar de constitución');
+        set('d_capital', 'Capital Social'); set('d_actividad', 'Actividad ecónomica (CSF)'); 
+        set('d_cambios_acc', 'Cambios Accionarios Histórico'); set('d_accionistas', 'Accionistas');
+        set('d_emp_coincide', 'Empresas COINCIDE'); set('d_opinion_acc', 'Opinión Accionistas');
+        set('d_ad', 'AD'); set('d_regimen', 'Régimen'); set('d_buzon', 'Buzón'); set('d_aviso_sat', 'Aviso Socios');
+        set('d_aviso_sat_act', 'Aviso Socios Act'); 
+        
+        document.getElementById('d_opinion_sat').innerText = c['Opinión SAT'];
+        document.getElementById('d_vigencia_fiel').innerText = c['Vigencia FIEL'];
+
+        set('d_activo', 'Activo Fijo'); set('d_cxc', 'CxC'); set('d_cxp', 'CxP');
+        set('d_riesgo_cuentas', 'Riesgo Cuentas'); set('d_cuca', 'CUCA'); set('d_cufin', 'CUFIN'); set('d_perdidas', 'Pérdidas');
+        set('d_iva', 'IVA'); set('d_isr', 'ISR'); set('d_conceptos', 'Conceptos'); set('d_beneficiario', 'Beneficiario');
+        set('d_vulnerable', 'Vulnerables'); set('d_69b', 'Lista 69-B'); set('d_cont_fiscal', 'Contingencias');
+        set('d_estatus_proc', 'Estatus Contingencias'); set('d_rel_69b', 'Relación 69-B');
+        set('d_domicilio', 'Domicilio'); set('d_verificacion', 'Verificación Dom'); set('d_tipo_comp', 'Tipo Comprobante');
+        set('d_cuentas_banc', 'Bancos'); set('d_dom_bancos', 'Dom Bancos'); 
+        set('d_acc_bancos', 'Acc Bancos');  set('d_cont_bancos', 'Cont Bancos');
+        set('d_imss', 'IMSS'); set('d_infonavit', 'INFONAVIT'); set('d_rp', 'RP'); set('d_repse', 'REPSE');
+        set('d_empleados', 'Empleados'); set('d_cont_ss', 'Contingencia SS');
+        set('d_web', 'Web'); set('d_acum_ing', 'Acum Ing'); set('d_acum_ret', 'Acum Ret');
+        
+        set('d_fact_acum', 'Facturacion Acum');
+        set('d_fact_ejer', 'Facturacion Ejer');
+
+        set('d_don_cte', 'Don Cte'); set('d_don_monto', 'Don Monto'); set('d_don_fecha', 'Don Fecha');
+        set('d_mod_cufin', 'Mod CUFIN'); set('d_mod_cuca', 'Mod CUCA'); set('d_prima', 'Prima');
+        set('d_cv_saldo', 'CV Saldo'); set('d_cv_b2b', 'CV B2B'); set('d_cv_inv', 'CV Inv'); set('d_cv_fecha', 'Fecha 1');
+        set('d_sin_saldo', 'Sin Saldo'); set('d_sin_b2b', 'Sin B2B'); set('d_sin_inv', 'Sin Inv'); set('d_sin_fecha', 'Fecha 2');
+        set('d_mug_saldo', 'Mug Saldo'); set('d_mug_b2b', 'Mug B2B'); set('d_mug_inv', 'Mug Inv'); set('d_mug_fecha', 'Fecha 3');
+
+        document.getElementById('modal').classList.add('open');
+        openTab(null, 'tab1');
+    }
+
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        if (evt) evt.currentTarget.classList.add('active');
+        else document.querySelector('.tab-btn').classList.add('active');
+    }
+
+    function filterDashboard(val) {
+        if(val === 'ALL') renderDashboard(companies);
+        else renderDashboard(companies.filter(c => c['Razón Social'] === val));
+    }
+
+    // Init
+    const sel = document.getElementById('companySelector');
+    companies.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c['Razón Social'];
+        opt.innerText = c['Razón Social'];
+        sel.appendChild(opt);
+    });
+    renderDashboard(companies);
+
+</script>
+</body>
+</html>
