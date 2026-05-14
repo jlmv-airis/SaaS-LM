@@ -1914,13 +1914,20 @@ function inlineCreateArea() {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-plus"></i>';
       if (!result.success) { error.textContent = result.error; return; }
-      if (!result.exists) areasCache.push({ id: result.id, name: name });
-      renderAreas();
-      var sel = document.getElementById('newOpArea');
-      sel.innerHTML = '<option value="">Sin área</option>';
-      areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
-      sel.value = name;
-      showToast('Área "' + name + '" creada', 'success');
+      // Recargar áreas desde el servidor para garantizar datos frescos
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            areasCache = res.areas;
+            renderAreas();
+            var sel = document.getElementById('newOpArea');
+            sel.innerHTML = '<option value="">Sin área</option>';
+            areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
+            sel.value = name;
+            showToast('Área "' + name + '" creada', 'success');
+          }
+        })
+        .listAreas(sessionToken);
     })
     .withFailureHandler(function(err) {
       btn.disabled = false;
