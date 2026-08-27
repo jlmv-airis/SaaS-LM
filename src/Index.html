@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -293,7 +293,30 @@ body {
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* Importante para que la ola no se salga */
+}
+
+/* Efecto Ola de Mar (Ripple) */
+.btn-wave {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border-radius: 50%;
+  animation: wave-animation 0.8s linear;
+}
+
+@keyframes wave-animation {
+  from {
+    width: 0px;
+    height: 0px;
+    opacity: 0.5;
+  }
+  to {
+    width: 500px;
+    height: 500px;
+    opacity: 0;
+  }
 }
 
 .login-btn:hover {
@@ -356,9 +379,18 @@ body {
   to { opacity: 1; }
 }
 
+/* Layout shift with sidebar */
+.app-wrapper {
+  transition: margin-left 0.3s ease;
+  margin-left: 260px;
+}
+.app-wrapper.sidebar-closed {
+  margin-left: 68px;
+}
+
 /* Header */
 .header {
-  padding: 20px 32px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -374,31 +406,31 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .header-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: linear-gradient(135deg, var(--accent), #8b7cf7);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .header-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.3px;
 }
 
 .header-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   background: var(--accent);
-  padding: 3px 10px;
+  padding: 3px 8px;
   border-radius: 20px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -407,7 +439,172 @@ body {
 .header-right {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, var(--bg-start), var(--bg-mid));
+  border-right: 1px solid var(--glass-border);
+  z-index: 100;
+  transition: width 0.3s ease, left 0.3s ease;
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar.closed {
+  width: 68px;
+  padding: 24px 8px;
+}
+/* Sidebar collapsed: hide text, center icons */
+.sidebar.closed .sidebar-brand-text,
+.sidebar.closed .sidebar-toggle-label,
+.sidebar.closed .sidebar-user > div:last-child,
+.sidebar.closed .sidebar-footer .btn-glass span,
+.sidebar.closed .tab-btn > span { display: none; }
+.sidebar.closed .sidebar-brand { justify-content: center; padding: 0 0 24px; }
+.sidebar.closed .sidebar-user { justify-content: center; padding: 8px; }
+.sidebar.closed .tab-btn { justify-content: center; padding: 12px 0; }
+.sidebar.closed .sidebar-footer .btn-glass { justify-content: center; padding: 10px 0; }
+.sidebar.closed .sidebar-toggle-label { display: none; }
+/* Hover expand when collapsed (via JS class) */
+.sidebar.closed.sidebar-hover {
+  width: 260px;
+  padding: 24px 12px;
+}
+.sidebar.closed.sidebar-hover .sidebar-brand-text,
+.sidebar.closed.sidebar-hover .sidebar-toggle-label,
+.sidebar.closed.sidebar-hover .sidebar-user > div:last-child,
+.sidebar.closed.sidebar-hover .sidebar-footer .btn-glass span,
+.sidebar.closed.sidebar-hover .tab-btn > span { display: revert; }
+.sidebar.closed.sidebar-hover .sidebar-toggle-label { display: block; }
+.sidebar.closed.sidebar-hover .sidebar-brand { justify-content: flex-start; padding: 0 8px 24px; }
+.sidebar.closed.sidebar-hover .sidebar-user { justify-content: flex-start; padding: 8px 12px; }
+.sidebar.closed.sidebar-hover .tab-btn { justify-content: flex-start; padding: 10px 12px; }
+.sidebar.closed.sidebar-hover .sidebar-footer .btn-glass { justify-content: flex-start; padding: 10px 14px; }
+.sidebar-brand {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  padding: 0 8px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 16px;
+}
+.sidebar-brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #8b7cf7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.sidebar-brand-text {
+  font-size: 16px;
+  font-weight: 800;
+}
+.sidebar-brand-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px;
+  background: var(--glass-bg);
+  border-radius: var(--radius-xs);
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.sidebar-user-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.sidebar-user-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.sidebar-user-role {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.sidebar .tab-btn {
+  padding: 12px 12px;
+  border-radius: var(--radius-xs);
+  border: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  gap: 12px;
+}
+.sidebar .tab-btn.active {
+  background: rgba(108,92,231,0.2);
+  color: var(--accent-light);
+  border-bottom: none;
+}
+.sidebar .tab-btn:hover {
+  background: rgba(255,255,255,0.06);
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--glass-border);
+}
+.sidebar-footer .btn-glass {
+  width: 100%;
+  justify-content: center;
+  font-size: 12px;
+  padding: 10px;
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (min-width: 769px) {
+  .sidebar-overlay { display: none; }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-glass {
@@ -648,6 +845,49 @@ tr:hover td {
   border-color: rgba(108,92,231,0.2);
 }
 
+.btn-icon-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.btn-icon-sm:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px 14px;
+  background: var(--glass-bg);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s;
+  user-select: none;
+}
+.form-checkbox:hover {
+  border-color: var(--accent);
+  background: rgba(108,92,231,0.05);
+}
+.form-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .empty-state {
   padding: 60px 28px;
   text-align: center;
@@ -837,6 +1077,7 @@ tr:hover td {
   font-family: inherit;
   outline: none;
   transition: all 0.3s;
+  resize: vertical;
 }
 
 .form-input:focus {
@@ -916,6 +1157,27 @@ tr:hover td {
   color: #ff6b6b;
 }
 
+.toast.warning {
+  background: rgba(40,30,5,0.92);
+  border: 1px solid #f0ad4e;
+  color: #f0ad4e;
+}
+
+.toast-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.6;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.toast-close:hover { opacity: 1; }
+
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
@@ -971,6 +1233,220 @@ tr:hover td {
 
 .tab-content.active {
   display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ===== WIZARD ONBOARDING ===== */
+.wizard-progress {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  position: relative;
+  padding: 0 10px;
+}
+.wizard-progress::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  background: var(--glass-border);
+  z-index: 0;
+}
+.wizard-progress::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  height: 3px;
+  background: var(--accent);
+  z-index: 0;
+  transition: width 0.4s ease;
+  width: var(--progress-width, 0%);
+}
+.wizard-step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+  cursor: pointer;
+  flex: 1;
+}
+.wizard-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  color: var(--text-secondary);
+  transition: all 0.3s;
+  margin-bottom: 6px;
+}
+.wizard-step-indicator.active .wizard-step-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.wizard-step-indicator.completed .wizard-step-circle {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.wizard-step-label {
+  font-size: 10px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 500;
+  max-width: 80px;
+  line-height: 1.3;
+}
+.wizard-step-indicator.active .wizard-step-label {
+  color: var(--accent-light);
+  font-weight: 700;
+}
+.wizard-step-indicator.completed .wizard-step-label {
+  color: var(--success);
+}
+.wizard-step {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+.wizard-step.active {
+  display: block;
+}
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--glass-border);
+}
+.uppercase { text-transform: uppercase; }
+.uppercase-input input { text-transform: uppercase; }
+.uppercase-input input::placeholder { text-transform: none; }
+/* Toggle Switch iOS-style */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.toggle-switch {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #555;
+  border-radius: 30px;
+  transition: background 0.3s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--success);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+.toggle-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+.billing-concentrate-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.billing-concentrate-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.billing-url-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.billing-url-input input {
+  flex: 1;
+}
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.doc-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  transition: all 0.3s;
+}
+.doc-card.complete {
+  border-color: var(--success);
+  background: rgba(81,207,102,0.08);
+}
+.doc-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.doc-card-status {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-block;
+}
+.billing-gap {
+  background: rgba(255,107,107,0.15);
+  color: #ff6b6b;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.client-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
 /* Project Form */
@@ -1081,14 +1557,19 @@ tr:hover td {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header { padding: 16px 20px; }
-  .main-content { padding: 20px; }
+  .header { padding: 12px 16px; }
+  .header-title { font-size: 15px; }
+  .header-right .btn-accent span { display: none; }
+  .main-content { padding: 16px; }
   .table-header { padding: 20px; flex-direction: column; gap: 12px; align-items: stretch; }
   th, td { padding: 12px 16px; }
   .stats-grid { grid-template-columns: 1fr; }
   .modal { margin: 16px; padding: 28px 24px; }
   .login-card { padding: 32px 24px; margin: 16px; }
   .actions-cell { flex-wrap: wrap; }
+  .sidebar { width: 240px; }
+  .sidebar.closed { left: -245px; }
+  .app-wrapper { margin-left: 0; }
 }
 
 /* Scrollbar */
@@ -1348,34 +1829,20 @@ tr:hover td {
 
 <!-- DASHBOARD -->
 <div id="dashboard">
+  <div class="app-wrapper">
   <header class="header">
     <div class="header-left">
-      <div class="header-logo" style="overflow:hidden;background:transparent;padding:0;width:38px;height:38px;border-radius:10px;">
-        <? if (logoBase64) { ?>
-          <img src="<?!= logoBase64 ?>" style="width:100%;height:100%;object-fit:cover;">
-        <? } else { ?>
-          <i class="fas fa-scale-balanced"></i>
-        <? } ?>
+      <div class="header-logo" style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#8b7cf7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;">
+        <i class="fas fa-scale-balanced"></i>
       </div>
       <div>
-        <span class="header-title">SaaS LM</span>
+        <span class="header-title" style="text-transform:uppercase;">SAAS LM</span>
         <span class="header-badge" id="roleBadge">Admin</span>
-      </div>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('operators')" id="tabOperators">
-          <i class="fas fa-users"></i> Operadores
-        </button>
-        <button class="tab-btn" onclick="switchTab('projects')" id="tabProjects">
-          <i class="fas fa-folder-open"></i> Proyectos
-        </button>
-        <button class="tab-btn" onclick="switchTab('settings')" id="tabSettings">
-          <i class="fas fa-cog"></i> Configuración
-        </button>
       </div>
     </div>
     <div class="header-right">
-      <button class="btn-accent" id="btnHeaderAction" onclick="openCreateOperatorModal()">
-        <i class="fas fa-plus"></i> Nuevo Operador
+      <button class="btn-accent" id="btnHeaderAction" onclick="openCreateUserModal()">
+        <i class="fas fa-plus"></i><span> Nuevo Usuario</span>
       </button>
       <button class="btn-glass" onclick="refreshData()" title="Actualizar">
         <i class="fas fa-rotate"></i>
@@ -1385,6 +1852,42 @@ tr:hover td {
       </button>
     </div>
   </header>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i class="fas fa-scale-balanced"></i></div>
+      <span class="sidebar-brand-text" style="text-transform:uppercase;">SAAS LM</span>
+      <button class="sidebar-brand-close sidebar-toggle-label" onclick="toggleSidebar()" title="Colapsar"><i class="fas fa-bars"></i></button>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-icon" id="sidebarUserIcon">A</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+        <div class="sidebar-user-role" id="sidebarUserRole">ADMIN</div>
+      </div>
+    </div>
+    <button class="tab-btn active" onclick="switchTab('operators')" id="tabOperators">
+      <i class="fas fa-users"></i><span> Usuarios</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('projects')" id="tabProjects">
+      <i class="fas fa-folder-open"></i><span> Proyectos</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('clients')" id="tabClients">
+      <i class="fas fa-building"></i><span> Clientes</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('settings')" id="tabSettings">
+      <i class="fas fa-cog"></i><span> Configuración</span>
+    </button>
+    <div class="sidebar-footer">
+      <button class="btn-glass" onclick="handleLogout()">
+        <i class="fas fa-right-from-bracket"></i><span> Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Operator info bar -->
   <div id="operatorInfo" class="operator-info-bar" style="display:none;">
@@ -1401,25 +1904,26 @@ tr:hover td {
         <div class="glass stat-card">
           <div class="stat-icon ops"><i class="fas fa-users"></i></div>
           <div class="stat-number" id="statTotal">0</div>
-          <div class="stat-label">Operadores Registrados</div>
+          <div class="stat-label">Usuarios Registrados</div>
         </div>
         <div class="glass stat-card">
           <div class="stat-icon active"><i class="fas fa-user-check"></i></div>
           <div class="stat-number" id="statActive">0</div>
-          <div class="stat-label">Operadores Activos</div>
+          <div class="stat-label">Usuarios Activos</div>
         </div>
       </div>
 
       <div class="glass table-card">
         <div class="table-header">
           <span class="table-title"><i class="fas fa-list"></i> Lista de Operadores</span>
-          <span style="color:var(--text-secondary);font-size:13px;" id="tableCount">0 operadores</span>
+          <span style="color:var(--text-secondary);font-size:13px;" id="tableCount">0 usuarios</span>
         </div>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Operador</th>
+                <th>Usuario</th>
+                <th>Rol</th>
                 <th>Área</th>
                 <th style="text-align:right;">Acciones</th>
               </tr>
@@ -1429,8 +1933,8 @@ tr:hover td {
         </div>
         <div id="emptyState" class="empty-state">
           <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
-          <div class="empty-text">No hay operadores registrados</div>
-          <div class="empty-sub">Crea tu primer operador para comenzar</div>
+          <div class="empty-text">No hay usuarios registrados</div>
+          <div class="empty-sub">Crea el primer usuario para comenzar</div>
         </div>
       </div>
     </div>
@@ -1478,7 +1982,55 @@ tr:hover td {
       </div>
     </div>
 
-    <!-- TAB: CONFIGURACIÓN -->
+    <!-- TAB: CLIENTES -->
+    <div class="tab-content" id="viewClients">
+      <div class="stats-grid">
+        <div class="glass stat-card">
+          <div class="stat-icon ops"><i class="fas fa-building"></i></div>
+          <div class="stat-number" id="cliTotal">0</div>
+          <div class="stat-label">Clientes Registrados</div>
+        </div>
+        <div class="glass stat-card">
+          <div class="stat-icon active"><i class="fas fa-spinner"></i></div>
+          <div class="stat-number" id="cliOnboarding">0</div>
+          <div class="stat-label">En Onboarding</div>
+        </div>
+        <div class="glass stat-card">
+          <div class="stat-icon" style="background:rgba(81,207,102,0.15);"><i class="fas fa-check-circle" style="color:#51cf66;"></i></div>
+          <div class="stat-number" id="cliCompleted">0</div>
+          <div class="stat-label">Onboarding Completado</div>
+        </div>
+      </div>
+
+      <div class="glass table-card">
+        <div class="table-header">
+          <span class="table-title"><i class="fas fa-list"></i> Clientes</span>
+          <span style="color:var(--text-secondary);font-size:13px;" id="cliCount">0 clientes</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>RFC</th>
+                <th>Email</th>
+                <th>Etapa</th>
+                <th>Estatus</th>
+                <th style="text-align:right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+        </div>
+        <div id="cliEmptyState" class="empty-state">
+          <div class="empty-icon"><i class="fas fa-building-circle-exclamation"></i></div>
+          <div class="empty-text">No hay clientes registrados</div>
+          <div class="empty-sub">Inicia el onboarding de un nuevo cliente para comenzar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIGURACI"N -->
     <div class="tab-content" id="viewSettings">
       <div class="settings-grid">
         <div class="glass settings-card">
@@ -1520,27 +2072,58 @@ tr:hover td {
           </div>
         </div>
       </div>
+        <div class="glass settings-card">
+          <div class="settings-card-title">
+            <span><i class="fas fa-link"></i> URLs por Defecto</span>
+          </div>
+          <div class="settings-section">
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label" style="font-size:12px;">Concentrado de Facturación (URL por defecto)</label>
+              <div style="display:flex;gap:8px;">
+                <input type="url" id="cfgBillingUrl" class="form-input" style="flex:1;" placeholder="https://docs.google.com/spreadsheets/d/...">
+                <button class="btn-accent" style="padding:8px 16px;font-size:11px;" onclick="saveConfigUrl()">Guardar</button>
+              </div>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Esta URL se usará como predeterminada para nuevos clientes. Se puede sobrescribir por cliente en el wizard.</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:12px;">Catálogo de Servicios (URL por defecto)</label>
+              <div style="display:flex;gap:8px;">
+                <input type="url" id="cfgCatalogUrl" class="form-input" style="flex:1;" placeholder="https://drive.google.com/...">
+                <button class="btn-accent" style="padding:8px 16px;font-size:11px;" onclick="saveCatalogUrl()">Guardar</button>
+              </div>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Enlace al catálogo de servicios en Drive.</p>
+            </div>
+          </div>
+        </div>
     </div><!-- end TAB: CONFIGURACIÓN -->
 
   </main>
-</div>
+  </div><!-- end .app-wrapper -->
+</div><!-- end #dashboard -->
 
-<!-- MODAL CREATE OPERATOR -->
+<!-- MODAL CREATE USER -->
 <div class="modal-overlay" id="createModal">
   <div class="glass modal">
     <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-user-plus"></i> Nuevo Operador</span>
+      <span class="modal-title"><i class="fas fa-user-plus"></i> Nuevo Usuario</span>
       <button class="modal-close" onclick="closeCreateModal()"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="form-group">
-      <label class="form-label">Nombre del operador</label>
+      <label class="form-label">Rol</label>
+      <select id="newUserRole" class="form-select" onchange="onCreateRoleChange()">
+        <option value="operator">Operador</option>
+        <option value="manager">Manager</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
       <input type="text" id="newOpName" class="form-input" placeholder="Ej: Miriam" onkeydown="if(event.key==='Enter') confirmCreate()">
     </div>
     <div class="form-group">
       <label class="form-label">Contraseña</label>
       <input type="password" id="newOpPass" class="form-input" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter') confirmCreate()">
     </div>
-    <div class="form-group">
+    <div class="form-group" id="newUserAreaGroup">
       <label class="form-label">Área</label>
       <div style="display:flex;gap:8px;">
         <select id="newOpArea" class="form-select" style="flex:1;"><option value="">Sin área</option></select>
@@ -1552,7 +2135,7 @@ tr:hover td {
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeCreateModal()">Cancelar</button>
-      <button class="btn-accent" onclick="confirmCreate()">Crear Operador</button>
+      <button class="btn-accent" onclick="confirmCreate()">Crear Usuario</button>
     </div>
   </div>
 </div>
@@ -1801,16 +2384,376 @@ tr:hover td {
   </div>
 </div>
 
+<!-- MODAL EDIT MANAGER -->
+<div class="modal-overlay" id="editManagerModal">
+  <div class="glass modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-pen-to-square"></i> Editar Manager</span>
+      <button class="modal-close" onclick="closeEditManagerModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input type="text" id="editMgrName" class="form-input" placeholder="Nombre del manager">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña <span style="color:var(--text-secondary);font-weight:400;">(dejar vacío para no cambiar)</span></label>
+      <input type="password" id="editMgrPass" class="form-input" placeholder="Nueva contraseña">
+    </div>
+    <div id="editMgrError" class="form-error"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEditManagerModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmEditManager()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DELETE MANAGER -->
+<div class="modal-overlay" id="deleteManagerModal">
+  <div class="glass modal">
+    <div class="modal-header" style="background:linear-gradient(135deg,rgba(255,107,107,0.12),rgba(255,107,107,0.03));margin:-36px -32px 28px -32px;padding:32px 32px 24px 32px;border-radius:16px 16px 0 0;position:relative;">
+      <span class="modal-title" style="color:var(--danger);"><i class="fas fa-trash-can"></i> Eliminar Manager</span>
+      <button class="modal-close" style="position:absolute;top:8px;right:10px;z-index:2;" onclick="closeDeleteManagerModal()"><i class="fas fa-xmark"></i></button>
+      <div style="position:absolute;bottom:-10px;left:0;right:0;height:10px;background:linear-gradient(135deg,rgba(255,107,107,0.10),transparent);clip-path:polygon(0 0, 6% 40%, 12% 0, 18% 40%, 24% 0, 30% 40%, 36% 0, 42% 40%, 48% 0, 54% 40%, 60% 0, 66% 40%, 72% 0, 78% 40%, 84% 0, 90% 40%, 96% 0, 100% 40%, 100% 100%, 0 100%);"></div>
+    </div>
+    <div class="confirm-dialog">
+      <div class="confirm-icon danger"><i class="fas fa-trash-can"></i></div>
+      <div class="confirm-text">¿Estás seguro de eliminar a</div>
+      <div class="confirm-name" id="deleteMgrName"></div>
+      <div class="confirm-text">Esta acción no se puede deshacer.</div>
+      <div id="deleteMgrError" class="form-error"></div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;gap:16px;">
+      <button class="btn-secondary" style="padding:14px 36px;font-size:15px;" onclick="closeDeleteManagerModal()"><i class="fas fa-xmark"></i> Cancelar</button>
+      <button class="btn-danger" style="padding:14px 36px;font-size:15px;" onclick="confirmDeleteManager()"><i class="fas fa-trash-can"></i> Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGE ADMIN PASSWORD -->
+<div class="modal-overlay" id="adminPassModal">
+  <div class="glass modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-key"></i> Cambiar Contraseña Admin</span>
+      <button class="modal-close" onclick="closeAdminPassModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nueva contraseña</label>
+      <input type="password" id="adminNewPass" class="form-input" placeholder="Nueva contraseña del admin" onkeydown="if(event.key==='Enter') confirmAdminPassChange()">
+      <div id="adminPassError" class="form-error"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAdminPassModal()">Cancelar</button>
+      <button class="btn-accent" onclick="confirmAdminPassChange()"><i class="fas fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ONBOARDING WIZARD -->
+<div class="modal-overlay" id="onboardingModal">
+  <div class="glass modal" style="max-width:800px;width:95%;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-arrow-right-to-bracket"></i> Onboarding de Cliente</span>
+      <button class="modal-close" onclick="closeOnboardingModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div id="onboardingError" class="form-error" style="margin-bottom:12px;text-align:center;"></div>
+
+    <!-- Progress bar 7 steps -->
+    <div class="wizard-progress" id="wizardProgress">
+      <div class="wizard-step-indicator active" data-step="1">
+        <div class="wizard-step-circle">1</div>
+        <div class="wizard-step-label">Datos<br>generales</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="2">
+        <div class="wizard-step-circle">2</div>
+        <div class="wizard-step-label">Entrevista</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="3">
+        <div class="wizard-step-circle">3</div>
+        <div class="wizard-step-label">Catálogo<br>servicios</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="4">
+        <div class="wizard-step-circle">4</div>
+        <div class="wizard-step-label">Concentrado<br>facturación</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="5">
+        <div class="wizard-step-circle">5</div>
+        <div class="wizard-step-label">Conceptos</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="6">
+        <div class="wizard-step-circle">6</div>
+        <div class="wizard-step-label">Documentos<br>legales</div>
+      </div>
+      <div class="wizard-step-indicator" data-step="7">
+        <div class="wizard-step-circle">7</div>
+        <div class="wizard-step-label">Resumen</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Datos generales -->
+    <div class="wizard-step active" id="wizStep1">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-building" style="color:var(--accent-light);"></i> Datos del Cliente</div>
+      <div class="form-group uppercase-input">
+        <label class="form-label">Razón Social <span style="color:var(--danger);">*</span></label>
+        <input type="text" id="wizBusinessName" class="form-input uppercase" placeholder="Ej: Empresa S.A. de C.V." oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-row">
+        <div class="form-group uppercase-input" style="flex:1;">
+          <label class="form-label">RFC</label>
+          <input type="text" id="wizRfc" class="form-input uppercase" placeholder="RFC" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Código Postal</label>
+          <input type="text" id="wizCp" class="form-input" placeholder="CP">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group uppercase-input" style="flex:1;">
+          <label class="form-label">Representante Legal</label>
+          <input type="text" id="wizLegalRep" class="form-input uppercase" placeholder="Nombre completo" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">ID del Rep. Legal</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <select id="wizLegalRepId" class="form-select" style="flex:1;" onchange="toggleOtherId()">
+              <option value="">Seleccionar...</option>
+              <option value="INE">INE</option>
+              <option value="Pasaporte">Pasaporte</option>
+              <option value="Cédula Profesional">Cédula Profesional</option>
+              <option value="Cédula de Identidad">Cédula de Identidad</option>
+              <option value="Licencia de Conducir">Licencia de Conducir</option>
+              <option value="Cartilla del Servicio Militar">Cartilla del Servicio Militar</option>
+              <option value="Otro">Otro (especificar)</option>
+            </select>
+            <input type="text" id="wizLegalRepIdOther" class="form-input" style="flex:1;display:none;" placeholder="Especificar tipo de ID" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Email</label>
+          <input type="email" id="wizEmail" class="form-input" placeholder="correo@empresa.com">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Teléfono</label>
+          <input type="text" id="wizPhone" class="form-input" placeholder="55 1234 5678">
+        </div>
+      </div>
+      <div class="form-group uppercase-input">
+        <label class="form-label">Dirección</label>
+        <input type="text" id="wizAddress" class="form-input uppercase" placeholder="Calle, número, colonia, ciudad" oninput="this.value=this.value.toUpperCase()">
+      </div>
+    </div>
+
+    <!-- Step 2: Entrevista / Videollamada -->
+    <div class="wizard-step" id="wizStep2">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-video" style="color:var(--accent-light);"></i> Entrevista con el Cliente</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Fecha de entrevista</label>
+          <input type="date" id="wizInterviewDate" class="form-input">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="form-label">Tipo</label>
+          <select id="wizInterviewType" class="form-select">
+            <option value="">Seleccionar...</option>
+            <option value="Presencial">Presencial</option>
+            <option value="Videollamada (Meet)">Videollamada (Meet)</option>
+            <option value="Telefónica">Telefónica</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas de la entrevista</label>
+        <textarea id="wizInterviewNotes" class="form-input" rows="4" placeholder="Resumen de la conversación, acuerdos, observaciones..."></textarea>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-switch">
+          <input type="checkbox" id="wizInterviewDone">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Entrevista realizada con el cliente</span>
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Link de carpeta en Drive</label>
+        <input type="url" id="wizDriveFolderUrl" class="form-input" placeholder="https://drive.google.com/drive/folders/...">
+      </div>
+    </div>
+
+    <!-- Step 3: Catálogo de servicios -->
+    <div class="wizard-step" id="wizStep3">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-tags" style="color:var(--accent-light);"></i> Catálogo de Servicios</div>
+      <p style="color:var(--text-secondary);margin-bottom:16px;font-size:13px;">Revisa con el cliente los servicios disponibles y sus costos:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">1. Revisión anual de contratos</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$35,000/mes &bull; $430,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">2. Control de almacén</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$14,000/mes &bull; $168,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">3. Mantenimiento y sanitización</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$20,000/mes &bull; $290,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">4. Mantenimiento a equipos de cómputo</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$45,000/mes &bull; $552,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">5. Estrategia de marketing y redes</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$45,000/mes &bull; $552,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">6. Procesos administrativos</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$35,000/bimestre &bull; $210,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">7. Estudio de mercado</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$45,000/semestre &bull; $90,000/año</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+          <div style="font-size:12px;font-weight:700;">8. Administración de página web</div>
+          <div style="font-size:11px;color:var(--text-secondary);">$35,000/mes &bull; $420,000/año</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Link del catálogo en Drive</label>
+        <input type="url" id="wizCatalogDriveUrl" class="form-input" placeholder="https://drive.google.com/... (proporcionado por el cliente)">
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-switch">
+          <input type="checkbox" id="wizCatalogDone">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Asesoría de catálogo de servicios completada con el cliente</span>
+      </div>
+    </div>
+
+    <!-- Step 4: Concentrado de Facturación + Diagrama -->
+    <div class="wizard-step" id="wizStep4">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-file-invoice" style="color:var(--accent-light);"></i> Concentrado de Facturación</div>
+      <p style="color:var(--text-secondary);margin-bottom:12px;font-size:13px;">Revisa con el cliente el concentrado de facturación. Puedes configurar una URL por defecto en Configuración.</p>
+
+      <div class="billing-concentrate-card">
+        <h4><i class="fas fa-link" style="color:var(--accent-light);"></i> Link al Concentrado de Facturación</h4>
+        <div class="billing-url-input">
+          <input type="url" id="wizBillingUrl" class="form-input" placeholder="https://docs.google.com/spreadsheets/d/...">
+          <button class="btn-glass" style="padding:8px 14px;flex-shrink:0;" onclick="window.open(document.getElementById('wizBillingUrl').value, '_blank')" title="Abrir enlace"><i class="fas fa-external-link-alt"></i></button>
+        </div>
+        <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;">Este link se puede personalizar por cliente. Déjalo vacío si usarás la URL por defecto.</p>
+      </div>
+
+      <div class="billing-concentrate-card">
+        <h4><i class="fas fa-diagram-project" style="color:var(--accent-light);"></i> Diagrama de Operación</h4>
+        <?!= include('Diagram'); ?>
+      </div>
+
+      <div class="toggle-wrap" style="margin-top:8px;">
+        <label class="toggle-switch">
+          <input type="checkbox" id="wizBillingDone">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Concentrado de facturación y diagrama revisados con el cliente</span>
+      </div>
+    </div>
+
+    <!-- Step 5: Conceptos de facturación + Ejemplos -->
+    <div class="wizard-step" id="wizStep5">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-file-invoice-dollar" style="color:var(--accent-light);"></i> Conceptos de Facturación</div>
+
+      <p style="color:var(--text-secondary);margin-bottom:12px;font-size:13px;">Registra los conceptos facturables para este cliente:</p>
+      <div id="wizBillingList"></div>
+      <div id="wizBcEmpty" class="checklist-empty" style="margin-bottom:12px;">No hay conceptos de facturación</div>
+      <div class="form-row" style="gap:6px;flex-wrap:wrap;">
+        <input type="text" id="wizNewBcName" class="form-input" style="flex:2;min-width:120px;" placeholder="Concepto">
+        <input type="text" id="wizNewBcAmount" class="form-input" style="flex:1;min-width:80px;" placeholder="Monto">
+        <select id="wizNewBcFreq" class="form-select" style="flex:1;min-width:90px;">
+          <option value="">Frecuencia</option>
+          <option value="Mensual">Mensual</option>
+          <option value="Bimestral">Bimestral</option>
+          <option value="Semestral">Semestral</option>
+          <option value="Anual">Anual</option>
+        </select>
+        <button class="btn-accent" style="flex-shrink:0;padding:10px 16px;" onclick="addWizardBillingConcept()"><i class="fas fa-plus"></i></button>
+      </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--glass-border);">
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px;"><i class="fas fa-file-lines" style="color:var(--accent-light);"></i> Ejemplos de Conceptos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+            <div style="font-size:12px;font-weight:700;">SADEM</div>
+            <div style="font-size:11px;color:var(--text-secondary);">Auditoría interna de CFDI</div>
+            <div style="font-size:11px;color:var(--text-secondary);">$16,200/año &bull; Facturación desfasada</div>
+          </div>
+          <div style="background:var(--glass-bg);border-radius:8px;padding:10px;border:1px solid var(--glass-border);">
+            <div style="font-size:12px;font-weight:700;">ATEKA</div>
+            <div style="font-size:11px;color:var(--text-secondary);">Contabilidad de costos de mantenimiento</div>
+            <div style="font-size:11px;color:var(--text-secondary);">$199,033/mes &bull; Facturación desfasada</div>
+          </div>
+        </div>
+        <div class="toggle-wrap" style="margin-top:8px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="wizExamplesDone">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Ejemplos de conceptos (SADEM, ATEKA) explicados al cliente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Documentos legales -->
+    <div class="wizard-step" id="wizStep6">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-file-shield" style="color:var(--accent-light);"></i> Documentos Legales</div>
+      <p style="color:var(--text-secondary);margin-bottom:12px;font-size:13px;">Registra el estatus de cada documento requerido:</p>
+      <div id="wizDocsList"></div>
+    </div>
+
+    <!-- Step 7: Resumen + Asignación -->
+    <div class="wizard-step" id="wizStep7">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;"><i class="fas fa-check-double" style="color:var(--accent-light);"></i> Resumen y Asignación</div>
+      <div id="wizSummary" style="background:var(--glass-bg);border-radius:8px;padding:16px;margin-bottom:16px;border:1px solid var(--glass-border);">
+        <p style="color:var(--text-secondary);font-size:13px;">Cargando resumen...</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Asignar a operador de Materialidad <span style="color:var(--danger);">*</span></label>
+        <select id="wizAssignOperator" class="form-select"></select>
+      </div>
+      <div class="toggle-wrap" style="margin-top:8px;">
+        <label class="toggle-switch">
+          <input type="checkbox" id="wizConfirmDone">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Confirmo que el onboarding fue completado y el proyecto puede crearse</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="wizard-nav">
+      <button class="btn-secondary" id="wizPrevBtn" onclick="wizardPrev()"><i class="fas fa-arrow-left"></i> Anterior</button>
+      <span id="wizStepCounter" style="font-size:12px;color:var(--text-secondary);align-self:center;">Paso 1 de 7</span>
+      <button class="btn-accent" id="wizNextBtn" onclick="wizardNext()">Siguiente <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
 <script>
 var sessionToken = null;
 var currentUser = null;
+var usersCache = [];
 var operatorsCache = [];
 var managersCache = [];
 var projectsCache = [];
 var areasCache = [];
 var customFieldsCache = [];
+var clientsCache = [];
 var currentUserId = null;
 var pendingTemplateType = null;
+var wizardClientId = null;
+var wizardTempOps = [];
+var wizardTempBcs = [];
+var wizardTempDocs = [];
+var docStatuses = ['Pendiente', 'Recibido', 'Revisado', 'Completo'];
 
 /* Checklist state per type */
 var checklistState = { legal: [], mat: [] };
@@ -1822,15 +2765,25 @@ window.addEventListener('load', function() {
 /* ====== HELPERS ====== */
 function showToast(message, type) {
   var container = document.getElementById('toastContainer');
-  var icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark';
+  var iconMap = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation' };
+  var icon = iconMap[type] || 'fa-circle-info';
   var toast = document.createElement('div');
-  toast.className = 'toast ' + type;
-  toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + message;
+  toast.className = 'toast ' + (type || '');
+  toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + message + '<button class="toast-close" onclick="dismissToast(this)"><i class="fas fa-xmark"></i></button>';
   container.appendChild(toast);
-  setTimeout(function() {
-    toast.classList.add('out');
-    setTimeout(function() { toast.remove(); }, 300);
-  }, 3000);
+  var timer = setTimeout(function() {
+    dismissToast(toast.querySelector('.toast-close'));
+  }, 4000);
+  toast._timer = timer;
+}
+
+function dismissToast(btn) {
+  if (!btn) return;
+  var toast = btn.closest ? btn.closest('.toast') : btn.parentElement;
+  if (!toast) return;
+  if (toast._timer) { clearTimeout(toast._timer); }
+  toast.classList.add('out');
+  setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
 }
 
 function escapeHtml(text) {
@@ -1840,10 +2793,32 @@ function escapeHtml(text) {
 }
 
 /* ====== AUTH ====== */
-function handleLogin() {
+function handleLogin(event) {
+  var btn = document.getElementById('loginBtn');
+  
+  if (event && (event.type === 'click' || event.type === 'mousedown')) {
+    var rect = btn.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    
+    var wave = document.createElement('span');
+    wave.className = 'btn-wave';
+    wave.style.left = x + 'px';
+    wave.style.top = y + 'px';
+    btn.appendChild(wave);
+    
+    setTimeout(function() { wave.remove(); }, 800);
+  } else if (!event) {
+    var wave = document.createElement('span');
+    wave.className = 'btn-wave';
+    wave.style.left = '50%';
+    wave.style.top = '50%';
+    btn.appendChild(wave);
+    setTimeout(function() { wave.remove(); }, 800);
+  }
+
   var username = document.getElementById('loginUser').value.trim().toLowerCase();
   var password = document.getElementById('loginPassword').value;
-  var btn = document.getElementById('loginBtn');
   var error = document.getElementById('loginError');
 
   if (!username || !password) { error.textContent = 'Ingresa usuario y contraseña'; return; }
@@ -1860,12 +2835,20 @@ function handleLogin() {
         error.textContent = '';
         showToast('Bienvenido' + (result.role === 'admin' ? ' al panel de administración' : ', ' + result.name), 'success');
         showDashboard();
+        
+        // Carga forzada de datos iniciales tras inicio de sesión exitoso
+        loadProjects();
         if (result.role === 'admin') {
+          loadUsers();
           loadOperators();
           loadManagers();
           loadAreas();
+        } else if (result.role === 'manager') {
+          loadUsers();
+          loadOperators();
+        } else {
+          loadOperators();
         }
-        loadProjects();
       } else {
         error.textContent = result.error || 'Error de autenticación';
       }
@@ -1877,29 +2860,81 @@ function handleLogin() {
     .login(username, password);
 }
 
+function toggleSidebar() {
+  var s = document.getElementById('sidebar');
+  var w = document.querySelector('.app-wrapper');
+  s.classList.remove('sidebar-hover');
+  s.classList.toggle('closed');
+  w.classList.toggle('sidebar-closed');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+function initSidebar() {
+  var s = document.getElementById('sidebar');
+  var w = document.querySelector('.app-wrapper');
+  var isMobile = window.innerWidth < 769;
+  if (isMobile) {
+    s.classList.add('closed');
+    w.classList.add('sidebar-closed');
+  } else {
+    s.classList.remove('closed');
+    w.classList.remove('sidebar-closed');
+  }
+  // Hover expand/collapse on desktop
+  if (!isMobile) {
+    s.onmouseenter = function() {
+      if (s.classList.contains('closed')) s.classList.add('sidebar-hover');
+    };
+    s.onmouseleave = function() {
+      s.classList.remove('sidebar-hover');
+    };
+  } else {
+    s.onmouseenter = null;
+    s.onmouseleave = null;
+  }
+}
+
+window.addEventListener('resize', function() {
+  if (document.getElementById('dashboard').classList.contains('active')) {
+    initSidebar();
+  }
+});
+
 function showDashboard() {
+  initSidebar();
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('dashboard').classList.add('active');
 
   var isAdmin = currentUser && currentUser.role === 'admin';
+  var isManager = currentUser && currentUser.role === 'manager';
+  var displayName = currentUser && currentUser.name ? currentUser.name : 'Admin';
 
   // Header: user name + role badge
-  document.getElementById('roleBadge').textContent = isAdmin ? 'Admin' : currentUser.name;
+  document.getElementById('roleBadge').textContent = isAdmin ? 'Admin' : displayName;
 
-  // Show/hide admin tabs
-  document.getElementById('tabOperators').style.display = isAdmin ? '' : 'none';
+  // Sidebar user info
+  document.getElementById('sidebarUserIcon').textContent = displayName.charAt(0).toUpperCase();
+  document.getElementById('sidebarUserName').textContent = displayName;
+  document.getElementById('sidebarUserRole').textContent = isAdmin ? 'ADMIN' : (isManager ? 'MANAGER' : 'OPERADOR');
+
+  // Show/hide admin tabs in sidebar
+  document.getElementById('tabOperators').style.display = (isAdmin || isManager) ? '' : 'none';
+  document.getElementById('tabClients').style.display = (isAdmin || isManager) ? '' : 'none';
   document.getElementById('tabSettings').style.display = isAdmin ? '' : 'none';
 
-  // Default tab for operators
-  if (!isAdmin) switchTab('projects');
-
-  // Hide action button for operators
-  document.getElementById('btnHeaderAction').style.display = isAdmin ? '' : 'none';
-
+  // Tab por defecto
+  if (isAdmin) {
+    switchTab('operators');
+  } else if (isManager) {
+    switchTab('operators');
+  } else {
+    switchTab('projects');
+  }
+  
   // Show/hide operator-only info
-  document.getElementById('operatorInfo').style.display = isAdmin ? 'none' : 'flex';
-  if (!isAdmin) {
-    document.getElementById('operatorInfoName').textContent = currentUser.name;
+  document.getElementById('operatorInfo').style.display = (isAdmin || isManager) ? 'none' : 'flex';
+  if (!isAdmin && !isManager) {
+    document.getElementById('operatorInfoName').textContent = displayName;
     document.getElementById('operatorInfoArea').textContent = currentUser.area || 'Sin área';
   }
 }
@@ -1912,21 +2947,32 @@ function refreshData() {
     .withSuccessHandler(function(result) {
       if (icon) icon.classList.remove('fa-spin');
       if (result.success) {
+        usersCache = result.users || [];
         operatorsCache = result.operators || [];
+        managersCache = result.managers || [];
         projectsCache = result.projects || [];
         areasCache = result.areas || [];
-        renderOperators();
+        clientsCache = result.clients || [];
+        // Store config
+        if (result.config) {
+          document.getElementById('cfgBillingUrl').value = result.config.billingConcentrateUrl || '';
+          document.getElementById('cfgCatalogUrl').value = result.config.catalogDriveUrl || '';
+          window._billingDefaultUrl = result.config.billingConcentrateUrl || '';
+          window._catalogDefaultUrl = result.config.catalogDriveUrl || '';
+        }
+        renderUsers();
         renderOperatorsByArea();
         renderProjects();
+        renderClients();
         renderAreas();
-        showToast('✓ Recargado: ' + (result.operators || []).length + ' operadores', 'success');
+        showToast('o" Recargado: ' + (result.users || []).length + ' usuarios, ' + (result.clients || []).length + ' clientes', 'success');
       } else {
-        showToast('✗ ' + (result.error || 'Error desconocido'), 'error');
+        showToast('o- ' + (result.error || 'Error desconocido'), 'error');
       }
     })
     .withFailureHandler(function(err) {
       if (icon) icon.classList.remove('fa-spin');
-      showToast('✗ Error de conexión: ' + (err ? err.message || err : 'sin respuesta'), 'error');
+      showToast('o- Error de conexión: ' + (err ? err.message || err : 'sin respuesta'), 'error');
     })
     .refreshAllData(sessionToken);
 }
@@ -1949,7 +2995,7 @@ function handleLogout() {
 
 /* ====== TAB SWITCHING ====== */
 function switchTab(tab) {
-  ['operators', 'projects', 'settings'].forEach(function(t) {
+  ['operators', 'projects', 'clients', 'settings'].forEach(function(t) {
     var tabId = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
     var viewId = 'view' + t.charAt(0).toUpperCase() + t.slice(1);
     document.getElementById(tabId).classList.toggle('active', t === tab);
@@ -1958,12 +3004,16 @@ function switchTab(tab) {
 
   var btn = document.getElementById('btnHeaderAction');
   if (tab === 'operators') {
-    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Operador';
-    btn.onclick = openCreateOperatorModal;
+    btn.innerHTML = '<i class="fas fa-plus"></i><span> Nuevo Usuario</span>';
+    btn.onclick = openCreateUserModal;
     btn.style.display = '';
   } else if (tab === 'projects') {
-    btn.innerHTML = '<i class="fas fa-plus"></i> Nuevo Proyecto';
+    btn.innerHTML = '<i class="fas fa-plus"></i><span> Nuevo Proyecto</span>';
     btn.onclick = openProjectModal;
+    btn.style.display = '';
+  } else if (tab === 'clients') {
+    btn.innerHTML = '<i class="fas fa-plus"></i><span> Nuevo Cliente</span>';
+    btn.onclick = openOnboardingModal;
     btn.style.display = '';
   } else {
     btn.style.display = 'none';
@@ -1975,60 +3025,74 @@ function switchTab(tab) {
   }
 }
 
-/* ====== OPERADORES ====== */
+/* ====== USUARIOS ====== */
+function loadUsers() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        usersCache = result.users;
+        renderUsers();
+      } else if (result.error === 'Sesión expirada') { handleLogout(); }
+    })
+    .listAllUsers(sessionToken);
+}
+
 function loadOperators() {
   google.script.run
     .withSuccessHandler(function(result) {
       if (result.success) {
         operatorsCache = result.operators;
-        renderOperators();
         renderOperatorsByArea();
       } else if (result.error === 'Sesión expirada') { handleLogout(); }
     })
     .listOperators(sessionToken);
 }
 
-function renderOperators() {
+function renderUsers() {
   var tbody = document.getElementById('operatorsBody');
   var empty = document.getElementById('emptyState');
   var statTotal = document.getElementById('statTotal');
   var statActive = document.getElementById('statActive');
   var tableCount = document.getElementById('tableCount');
 
-  statTotal.textContent = operatorsCache.length;
-  statActive.textContent = operatorsCache.length;
-  tableCount.textContent = operatorsCache.length + ' operadores';
+  statTotal.textContent = usersCache.length;
+  statActive.textContent = usersCache.length;
+  tableCount.textContent = usersCache.length + ' usuarios';
 
-  if (operatorsCache.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  if (usersCache.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = '';
 
-  operatorsCache.forEach(function(op) {
-    var initials = op.name.substring(0, 2).toUpperCase();
-    var areaName = op.area || '—';
+  var roleLabels = { admin: 'Admin', manager: 'Manager', operator: 'Operador' };
+  var roleColors = { admin: 'rgba(108,92,231,0.2);color:#a29bfe', manager: 'rgba(81,207,102,0.2);color:#51cf66', operator: 'rgba(255,159,67,0.2);color:#ff9f43' };
+
+  usersCache.forEach(function(u) {
+    var initials = u.name.substring(0, 2).toUpperCase();
+    var areaName = u.area || '?"';
+    var roleLabel = roleLabels[u.role] || u.role;
+    var roleColor = roleColors[u.role] || 'rgba(255,255,255,0.2);color:white';
+
+    var actions = '';
+    if (u.role === 'admin') {
+      actions = '<button class="btn-icon accent" onclick="openAdminPassModal()" title="Cambiar contraseña"><i class="fas fa-key"></i></button>';
+    } else if (u.role === 'manager') {
+      actions =
+        '<button class="btn-icon accent" onclick="openEditManagerModal(\'' + u.id + '\')" title="Editar"><i class="fas fa-pen-to-square"></i></button>' +
+        '<button class="btn-icon danger" onclick="openDeleteManagerModal(\'' + u.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>';
+    } else {
+      actions =
+        '<button class="btn-icon accent" onclick="openEditModal(\'' + u.id + '\')" title="Editar"><i class="fas fa-pen-to-square"></i></button>' +
+        '<button class="btn-icon danger" onclick="openDeleteModal(\'' + u.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>';
+    }
 
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td><div class="operator-name"><div class="operator-avatar">' + initials + '</div>' + escapeHtml(op.name) + '</div></td>' +
+      '<td><div class="operator-name"><div class="operator-avatar">' + initials + '</div>' + escapeHtml(u.name) + '</div></td>' +
+      '<td><span style="background:' + roleColor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;">' + roleLabel + '</span></td>' +
       '<td><span style="color:var(--text-secondary);font-size:13px;">' + escapeHtml(areaName) + '</span></td>' +
-      '<td><div class="actions-cell" style="justify-content:flex-end;">' +
-        '<button class="btn-icon accent" onclick="openEditModal(\'' + op.id + '\')" title="Editar"><i class="fas fa-pen-to-square"></i></button>' +
-        '<button class="btn-icon danger" onclick="openDeleteModal(\'' + op.id + '\')" title="Eliminar"><i class="fas fa-trash-can"></i></button>' +
-      '</div></td>';
+      '<td><div class="actions-cell" style="justify-content:flex-end;">' + actions + '</div></td>';
     tbody.appendChild(tr);
   });
-}
-
-/* Create Operator Modal */
-function openCreateOperatorModal() {
-  document.getElementById('newOpName').value = '';
-  document.getElementById('newOpPass').value = '';
-  document.getElementById('createError').textContent = '';
-  var sel = document.getElementById('newOpArea');
-  sel.innerHTML = '<option value="">Sin área</option>';
-  areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
-  document.getElementById('createModal').classList.add('active');
-  setTimeout(function() { document.getElementById('newOpName').focus(); }, 200);
 }
 
 function closeCreateModal() {
@@ -2052,7 +3116,6 @@ function inlineCreateArea() {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-plus"></i>';
       if (!result.success) { error.textContent = result.error; return; }
-      // Recargar áreas desde el servidor para garantizar datos frescos
       google.script.run
         .withSuccessHandler(function(res) {
           if (res.success) {
@@ -2073,23 +3136,6 @@ function inlineCreateArea() {
       error.textContent = 'Error: ' + err.message;
     })
     .createArea(sessionToken, name);
-}
-
-function confirmCreate() {
-  var name = document.getElementById('newOpName').value.trim();
-  var pass = document.getElementById('newOpPass').value.trim();
-  var area = document.getElementById('newOpArea').value;
-  var error = document.getElementById('createError');
-  if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
-  if (!pass) { error.textContent = 'La contraseña es obligatoria'; return; }
-
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.success) { closeCreateModal(); showToast('Operador "' + name + '" creado', 'success'); loadOperators(); }
-      else { error.textContent = result.error; }
-    })
-    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
-    .createOperator(sessionToken, name, pass, area);
 }
 
 /* Edit Operator Modal */
@@ -2119,7 +3165,7 @@ function confirmEditOp() {
 
   google.script.run
     .withSuccessHandler(function(result) {
-      if (result.success) { closeEditModal(); showToast('Operador actualizado', 'success'); loadOperators(); }
+      if (result.success) { closeEditModal(); showToast('Operador actualizado', 'success'); loadUsers(); loadOperators(); }
       else { error.textContent = result.error; }
     })
     .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
@@ -2142,7 +3188,7 @@ function confirmDelete() {
   var error = document.getElementById('deleteError');
   google.script.run
     .withSuccessHandler(function(result) {
-      if (result.success) { closeDeleteModal(); showToast('Operador eliminado', 'success'); loadOperators(); }
+      if (result.success) { closeDeleteModal(); showToast('Operador eliminado', 'success'); loadUsers(); loadOperators(); }
       else { error.textContent = result.error; }
     })
     .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
@@ -2156,6 +3202,127 @@ function loadManagers() {
     .listManagers(sessionToken);
 }
 
+function onCreateRoleChange() {
+  var role = document.getElementById('newUserRole').value;
+  document.getElementById('newUserAreaGroup').style.display = role === 'operator' ? 'block' : 'none';
+}
+
+function openCreateUserModal() {
+  document.getElementById('newUserRole').value = 'operator';
+  document.getElementById('newOpName').value = '';
+  document.getElementById('newOpPass').value = '';
+  document.getElementById('createError').textContent = '';
+  document.getElementById('newUserAreaGroup').style.display = 'block';
+  var sel = document.getElementById('newOpArea');
+  sel.innerHTML = '<option value="">Sin área</option>';
+  areasCache.forEach(function(a) { sel.innerHTML += '<option value="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</option>'; });
+  document.getElementById('createModal').classList.add('active');
+  setTimeout(function() { document.getElementById('newOpName').focus(); }, 200);
+}
+
+function confirmCreate() {
+  var role = document.getElementById('newUserRole').value;
+  var name = document.getElementById('newOpName').value.trim();
+  var pass = document.getElementById('newOpPass').value.trim();
+  var area = document.getElementById('newOpArea').value;
+  var error = document.getElementById('createError');
+  if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
+  if (!pass) { error.textContent = 'La contraseña es obligatoria'; return; }
+
+  if (role === 'manager') {
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) { closeCreateModal(); showToast('Manager "' + name + '" creado', 'success'); loadUsers(); }
+        else { error.textContent = result.error; }
+      })
+      .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+      .createManager(sessionToken, name, pass);
+  } else {
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) { closeCreateModal(); showToast('Operador "' + name + '" creado', 'success'); loadUsers(); loadOperators(); }
+        else { error.textContent = result.error; }
+      })
+      .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+      .createOperator(sessionToken, name, pass, area);
+  }
+}
+
+/* Manager Edit/Delete */
+function openEditManagerModal(id) {
+  currentUserId = id;
+  var u = usersCache.find(function(o) { return o.id === id; });
+  if (!u) return;
+  document.getElementById('editMgrName').value = u.name;
+  document.getElementById('editMgrPass').value = '';
+  document.getElementById('editMgrError').textContent = '';
+  document.getElementById('editManagerModal').classList.add('active');
+  setTimeout(function() { document.getElementById('editMgrName').focus(); }, 200);
+}
+
+function closeEditManagerModal() { document.getElementById('editManagerModal').classList.remove('active'); currentUserId = null; }
+
+function confirmEditManager() {
+  var name = document.getElementById('editMgrName').value.trim();
+  var pass = document.getElementById('editMgrPass').value.trim();
+  var error = document.getElementById('editMgrError');
+  if (!name) { error.textContent = 'El nombre es obligatorio'; return; }
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeEditManagerModal(); showToast('Manager actualizado', 'success'); loadUsers(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .updateManager(sessionToken, currentUserId, name, pass);
+}
+
+function openDeleteManagerModal(id) {
+  currentUserId = id;
+  var u = usersCache.find(function(o) { return o.id === id; });
+  if (!u) return;
+  document.getElementById('deleteMgrName').textContent = u.name + '?';
+  document.getElementById('deleteMgrError').textContent = '';
+  document.getElementById('deleteManagerModal').classList.add('active');
+}
+
+function closeDeleteManagerModal() { document.getElementById('deleteManagerModal').classList.remove('active'); currentUserId = null; }
+
+function confirmDeleteManager() {
+  var error = document.getElementById('deleteMgrError');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeDeleteManagerModal(); showToast('Manager eliminado', 'success'); loadUsers(); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .deleteManager(sessionToken, currentUserId);
+}
+
+/* Admin password change */
+function openAdminPassModal() {
+  document.getElementById('adminNewPass').value = '';
+  document.getElementById('adminPassError').textContent = '';
+  document.getElementById('adminPassModal').classList.add('active');
+  setTimeout(function() { document.getElementById('adminNewPass').focus(); }, 200);
+}
+
+function closeAdminPassModal() { document.getElementById('adminPassModal').classList.remove('active'); }
+
+function confirmAdminPassChange() {
+  var newPass = document.getElementById('adminNewPass').value.trim();
+  var error = document.getElementById('adminPassError');
+  if (!newPass) { error.textContent = 'La contraseña es obligatoria'; return; }
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) { closeAdminPassModal(); showToast('Contraseña de admin actualizada', 'success'); }
+      else { error.textContent = result.error; }
+    })
+    .withFailureHandler(function(err) { error.textContent = 'Error: ' + err.message; })
+    .updateConfig('admin_pass', newPass);
+}
+
 /* ====== PROJECTS ====== */
 function loadProjects() {
   google.script.run
@@ -2167,6 +3334,7 @@ function loadProjects() {
 }
 
 function renderProjects() {
+  console.log('renderProjects ejecutado. Proyectos:', projectsCache);
   var tbody = document.getElementById('projectsBody');
   var empty = document.getElementById('projEmptyState');
   var totalEl = document.getElementById('projTotal');
@@ -2177,6 +3345,8 @@ function renderProjects() {
     ? projectsCache.filter(function(p) { return p.operator === currentUser.name; })
     : projectsCache;
 
+  console.log('Proyectos filtrados:', filtered);
+  
   var openCount = filtered.filter(function(p) { return p.status === 'Abierto'; }).length;
   totalEl.textContent = filtered.length;
   openEl.textContent = openCount;
@@ -2187,6 +3357,7 @@ function renderProjects() {
   tbody.innerHTML = '';
 
   filtered.forEach(function(p) {
+    console.log('Renderizando proyecto:', p.projectName);
     var deadline = p.deadline ? new Date(p.deadline + 'T00:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
     var isOpen = p.status === 'Abierto';
     var statusBadge = isOpen
@@ -2641,6 +3812,647 @@ function deleteCustomField(id) {
     .withSuccessHandler(function(result) { if (result.success) { showToast('Campo eliminado', 'success'); loadCustomFields(); } })
     .deleteCustomField(sessionToken, id);
 }
+
+/* ====== CLIENTES ====== */
+function renderClients() {
+  var tbody = document.getElementById('clientsBody');
+  var empty = document.getElementById('cliEmptyState');
+  var totalEl = document.getElementById('cliTotal');
+  var onbEl = document.getElementById('cliOnboarding');
+  var compEl = document.getElementById('cliCompleted');
+  var countEl = document.getElementById('cliCount');
+
+  if (!tbody) return;
+
+  totalEl.textContent = clientsCache.length;
+  var onbCount = clientsCache.filter(function(c) { return c.onboardingStage !== '7_completado' && c.onboardingStage !== '7_asignado'; }).length;
+  var compCount = clientsCache.filter(function(c) { return c.onboardingStage === '7_completado' || c.onboardingStage === '7_asignado'; }).length;
+  onbEl.textContent = onbCount;
+  compEl.textContent = compCount;
+  countEl.textContent = clientsCache.length + ' clientes';
+
+  if (clientsCache.length === 0) { tbody.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
+  if (empty) empty.style.display = 'none';
+  tbody.innerHTML = '';
+
+  var stageLabels = {
+    '1_datos_generales': 'Datos generales',
+    '2_entrevista': 'Entrevista',
+    '3_catalogo': 'Catálogo',
+    '4_operaciones': 'Operaciones',
+    '5_conceptos': 'Conceptos',
+    '6_documentos': 'Documentos',
+    '7_completado': 'Completado',
+    '7_asignado': 'Asignado'
+  };
+  var stageColors = {
+    '1_datos_generales': 'rgba(255,159,67,0.2);color:#ff9f43',
+    '2_entrevista': 'rgba(255,159,67,0.2);color:#ff9f43',
+    '3_catalogo': 'rgba(255,159,67,0.2);color:#ff9f43',
+    '4_operaciones': 'rgba(108,92,231,0.2);color:#a29bfe',
+    '5_conceptos': 'rgba(108,92,231,0.2);color:#a29bfe',
+    '6_documentos': 'rgba(108,92,231,0.2);color:#a29bfe',
+    '7_completado': 'rgba(81,207,102,0.2);color:#51cf66',
+    '7_asignado': 'rgba(81,207,102,0.2);color:#51cf66'
+  };
+
+  clientsCache.forEach(function(c) {
+    var initials = c.businessName.substring(0, 2).toUpperCase();
+    var stage = c.onboardingStage || '1_datos_generales';
+    var stageLabel = stageLabels[stage] || stage;
+    var stageColor = stageColors[stage] || 'rgba(255,255,255,0.2);color:white';
+    var statusColor = c.status === 'Activo' ? 'rgba(81,207,102,0.15);color:#51cf66' : 'rgba(255,107,107,0.15);color:#ff6b6b';
+
+    var actions = '';
+    if (stage === '7_completado' || stage === '7_asignado') {
+      actions = '<span style="font-size:11px;color:var(--text-secondary);">Completado</span>';
+    } else {
+      actions = '<button class="btn-icon accent" onclick="continueOnboarding(\'' + c.id + '\')" title="Continuar onboarding"><i class="fas fa-arrow-right-to-bracket"></i></button>';
+    }
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><div class="operator-name"><div class="operator-avatar">' + initials + '</div>' + escapeHtml(c.businessName) + '</div></td>' +
+      '<td>' + escapeHtml(c.rfc || '-') + '</td>' +
+      '<td>' + escapeHtml(c.email || '-') + '</td>' +
+      '<td><span style="background:' + stageColor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;">' + stageLabel + '</span></td>' +
+      '<td><span style="background:' + statusColor + ';padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;">' + escapeHtml(c.status || '') + '</span></td>' +
+      '<td><div class="client-row-actions">' + actions + '</div></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* ====== ONBOARDING HELPERS ====== */
+function toggleOtherId() {
+  var sel = document.getElementById('wizLegalRepId');
+  var other = document.getElementById('wizLegalRepIdOther');
+  other.style.display = sel.value === 'Otro' ? '' : 'none';
+  if (sel.value === 'Otro') other.focus();
+}
+
+function saveConfigUrl() {
+  var url = document.getElementById('cfgBillingUrl').value.trim();
+  google.script.run
+    .withSuccessHandler(function(res) {
+      showToast('URL de concentrado guardada', 'success');
+      window._billingDefaultUrl = url;
+    })
+    .updateConfig('billingConcentrateUrl', url);
+}
+
+function saveCatalogUrl() {
+  var url = document.getElementById('cfgCatalogUrl').value.trim();
+  google.script.run
+    .withSuccessHandler(function(res) {
+      showToast('URL de catálogo guardada', 'success');
+      window._catalogDefaultUrl = url;
+    })
+    .updateConfig('catalogDriveUrl', url);
+}
+
+function openOnboardingModal() {
+  // Reset wizard state
+  wizardClientId = null;
+  wizardTempOps = [];
+  wizardTempBcs = [];
+  wizardTempDocs = [];
+  document.getElementById('wizBusinessName').value = '';
+  document.getElementById('wizRfc').value = '';
+  document.getElementById('wizCp').value = '';
+  document.getElementById('wizLegalRep').value = '';
+  document.getElementById('wizLegalRepId').value = '';
+  document.getElementById('wizLegalRepIdOther').value = '';
+  document.getElementById('wizLegalRepIdOther').style.display = 'none';
+  document.getElementById('wizEmail').value = '';
+  document.getElementById('wizPhone').value = '';
+  document.getElementById('wizAddress').value = '';
+  document.getElementById('wizInterviewDate').value = '';
+  document.getElementById('wizInterviewType').value = '';
+  document.getElementById('wizInterviewNotes').value = '';
+  document.getElementById('wizInterviewDone').checked = false;
+  document.getElementById('wizDriveFolderUrl').value = '';
+  document.getElementById('wizCatalogDone').checked = false;
+  document.getElementById('wizCatalogDriveUrl').value = '';
+  document.getElementById('wizBillingUrl').value = window._billingDefaultUrl || '';
+  document.getElementById('wizBillingDone').checked = false;
+  document.getElementById('wizExamplesDone').checked = false;
+  document.getElementById('wizConfirmDone').checked = false;
+  document.getElementById('onboardingError').textContent = '';
+
+  // Init doc statuses
+  var docTypes = [
+    { key: '01', name: 'Escritura constitutiva (con boleta RPP)' },
+    { key: '02', name: 'Escrituras de cambios estatutarios' },
+    { key: '03', name: 'Poder notarial del Representante Legal' },
+    { key: '04', name: 'Identificación vigente del Representante Legal' },
+    { key: '05', name: "Constancia de Situación Fiscal (CSF) - actualizada ?3 meses" },
+    { key: '06', name: 'Cédula de Identificación Fiscal (CIF)' },
+    { key: '07', name: 'Opinión de Cumplimiento (32-D) positiva' },
+    { key: '08', name: "Comprobante de domicilio (luz, agua o teléfono) ?3 meses" }
+  ];
+  wizardTempDocs = docTypes.map(function(d) { return { key: d.key, name: d.name, status: 'Pendiente' }; });
+  renderWizardDocs();
+
+  // Load materialidad operators
+  loadMaterialidadOperators();
+
+  goToWizardStep(1);
+  document.getElementById('wizStepCounter').textContent = 'Paso 1 de 7';
+  document.getElementById('onboardingModal').classList.add('active');
+  setTimeout(function() { document.getElementById('wizBusinessName').focus(); }, 300);
+}
+
+function closeOnboardingModal() {
+  document.getElementById('onboardingModal').classList.remove('active');
+}
+
+function continueOnboarding(clientId) {
+  wizardClientId = clientId;
+  // Load client data first, then operations, billing, docs
+  google.script.run
+    .withSuccessHandler(function(allResult) {
+      if (!allResult.success) { showToast('Error al cargar clientes', 'error'); return; }
+      var client = null;
+      for (var i = 0; i < allResult.clients.length; i++) {
+        if (allResult.clients[i].id === clientId) { client = allResult.clients[i]; break; }
+      }
+      if (!client) { showToast('Cliente no encontrado', 'error'); return; }
+
+      document.getElementById('wizBusinessName').value = client.businessName || '';
+      document.getElementById('wizRfc').value = client.rfc || '';
+      document.getElementById('wizCp').value = client.cp || '';
+      document.getElementById('wizLegalRep').value = client.legalRep || '';
+      var repId = client.legalRepId || '';
+      var knownIds = ['INE','Pasaporte','Cédula Profesional','Cédula de Identidad','Licencia de Conducir','Cartilla del Servicio Militar'];
+      if (knownIds.indexOf(repId) >= 0) {
+        document.getElementById('wizLegalRepId').value = repId;
+      } else if (repId) {
+        document.getElementById('wizLegalRepId').value = 'Otro';
+        document.getElementById('wizLegalRepIdOther').value = repId;
+        document.getElementById('wizLegalRepIdOther').style.display = '';
+      } else {
+        document.getElementById('wizLegalRepId').value = '';
+      }
+      document.getElementById('wizEmail').value = client.email || '';
+      document.getElementById('wizPhone').value = client.phone || '';
+      document.getElementById('wizAddress').value = client.address || '';
+      document.getElementById('wizInterviewDate').value = client.interviewDate || '';
+      document.getElementById('wizInterviewType').value = client.interviewType || '';
+      document.getElementById('wizInterviewNotes').value = client.interviewNotes || '';
+      document.getElementById('wizInterviewDone').checked = !!(client.interviewDate);
+      document.getElementById('wizDriveFolderUrl').value = client.driveFolderUrl || '';
+      document.getElementById('wizCatalogDriveUrl').value = client.catalogDriveUrl || '';
+      document.getElementById('wizBillingUrl').value = client.billingConcentrateUrl || '';
+
+      loadMaterialidadOperators();
+
+      // Load billing concepts
+      google.script.run
+        .withSuccessHandler(function(bcResult) {
+          if (bcResult.success) {
+            wizardTempBcs = bcResult.concepts.map(function(b) { return { id: b.id, name: b.conceptName, amount: b.baseAmount, freq: b.frequency }; });
+            renderWizardBcs();
+          }
+        })
+        .listBillingConcepts(sessionToken, clientId);
+
+      // Load docs
+      google.script.run
+        .withSuccessHandler(function(docResult) {
+          if (docResult.success && docResult.docs) {
+            wizardTempDocs = docResult.docs.map(function(d) { return { key: d.docKey, name: d.docName, status: d.status || 'Pendiente' }; });
+            renderWizardDocs();
+          }
+        })
+        .listClientDocs(sessionToken, clientId);
+
+      // Go to current stage
+      var stage = client.onboardingStage || '1_datos_generales';
+      var stepMap = { '1_datos_generales': 1, '2_entrevista': 2, '3_catalogo': 3, '4_operaciones': 4, '4_concentrado': 4, '5_conceptos': 5, '6_documentos': 6, '7_completado': 7, '7_asignado': 7 };
+      var step = stepMap[stage] || 1;
+      goToWizardStep(step);
+      document.getElementById('wizStepCounter').textContent = 'Paso ' + step + ' de 7';
+      document.getElementById('onboardingModal').classList.add('active');
+    })
+    .listClients(sessionToken);
+}
+
+/* ====== WIZARD NAVIGATION ====== */
+var wizardCurrentStep = 1;
+
+function goToWizardStep(step) {
+  wizardCurrentStep = step;
+  for (var i = 1; i <= 7; i++) {
+    var el = document.getElementById('wizStep' + i);
+    if (el) el.classList.toggle('active', i === step);
+    var ind = document.querySelector('.wizard-step-indicator[data-step="' + i + '"]');
+    if (ind) {
+      ind.classList.toggle('active', i === step);
+      ind.classList.toggle('completed', i < step);
+    }
+  }
+  // Update progress bar width
+  var progressBar = document.querySelector('.wizard-progress');
+  if (progressBar) {
+    var pct = ((step - 1) / 6) * 100;
+    progressBar.style.setProperty('--progress-width', pct + '%');
+  }
+  document.getElementById('wizStepCounter').textContent = 'Paso ' + step + ' de 7';
+  document.getElementById('wizPrevBtn').style.display = step === 1 ? 'none' : '';
+  var nextBtn = document.getElementById('wizNextBtn');
+  if (step === 7) {
+    nextBtn.innerHTML = '<i class="fas fa-check"></i> Finalizar';
+  } else {
+    nextBtn.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+  }
+}
+
+function wizardNext() {
+  var error = document.getElementById('onboardingError');
+  error.textContent = '';
+
+  // Validate current step
+  if (wizardCurrentStep === 1) {
+    var name = document.getElementById('wizBusinessName').value.trim();
+    if (!name) { showToast('La razón social es obligatoria', 'warning'); return; }
+    var repIdSelect = document.getElementById('wizLegalRepId').value;
+    var repIdOther = document.getElementById('wizLegalRepIdOther').value.trim();
+    var repIdFinal = repIdSelect === 'Otro' ? (repIdOther || 'Otro') : repIdSelect;
+    var data = {
+      businessName: name,
+      rfc: document.getElementById('wizRfc').value.trim(),
+      cp: document.getElementById('wizCp').value.trim(),
+      legalRep: document.getElementById('wizLegalRep').value.trim(),
+      legalRepId: repIdFinal,
+      email: document.getElementById('wizEmail').value.trim(),
+      phone: document.getElementById('wizPhone').value.trim(),
+      address: document.getElementById('wizAddress').value.trim(),
+      driveFolderUrl: document.getElementById('wizDriveFolderUrl').value.trim(),
+      onboardingStage: '2_entrevista'
+    };
+
+    if (wizardClientId) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) updateClientStage('2_entrevista');
+          else { error.textContent = res.error || 'Error al guardar'; }
+        })
+        .updateClient(sessionToken, wizardClientId, data);
+    } else {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            wizardClientId = res.clientId;
+            updateClientStage('2_entrevista');
+          } else { error.textContent = res.error || 'Error al crear cliente'; }
+        })
+        .createClient(sessionToken, data);
+    }
+    return;
+  } else if (wizardCurrentStep === 2) {
+    if (!document.getElementById('wizInterviewDone').checked) {
+      showToast('Marca la entrevista como realizada para continuar', 'warning');
+      return;
+    }
+    var interviewData = {
+      interviewDate: document.getElementById('wizInterviewDate').value,
+      interviewType: document.getElementById('wizInterviewType').value,
+      interviewNotes: document.getElementById('wizInterviewNotes').value.trim(),
+      driveFolderUrl: document.getElementById('wizDriveFolderUrl').value.trim(),
+      onboardingStage: '3_catalogo'
+    };
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) updateClientStage('3_catalogo');
+        else { error.textContent = res.error || 'Error al guardar'; }
+      })
+      .updateClient(sessionToken, wizardClientId, interviewData);
+    return;
+  } else if (wizardCurrentStep === 3) {
+    if (!document.getElementById('wizCatalogDone').checked) {
+      showToast('Marca la asesoría de catálogo como completada para continuar', 'warning');
+      return;
+    }
+    var catalogData = {
+      catalogDriveUrl: document.getElementById('wizCatalogDriveUrl').value.trim(),
+      onboardingStage: '4_concentrado'
+    };
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) updateClientStage('4_concentrado');
+        else { error.textContent = res.error || 'Error al guardar'; }
+      })
+      .updateClient(sessionToken, wizardClientId, catalogData);
+    return;
+  } else if (wizardCurrentStep === 4) {
+    if (!document.getElementById('wizBillingDone').checked) {
+      showToast('Marca el concentrado de facturación como revisado para continuar', 'warning');
+      return;
+    }
+    var billingData = {
+      billingConcentrateUrl: document.getElementById('wizBillingUrl').value.trim(),
+      onboardingStage: '5_conceptos'
+    };
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) updateClientStage('5_conceptos');
+        else { error.textContent = res.error || 'Error al guardar'; }
+      })
+      .updateClient(sessionToken, wizardClientId, billingData);
+    return;
+  } else if (wizardCurrentStep === 5) {
+    if (!document.getElementById('wizExamplesDone').checked) {
+      showToast('Marca los ejemplos como explicados para continuar', 'warning');
+      return;
+    }
+    saveWizardBillingToServer(function() {
+      updateClientStage('6_documentos');
+    });
+    return;
+  } else if (wizardCurrentStep === 6) {
+    updateClientStage('7_completado');
+    // Build summary
+    buildWizardSummary();
+    return;
+  } else if (wizardCurrentStep === 7) {
+    wizardFinish();
+    return;
+  }
+
+  goToWizardStep(wizardCurrentStep + 1);
+}
+
+function wizardPrev() {
+  if (wizardCurrentStep > 1) goToWizardStep(wizardCurrentStep - 1);
+}
+
+function updateClientStage(stage) {
+  if (!wizardClientId) return;
+  google.script.run
+    .withSuccessHandler(function() {})
+    .updateOnboardingStage(sessionToken, wizardClientId, stage);
+  goToWizardStep(wizardCurrentStep + 1);
+}
+
+/* ====== WIZARD: OPERACIONES ====== */
+function addWizardOperation() {
+  var name = document.getElementById('wizNewOpName').value.trim();
+  var desc = document.getElementById('wizNewOpDesc').value.trim();
+  if (!name) { showToast('Nombre de operación requerido', 'error'); return; }
+  wizardTempOps.push({ id: null, name: name, description: desc, hasBilling: false });
+  document.getElementById('wizNewOpName').value = '';
+  document.getElementById('wizNewOpDesc').value = '';
+  renderWizardOps();
+}
+
+function removeWizardOperation(idx) {
+  wizardTempOps.splice(idx, 1);
+  renderWizardOps();
+}
+
+function toggleWizardOpBilling(idx) {
+  wizardTempOps[idx].hasBilling = !wizardTempOps[idx].hasBilling;
+  renderWizardOps();
+}
+
+function renderWizardOps() {
+  var container = document.getElementById('wizOperationsList');
+  var empty = document.getElementById('wizOpsEmpty');
+  if (!container) return;
+  if (wizardTempOps.length === 0) { container.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
+  if (empty) empty.style.display = 'none';
+  container.innerHTML = '';
+  wizardTempOps.forEach(function(op, idx) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--glass-border);';
+    var gapBadge = op.hasBilling ? '' : ' <span class="billing-gap">Sin facturación</span>';
+    div.innerHTML =
+      '<span style="flex:1;font-size:13px;">' + escapeHtml(op.name) + gapBadge + '</span>' +
+      '<span style="font-size:11px;color:var(--text-secondary);flex:1;">' + escapeHtml(op.description || '') + '</span>' +
+      '<button class="btn-icon-sm" onclick="toggleWizardOpBilling(' + idx + ')" title="Alternar facturación" style="background:' + (op.hasBilling ? 'rgba(81,207,102,0.2)' : 'rgba(255,107,107,0.2)') + ';color:' + (op.hasBilling ? '#51cf66' : '#ff6b6b') + ';"><i class="fas fa-dollar-sign"></i></button>' +
+      '<button class="btn-icon-sm" onclick="removeWizardOperation(' + idx + ')" style="color:var(--danger);"><i class="fas fa-times"></i></button>';
+    container.appendChild(div);
+  });
+}
+
+function saveWizardOperationsToServer(callback) {
+  if (!wizardClientId) { if (callback) callback(); return; }
+  var pending = wizardTempOps.filter(function(o) { return !o.id; });
+  var done = 0;
+  if (pending.length === 0) { if (callback) callback(); return; }
+  pending.forEach(function(op) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        done++;
+        if (res.success) op.id = res.operationId;
+        if (done >= pending.length && callback) callback();
+      })
+      .saveClientOperation(sessionToken, { clientId: wizardClientId, operationName: op.name, description: op.description, hasBilling: op.hasBilling });
+  });
+}
+
+/* ====== WIZARD: BILLING CONCEPTS ====== */
+function addWizardBillingConcept() {
+  var name = document.getElementById('wizNewBcName').value.trim();
+  var amount = document.getElementById('wizNewBcAmount').value.trim();
+  var freq = document.getElementById('wizNewBcFreq').value;
+  if (!name) { showToast('Nombre del concepto requerido', 'error'); return; }
+  wizardTempBcs.push({ id: null, name: name, amount: amount, freq: freq });
+  document.getElementById('wizNewBcName').value = '';
+  document.getElementById('wizNewBcAmount').value = '';
+  document.getElementById('wizNewBcFreq').value = '';
+  renderWizardBcs();
+}
+
+function removeWizardBillingConcept(idx) {
+  wizardTempBcs.splice(idx, 1);
+  renderWizardBcs();
+}
+
+function renderWizardBcs() {
+  var container = document.getElementById('wizBillingList');
+  var empty = document.getElementById('wizBcEmpty');
+  if (!container) return;
+  if (wizardTempBcs.length === 0) { container.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
+  if (empty) empty.style.display = 'none';
+  container.innerHTML = '';
+  wizardTempBcs.forEach(function(bc, idx) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--glass-border);';
+    div.innerHTML =
+      '<span style="flex:1;font-size:13px;font-weight:500;">' + escapeHtml(bc.name) + '</span>' +
+      '<span style="font-size:12px;color:var(--text-secondary);">$' + escapeHtml(bc.amount || '0') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-secondary);">' + escapeHtml(bc.freq || '-') + '</span>' +
+      '<button class="btn-icon-sm" onclick="removeWizardBillingConcept(' + idx + ')" style="color:var(--danger);"><i class="fas fa-times"></i></button>';
+    container.appendChild(div);
+  });
+}
+
+function saveWizardBillingToServer(callback) {
+  if (!wizardClientId) { if (callback) callback(); return; }
+  var pending = wizardTempBcs.filter(function(b) { return !b.id; });
+  var done = 0;
+  if (pending.length === 0) { if (callback) callback(); return; }
+  pending.forEach(function(bc) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        done++;
+        if (res.success) bc.id = res.billingConceptId;
+        if (done >= pending.length && callback) callback();
+      })
+      .saveBillingConcept(sessionToken, { clientId: wizardClientId, conceptName: bc.name, baseAmount: bc.amount, frequency: bc.freq });
+  });
+}
+
+/* ====== WIZARD: DOCUMENTOS ====== */
+function renderWizardDocs() {
+  var container = document.getElementById('wizDocsList');
+  if (!container) return;
+  if (wizardTempDocs.length === 0) { container.innerHTML = '<div class="checklist-empty">No hay documentos registrados</div>'; return; }
+  container.innerHTML = '';
+  var html = '<div class="doc-grid">';
+  wizardTempDocs.forEach(function(doc, idx) {
+    var isComplete = doc.status === 'Completo';
+    var statusColors = {
+      'Pendiente': 'rgba(255,159,67,0.2);color:#ff9f43',
+      'Recibido': 'rgba(108,92,231,0.2);color:#a29bfe',
+      'Revisado': 'rgba(81,207,102,0.2);color:#51cf66',
+      'Completo': 'rgba(81,207,102,0.3);color:#51cf66'
+    };
+    html += '<div class="doc-card' + (isComplete ? ' complete' : '') + '">';
+    html += '<div class="doc-card-title"><i class="fas fa-file-' + (isComplete ? 'circle-check' : 'circle') + '" style="color:' + (isComplete ? '#51cf66' : 'var(--text-secondary)') + ';"></i> ' + escapeHtml(doc.name) + '</div>';
+    html += '<select class="form-select" style="font-size:11px;padding:4px 8px;width:100%;" onchange="updateWizardDocStatus(' + idx + ', this.value)">';
+    docStatuses.forEach(function(s) {
+      html += '<option value="' + s + '"' + (s === doc.status ? ' selected' : '') + '>' + s + '</option>';
+    });
+    html += '</select>';
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function updateWizardDocStatus(idx, status) {
+  if (wizardTempDocs[idx]) wizardTempDocs[idx].status = status;
+}
+
+/* ====== WIZARD: RESUMEN Y ASIGNACIÓN ====== */
+function loadMaterialidadOperators() {
+  var sel = document.getElementById('wizAssignOperator');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Seleccionar operador...</option>';
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        var matOps = result.operators.filter(function(o) { return o.area && o.area.toLowerCase() === 'materialidad'; });
+        if (matOps.length === 0) {
+          // Fallback: show all operators
+          matOps = result.operators;
+        }
+        matOps.forEach(function(op) {
+          sel.innerHTML += '<option value="' + escapeHtml(op.id) + '">' + escapeHtml(op.name) + ' (' + escapeHtml(op.area || 'Sin área') + ')</option>';
+        });
+      }
+    })
+    .listOperators(sessionToken);
+}
+
+function buildWizardSummary() {
+  var container = document.getElementById('wizSummary');
+  if (!container) return;
+  var name = document.getElementById('wizBusinessName').value.trim();
+  var rfc = document.getElementById('wizRfc').value.trim();
+  var interviewDate = document.getElementById('wizInterviewDate').value;
+  var opsCount = wizardTempOps.length;
+  var bcCount = wizardTempBcs.length;
+  var docsComplete = wizardTempDocs.filter(function(d) { return d.status === 'Completo'; }).length;
+  var docsTotal = wizardTempDocs.length;
+
+  container.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+      '<div><strong>Cliente:</strong> ' + escapeHtml(name) + '</div>' +
+      '<div><strong>RFC:</strong> ' + escapeHtml(rfc || '-') + '</div>' +
+      '<div><strong>Entrevista:</strong> ' + (interviewDate || 'Pendiente') + '</div>' +
+      '<div><strong>Operaciones:</strong> ' + opsCount + '</div>' +
+      '<div><strong>Conceptos facturables:</strong> ' + bcCount + '</div>' +
+      '<div><strong>Documentos:</strong> ' + docsComplete + '/' + docsTotal + ' completos</div>' +
+    '</div>';
+}
+
+function wizardFinish() {
+  var error = document.getElementById('onboardingError');
+  error.textContent = '';
+
+  if (!document.getElementById('wizConfirmDone').checked) {
+    showToast('Confirma que el onboarding fue completado para finalizar', 'warning');
+    return;
+  }
+
+  var opSel = document.getElementById('wizAssignOperator');
+  var selectedOpId = opSel.value;
+  if (!selectedOpId) {
+    showToast('Selecciona un operador de Materialidad para asignar el proyecto', 'warning');
+    return;
+  }
+
+  // Find operator name
+  var selectedOp = null;
+  for (var i = 0; i < operatorsCache.length; i++) {
+    if (operatorsCache[i].id === selectedOpId) { selectedOp = operatorsCache[i]; break; }
+  }
+  if (!selectedOp) {
+    showToast('Operador no encontrado', 'warning');
+    return;
+  }
+
+  // Update client stage to '7_asignado'
+  google.script.run
+    .withSuccessHandler(function() {
+      // Save doc statuses to server
+      saveWizardDocsToServer(function() {
+        // Create the project
+        var clientName = document.getElementById('wizBusinessName').value.trim();
+        var projectData = {
+          operator: selectedOp.name,
+          client: clientName,
+          projectName: 'Onboarding - ' + clientName,
+          deadline: '',
+          manager1: selectedOp.name,
+          manager2: '',
+          legalSteps: [],
+          matSteps: []
+        };
+        google.script.run
+          .withSuccessHandler(function(projResult) {
+            if (projResult.success) {
+              closeOnboardingModal();
+              showToast('Proyecto "' + projectData.projectName + '" creado y asignado a ' + selectedOp.name, 'success');
+              refreshData();
+            } else {
+              error.textContent = projResult.error || 'Error al crear proyecto';
+            }
+          })
+          .createProject(sessionToken, projectData);
+      });
+    })
+    .updateOnboardingStage(sessionToken, wizardClientId, '7_asignado');
+}
+
+function saveWizardDocsToServer(callback) {
+  if (!wizardClientId) { if (callback) callback(); return; }
+  var done = 0;
+  var total = wizardTempDocs.length;
+  if (total === 0) { if (callback) callback(); return; }
+  wizardTempDocs.forEach(function(doc) {
+    google.script.run
+      .withSuccessHandler(function() {
+        done++;
+        if (done >= total && callback) callback();
+      })
+      .saveClientDocStatus(sessionToken, wizardClientId, doc.key, doc.status, '', '');
+  });
+}
 </script>
 </body>
 </html>
+

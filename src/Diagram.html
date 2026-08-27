@@ -1,0 +1,149 @@
+﻿<div class="diagram-wrapper">
+<style>
+.diagram-wrapper {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  overflow-x: auto;
+  user-select: none;
+}
+.diagram-inner {
+  min-width: 700px;
+}
+.diagram-title {
+  text-align: center;
+  color: #444;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  outline: none;
+  user-select: text;
+}
+.actors-row {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+  z-index: 10;
+  gap: 4px;
+}
+.actor-box {
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 10px 6px;
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  border-radius: 4px;
+  user-select: text;
+  min-width: 0;
+}
+.sequence-body {
+  position: relative;
+  padding: 12px 0;
+  min-height: 120px;
+}
+.vertical-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ccc;
+  z-index: 1;
+}
+.message-container {
+  position: relative;
+  height: 48px;
+  width: 100%;
+  z-index: 5;
+}
+.message-line {
+  position: absolute;
+  top: 24px;
+  z-index: 2;
+}
+.solid { border-bottom: 1px solid #333; }
+.dashed { border-bottom: 1px dashed #333; }
+.arrow-right::after {
+  content: ''; position: absolute; right: -2px; top: -5px;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #333;
+}
+.arrow-left::before {
+  content: ''; position: absolute; left: -2px; top: -5px;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid #333;
+}
+.circle-num {
+  position: absolute;
+  top: -10px;
+  width: 20px; height: 20px;
+  background: #333;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 3;
+  user-select: text;
+}
+.circle-left { left: 0; transform: translateX(-50%); }
+.circle-right { right: 0; transform: translateX(50%); }
+.message-text {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 0 6px;
+  font-size: 11px;
+  color: #444;
+  white-space: nowrap;
+  user-select: text;
+}
+.diagram-edit-hint {
+  text-align: center;
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+  font-style: italic;
+}
+</style>
+<div class="diagram-inner">
+  <div class="diagram-title">DIAGRAMA DE PROCESO (ADMINISTRATIVO / OPERATIVO)</div>
+  <div class="actors-row">
+    <div class="actor-box">Cliente</div>
+    <div class="actor-box">Compras - Frigo</div>
+    <div class="actor-box">Almacén - Frigo</div>
+    <div class="actor-box">Facturación - Frigo</div>
+  </div>
+  <div class="sequence-body">
+    <div class="message-container">
+      <div class="message-line solid arrow-right" style="left:12.5%;width:25%;">
+        <div class="circle-num circle-left">1</div>
+        <div class="message-text">Orden de Compra OC-00001</div>
+      </div>
+    </div>
+    <div class="message-container">
+      <div class="message-line solid arrow-right" style="left:37.5%;width:25%;">
+        <div class="circle-num circle-left">2</div>
+        <div class="message-text">Ingreso de Pedido OC-00001</div>
+      </div>
+    </div>
+    <div class="message-container">
+      <div class="message-line dashed arrow-left" style="left:12.5%;width:50%;">
+        <div class="circle-num circle-right">3</div>
+        <div class="message-text">Confirmación de surtido de pedido</div>
+      </div>
+    </div>
+  </div>
+  <div class="actors-row" style="margin-top:16px;">
+    <div class="actor-box">Liz Memun (eATICS)</div>
+    <div class="actor-box">Coord. Logística</div>
+    <div class="actor-box">Jefe Almacén</div>
+    <div class="actor-box">Julio Antonio (Frigo)</div>
+  </div>
+</div>
+<div class="diagram-edit-hint">* Diagrama de flujo de referencia para revisión con el cliente</div>
+</div>
+
